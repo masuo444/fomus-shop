@@ -1,26 +1,100 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #FAF8F5;
+  --foreground: #1A1A1A;
+  --color-primary: #1A1A1A;
+  --color-accent: #1A1A1A;
+  --color-subtle: #F3F0EC;
+  --color-border: #E8E4DE;
+  --color-muted: #8C8577;
+  --color-member: #00A8A0;
+  --color-member-bg: #E6F7F6;
+  --color-member-dark: #00857E;
+  --color-member-border: #B2E0DD;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-member: var(--color-member);
+  --color-member-bg: var(--color-member-bg);
+  --color-member-dark: var(--color-member-dark);
+  --color-member-border: var(--color-member-border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-serif: var(--font-cormorant);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Luxury typography */
+.font-display {
+  font-family: var(--font-serif), 'Georgia', serif;
+}
+
+/* Refined link transitions */
+a {
+  transition: color 0.3s ease, opacity 0.3s ease;
+}
+
+/* Subtle image hover */
+.img-hover {
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.group:hover .img-hover {
+  transform: scale(1.03);
+}
+
+/* Elegant divider */
+.divider {
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* Button base */
+.btn-primary {
+  background: var(--color-primary);
+  color: #FAF8F5;
+  letter-spacing: 0.08em;
+  font-size: 0.8125rem;
+  padding: 0.875rem 2.5rem;
+  transition: opacity 0.3s ease;
+}
+
+.btn-primary:hover {
+  opacity: 0.85;
+}
+
+.btn-outline {
+  border: 1px solid var(--color-border);
+  color: var(--color-primary);
+  letter-spacing: 0.08em;
+  font-size: 0.8125rem;
+  padding: 0.875rem 2.5rem;
+  transition: border-color 0.3s ease;
+}
+
+.btn-outline:hover {
+  border-color: var(--color-primary);
+}
+
+/* Scrollbar refinement */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
 }
