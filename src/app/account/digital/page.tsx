@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
 import { formatPrice, formatDate } from '@/lib/utils'
 import siteConfig from '@/site.config'
@@ -30,6 +30,14 @@ interface Transfer {
 }
 
 export default function MyDigitalPage() {
+  return (
+    <Suspense fallback={<div className="max-w-3xl mx-auto px-4 py-16 text-center text-gray-400">読み込み中...</div>}>
+      <MyDigitalContent />
+    </Suspense>
+  )
+}
+
+function MyDigitalContent() {
   const searchParams = useSearchParams()
   const justPurchased = searchParams.get('purchased') === 'true'
 

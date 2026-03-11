@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -8,6 +8,14 @@ import { Shield } from 'lucide-react'
 import siteConfig from '@/site.config'
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="max-w-sm mx-auto px-4 py-16 text-center text-gray-400">読み込み中...</div>}>
+      <LoginContent />
+    </Suspense>
+  )
+}
+
+function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || '/'

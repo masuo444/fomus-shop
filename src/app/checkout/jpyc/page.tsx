@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Copy, Check, Loader2, CheckCircle, AlertCircle, ExternalLink } from 'lucide-react'
@@ -8,6 +8,14 @@ import { formatPrice } from '@/lib/utils'
 import { clearLocalCart } from '@/lib/cart'
 
 export default function JpycPaymentPage() {
+  return (
+    <Suspense fallback={<div className="max-w-lg mx-auto px-4 py-16 text-center text-gray-400">読み込み中...</div>}>
+      <JpycPaymentContent />
+    </Suspense>
+  )
+}
+
+function JpycPaymentContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
