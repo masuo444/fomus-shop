@@ -2,8 +2,17 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 
-const TRANSFER_FEE = 500 // ¥500 transfer fee
+const FLAT_FEE = 500 // ¥500 for under 100,000
+const PERCENTAGE_FEE = 0.03 // 3% for 100,000+
+const PERCENTAGE_THRESHOLD = 100000
 const MIN_PAYOUT_POINTS = 1000 // Minimum points to request payout
+
+function calculateFee(points: number): number {
+  if (points >= PERCENTAGE_THRESHOLD) {
+    return Math.ceil(points * PERCENTAGE_FEE)
+  }
+  return FLAT_FEE
+}
 
 // GET: Get user's payout requests
 export async function GET() {
@@ -32,7 +41,9 @@ export async function GET() {
   return NextResponse.json({
     points: profile?.points || 0,
     min_points: MIN_PAYOUT_POINTS,
-    fee: TRANSFER_FEE,
+    flat_fee: FLAT_FEE,
+    percentage_fee: PERCENTAGE_FEE,
+    percentage_threshold: PERCENTAGE_THRESHOLD,
     requests: requests || [],
   })
 }
@@ -59,8 +70,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: `最低${MIN_PAYOUT_POINTS}ポイントから申請できます` }, { status: 400 })
   }
 
-  if (pointsNum <= TRANSFER_FEE) {
-    return NextResponse.json({ error: '振込手数料（¥500）を超えるポイントが必要です' }, { status: 400 })
+  const fee = calculateFee(pointsNum)
+  if (pointsNum <= fee) {
+    return NextResponse.json({ error: '振込手数料を超えるポイントが必要です' }, { status: 400 })
   }
 
   const admin = createAdminClient()
@@ -90,7 +102,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'エラーが発生しました' }, { status: 500 })
   }
 
-  const payoutAmount = pointsNum - TRANSFER_FEE
+  const payoutAmount = pointsNum - fee
 
   // Create payout request
   const { data: payout, error } = await admin
@@ -99,7 +111,7 @@ export async function POST(request: Request) {
       user_id: user.id,
       points: pointsNum,
       amount: payoutAmount,
-      fee: TRANSFER_FEE,
+      fee,
       bank_name: bank_name.trim(),
       branch_name: branch_name.trim(),
       account_type: account_type || 'ordinary',
@@ -122,7 +134,7 @@ export async function POST(request: Request) {
     user_id: user.id,
     amount: -pointsNum,
     type: 'payout',
-    description: `振込申請: ¥${payoutAmount.toLocaleString()}（手数料¥${TRANSFER_FEE}）`,
+    description: `振込申請: ¥${payoutAmount.toLocaleString()}（手数料¥${fee.toLocaleString()}）`,
   })
 
   return NextResponse.json({ payout })

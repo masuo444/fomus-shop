@@ -2,12 +2,46 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { formatPrice, formatDate } from '@/lib/utils'
 import { notFound } from 'next/navigation'
 import type { CrowdfundingProject, CrowdfundingTier } from '@/lib/types'
+import type { Metadata } from 'next'
 import { CROWDFUNDING_STATUS_LABELS } from '@/lib/types'
+import { CrowdfundingJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import CrowdfundingBackButton from './CrowdfundingBackButton'
+import siteConfig from '@/site.config'
 
 interface Props {
   params: Promise<{ id: string }>
   searchParams: Promise<{ backed?: string }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params
+  const admin = createAdminClient()
+  const { data } = await admin
+    .from('crowdfunding_projects')
+    .select('title, description, image_url')
+    .eq('id', id)
+    .single()
+
+  const title = data?.title || 'クラウドファンディング'
+  const description = data?.description?.slice(0, 160) || siteConfig.description
+  const imageUrl = data?.image_url || undefined
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: imageUrl ? [{ url: imageUrl }] : undefined,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: imageUrl ? [imageUrl] : undefined,
+    },
+  }
 }
 
 export default async function CrowdfundingDetailPage({ params, searchParams }: Props) {
@@ -38,6 +72,22 @@ export default async function CrowdfundingDetailPage({ params, searchParams }: P
   const sortedTiers = [...(typedProject.tiers || [])].sort((a, b) => a.sort_order - b.sort_order)
 
   return (
+    <>
+      <CrowdfundingJsonLd
+        name={typedProject.title}
+        description={typedProject.description || ''}
+        url={`/market/crowdfunding/${typedProject.id}`}
+        startDate={typedProject.created_at}
+        endDate={typedProject.deadline}
+        image={typedProject.image_url || undefined}
+        organizer={typedProject.creator?.name || '匿名'}
+      />
+      <BreadcrumbJsonLd items={[
+        { name: 'ホーム', href: '/' },
+        { name: siteConfig.features.marketplaceName, href: '/market' },
+        { name: 'クラウドファンディング', href: '/market/crowdfunding' },
+        { name: typedProject.title, href: `/market/crowdfunding/${typedProject.id}` },
+      ]} />
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
       {backed && (
         <div className="bg-green-50 border border-green-200 rounded-xl p-5 mb-6">
@@ -152,5 +202,6 @@ export default async function CrowdfundingDetailPage({ params, searchParams }: P
         </div>
       </div>
     </div>
+    </>
   )
 }

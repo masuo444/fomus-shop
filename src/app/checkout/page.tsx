@@ -12,6 +12,8 @@ import type { Product, Profile } from '@/lib/types'
 import siteConfig from '@/site.config'
 import { useCurrency } from '@/hooks/useCurrency'
 
+type PaymentMethod = 'stripe' | 'jpyc'
+
 interface CartItemWithProduct extends LocalCartItem {
   product?: Product
 }
@@ -23,6 +25,7 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe')
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -34,6 +37,7 @@ export default function CheckoutPage() {
   const currency = useCurrency()
   const isEur = currency === 'eur'
   const isPremiumMember = profile?.is_premium_member === true
+  const jpycEnabled = siteConfig.jpyc.enabled && !isEur
 
   useEffect(() => {
     loadData()
@@ -109,27 +113,43 @@ export default function CheckoutPage() {
     setError('')
     setSubmitting(true)
 
+    const cartItems = items.map((item) => ({
+      product_id: item.product_id,
+      quantity: item.quantity,
+    }))
+
     try {
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items: items.map((item) => ({
-            product_id: item.product_id,
-            quantity: item.quantity,
-          })),
-          shipping: form,
-          currency,
-        }),
-      })
+      if (paymentMethod === 'jpyc') {
+        // JPYC checkout
+        const res = await fetch('/api/jpyc/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: cartItems, shipping: form }),
+        })
 
-      const data = await res.json()
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || '注文の作成に失敗しました')
 
-      if (!res.ok) {
-        throw new Error(data.error || '決済の作成に失敗しました')
+        const params = new URLSearchParams({
+          order_id: data.order_id,
+          order_number: data.order_number,
+          total: String(data.total),
+          wallet: data.wallet_address,
+        })
+        router.push(`/checkout/jpyc?${params.toString()}`)
+      } else {
+        // Stripe checkout
+        const res = await fetch('/api/stripe/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: cartItems, shipping: form, currency }),
+        })
+
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || '決済の作成に失敗しました')
+
+        window.location.href = data.url
       }
-
-      window.location.href = data.url
     } catch (err) {
       setError(err instanceof Error ? err.message : 'エラーが発生しました')
       setSubmitting(false)
@@ -289,6 +309,39 @@ export default function CheckoutPage() {
           </div>
         </div>
 
+        {/* Payment Method Selection */}
+        {jpycEnabled && (
+          <div className="mt-8">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">お支払い方法</h2>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setPaymentMethod('stripe')}
+                className={`p-4 rounded-xl border text-left transition-all ${
+                  paymentMethod === 'stripe'
+                    ? 'border-[var(--foreground)] bg-[var(--color-subtle)]'
+                    : 'border-[var(--color-border)] hover:border-gray-400'
+                }`}
+              >
+                <p className="text-sm font-medium text-gray-900">クレジットカード</p>
+                <p className="text-[10px] text-[var(--color-muted)] mt-1">Visa / Mastercard / AMEX</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentMethod('jpyc')}
+                className={`p-4 rounded-xl border text-left transition-all ${
+                  paymentMethod === 'jpyc'
+                    ? 'border-[var(--foreground)] bg-[var(--color-subtle)]'
+                    : 'border-[var(--color-border)] hover:border-gray-400'
+                }`}
+              >
+                <p className="text-sm font-medium text-gray-900">JPYC</p>
+                <p className="text-[10px] text-[var(--color-muted)] mt-1">Polygon / 手数料ほぼ無料</p>
+              </button>
+            </div>
+          </div>
+        )}
+
         {error && (
           <div className="mt-6 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg">
             {error}
@@ -301,7 +354,12 @@ export default function CheckoutPage() {
             disabled={submitting}
             className="flex-1 bg-black text-white py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {submitting ? (isEur ? 'Processing...' : '処理中...') : (isEur ? 'Proceed to Payment' : 'お支払いへ')}
+            {submitting
+              ? (isEur ? 'Processing...' : '処理中...')
+              : paymentMethod === 'jpyc'
+                ? 'JPYC決済へ'
+                : (isEur ? 'Proceed to Payment' : 'お支払いへ')
+            }
           </button>
           <Link
             href="/cart"

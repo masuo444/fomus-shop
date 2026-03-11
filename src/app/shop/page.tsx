@@ -5,9 +5,11 @@ import { getPublishedShopIds } from '@/lib/shop'
 import { getCurrency } from '@/lib/currency'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import siteConfig from '@/site.config'
 
 export const metadata: Metadata = {
   title: '商品一覧',
+  description: `${siteConfig.name}の商品一覧。最新のアイテムをチェックしよう。`,
 }
 
 interface ShopPageProps {
@@ -62,7 +64,8 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       .in('shop_id', shopIds)
       .order('sort_order')
 
-    categories = categoriesData || []
+    const excludeCategories = ['撮影', 'イベント']
+    categories = (categoriesData || []).filter((c) => !excludeCategories.includes(c.name))
 
     let query = supabase
       .from('products')

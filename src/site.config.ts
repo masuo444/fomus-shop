@@ -35,6 +35,19 @@ const siteConfig = {
     memberColor: process.env.NEXT_PUBLIC_THEME_MEMBER || '#00A8A0',
   },
 
+  // JPYC Payment
+  jpyc: {
+    enabled: process.env.FEATURE_JPYC === 'true',
+    walletAddress: process.env.JPYC_WALLET_ADDRESS || '',
+    // JPYC V2 on Polygon
+    contractAddress: process.env.JPYC_CONTRACT_ADDRESS || '0x431D5dfF03120AFA4bDf332c61A6e1766eF37BDB',
+    rpcUrl: process.env.POLYGON_RPC_URL || 'https://polygon-rpc.com',
+    chainId: 137,
+    // Confirmation polling
+    pollIntervalMs: 5000,
+    maxPollMinutes: 30,
+  },
+
   // Feature flags
   features: {
     membershipProgram: process.env.FEATURE_MEMBERSHIP === 'true',

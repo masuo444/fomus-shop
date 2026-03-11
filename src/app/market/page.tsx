@@ -2,9 +2,15 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getPublishedShopIds } from '@/lib/shop'
 import type { DigitalItem } from '@/lib/types'
+import type { Metadata } from 'next'
 import { DIGITAL_ITEM_CATEGORIES } from '@/lib/types'
 import { formatPrice } from '@/lib/utils'
 import siteConfig from '@/site.config'
+
+export const metadata: Metadata = {
+  title: siteConfig.features.marketplaceName,
+  description: `${siteConfig.features.marketplaceName} — デジタルアイテムのマーケットプレイス`,
+}
 
 interface MarketPageProps {
   searchParams: Promise<{

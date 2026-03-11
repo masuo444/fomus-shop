@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import type { Product } from '@/lib/types'
 import type { Metadata } from 'next'
 import ProductDetailClient from './ProductDetailClient'
+import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import siteConfig from '@/site.config'
 
 interface Props {
@@ -66,5 +67,26 @@ export default async function ProductDetailPage({ params }: Props) {
     shopName = shop.name
   }
 
-  return <ProductDetailClient product={product as Product} shopName={shopName} />
+  const p = product as Product
+
+  return (
+    <>
+      <ProductJsonLd
+        name={p.name}
+        description={p.description || siteConfig.description}
+        price={p.price}
+        currency="JPY"
+        image={p.images?.[0]}
+        url={`/shop/${p.id}`}
+        inStock={p.stock !== 0}
+        sku={p.id}
+      />
+      <BreadcrumbJsonLd items={[
+        { name: 'ホーム', href: '/' },
+        { name: '商品一覧', href: '/shop' },
+        { name: p.name, href: `/shop/${p.id}` },
+      ]} />
+      <ProductDetailClient product={p} shopName={shopName} />
+    </>
+  )
 }

@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import DigitalItemDetailClient from './DigitalItemDetailClient'
+import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd'
+import siteConfig from '@/site.config'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -12,13 +14,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = await createClient()
   const { data } = await supabase
     .from('digital_items')
-    .select('name, description')
+    .select('name, description, image_url')
     .eq('id', id)
     .single()
 
+  const title = data?.name || 'デジタルアイテム'
+  const description = data?.description || siteConfig.description
+  const imageUrl = data?.image_url || undefined
+
   return {
-    title: data?.name || 'デジタルアイテム',
-    description: data?.description || undefined,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: imageUrl ? [{ url: imageUrl }] : undefined,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: imageUrl ? [imageUrl] : undefined,
+    },
   }
 }
 
@@ -83,5 +101,23 @@ export default async function DigitalItemDetailPage({ params }: Props) {
     transfers = transfersData || []
   }
 
-  return <DigitalItemDetailClient item={item} transfers={transfers} isLoggedIn={isLoggedIn} hasDigitalAccess={hasDigitalAccess} />
+  return (
+    <>
+      <ProductJsonLd
+        name={item.name}
+        description={item.description || siteConfig.description}
+        price={item.price}
+        currency="JPY"
+        image={item.image_url}
+        url={`/digital/${item.id}`}
+        inStock={item.issued_count < item.total_supply}
+      />
+      <BreadcrumbJsonLd items={[
+        { name: 'ホーム', href: '/' },
+        { name: 'デジタルアイテム', href: '/digital' },
+        { name: item.name, href: `/digital/${item.id}` },
+      ]} />
+      <DigitalItemDetailClient item={item} transfers={transfers} isLoggedIn={isLoggedIn} hasDigitalAccess={hasDigitalAccess} />
+    </>
+  )
 }

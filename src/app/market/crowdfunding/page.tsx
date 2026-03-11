@@ -2,6 +2,13 @@ import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatPrice } from '@/lib/utils'
 import type { CrowdfundingProject } from '@/lib/types'
+import type { Metadata } from 'next'
+import siteConfig from '@/site.config'
+
+export const metadata: Metadata = {
+  title: 'クラウドファンディング',
+  description: `${siteConfig.features.marketplaceName}のクラウドファンディング。プロジェクトを応援して、限定リターンを手に入れよう。`,
+}
 
 export default async function CrowdfundingListPage() {
   const admin = createAdminClient()

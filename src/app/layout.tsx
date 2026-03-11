@@ -4,9 +4,12 @@ import { Cormorant_Garamond } from 'next/font/google'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import GoogleAnalytics from '@/components/layout/GoogleAnalytics'
+import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/seo/JsonLd'
 import { SITE_NAME, SITE_DESCRIPTION } from '@/lib/constants'
 import siteConfig from '@/site.config'
 import './globals.css'
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://shop.fomus.co.jp'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -30,6 +33,33 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
+  metadataBase: new URL(baseUrl),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    locale: 'ja_JP',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 }
 
 export default function RootLayout({
@@ -51,6 +81,8 @@ export default function RootLayout({
           }
         `}} />
         <GoogleAnalytics />
+        <OrganizationJsonLd />
+        <WebSiteJsonLd />
         <div className="flex flex-col min-h-screen">
           <Header />
           <main className="flex-1">{children}</main>

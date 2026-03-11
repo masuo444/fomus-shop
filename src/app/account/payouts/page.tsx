@@ -143,7 +143,9 @@ export default function PointsExchangePage() {
     }
   }
 
-  const payoutAmount = Number(payoutPoints) > 500 ? Number(payoutPoints) - 500 : 0
+  const currentPoints = Number(payoutPoints) || 0
+  const currentFee = currentPoints >= 100000 ? Math.ceil(currentPoints * 0.03) : 500
+  const payoutAmount = currentPoints > currentFee ? currentPoints - currentFee : 0
 
   if (loading) {
     return (
@@ -265,8 +267,12 @@ export default function PointsExchangePage() {
       {tab === 'payout' && (
         <div className="mb-8">
           <div className="bg-amber-50 border border-amber-200 rounded-xl px-5 py-3 mb-6">
-            <p className="text-sm text-amber-800">振込手数料: <strong>¥500</strong>（申請ポイントから差し引かれます）</p>
-            <p className="text-xs text-amber-600 mt-1">最低1,000ポイントから申請可能です</p>
+            <p className="text-sm text-amber-800">振込手数料（申請ポイントから差し引かれます）</p>
+            <ul className="text-xs text-amber-700 mt-1.5 space-y-0.5 list-disc list-inside">
+              <li>10万pt未満: <strong>¥500</strong>（固定）</li>
+              <li>10万pt以上: <strong>3%</strong>（例: 10万pt → 手数料¥3,000）</li>
+            </ul>
+            <p className="text-xs text-amber-600 mt-1.5">最低1,000ポイントから申請可能です</p>
           </div>
 
           <form onSubmit={handlePayout} className="space-y-4">
@@ -282,9 +288,9 @@ export default function PointsExchangePage() {
                 className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/10"
                 placeholder="1000"
               />
-              {Number(payoutPoints) > 500 && (
+              {currentPoints >= 1000 && (
                 <p className="text-xs text-gray-500 mt-1">
-                  振込額: <strong>¥{payoutAmount.toLocaleString()}</strong>（手数料¥500差引後）
+                  手数料: ¥{currentFee.toLocaleString()}{currentPoints >= 100000 ? ' (3%)' : ' (固定)'} → 振込額: <strong>¥{payoutAmount.toLocaleString()}</strong>
                 </p>
               )}
             </div>
