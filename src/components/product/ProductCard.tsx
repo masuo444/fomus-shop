@@ -28,9 +28,9 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
   if (isEur && product.price_eur == null) return null
 
   return (
-    <div className="group relative">
+    <div className="group relative card-hover rounded-xl">
       {/* Favorite Button */}
-      <div className="absolute top-3 right-3 z-10">
+      <div className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <FavoriteButton
           productId={product.id}
           initialFavorited={isFavorited}
@@ -39,7 +39,7 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
       </div>
 
       <Link href={`/shop/${product.id}`} className="block">
-        <div className="relative aspect-square bg-[var(--color-subtle)] overflow-hidden rounded-lg">
+        <div className="relative aspect-square bg-[var(--color-subtle)] overflow-hidden rounded-xl">
           {product.images && product.images.length > 0 ? (
             <Image
               src={product.images[0]}
@@ -55,6 +55,14 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
               </svg>
             </div>
           )}
+          {/* Hover overlay */}
+          {!isSoldOut && (
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500 flex items-center justify-center">
+              <span className="opacity-0 group-hover:opacity-100 transition-all duration-300 bg-white text-[var(--foreground)] text-[10px] tracking-[0.15em] uppercase font-medium px-5 py-2 rounded-full translate-y-2 group-hover:translate-y-0">
+                View
+              </span>
+            </div>
+          )}
           {isSoldOut && (
             <div className="absolute inset-0 bg-[var(--foreground)]/40 flex items-center justify-center">
               <span className="text-[10px] tracking-[0.2em] uppercase text-white font-medium">
@@ -64,7 +72,7 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
           )}
           {comparePrice && comparePrice > mainPrice && (
             <div className="absolute top-3 left-3">
-              <span className="bg-[var(--foreground)] text-[var(--background)] text-[9px] tracking-[0.15em] uppercase font-medium px-2.5 py-1">
+              <span className="bg-[var(--foreground)] text-[var(--background)] text-[9px] tracking-[0.15em] uppercase font-medium px-2.5 py-1 rounded-full">
                 Sale
               </span>
             </div>
@@ -72,7 +80,7 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
           {hasMemberPrice && (
             <div className={`absolute ${comparePrice && comparePrice > mainPrice ? 'top-9' : 'top-3'} left-3`}>
               <span
-                className="text-white text-[9px] tracking-wider font-medium px-2.5 py-1"
+                className="text-white text-[9px] tracking-wider font-medium px-2.5 py-1 rounded-full"
                 style={{ backgroundColor: 'var(--color-member)' }}
               >
                 {siteConfig.features.membershipName}

@@ -43,13 +43,23 @@ a {
   transition: color 0.3s ease, opacity 0.3s ease;
 }
 
-/* Subtle image hover */
+/* Subtle image hover with overlay */
 .img-hover {
   transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .group:hover .img-hover {
-  transform: scale(1.03);
+  transform: scale(1.05);
+}
+
+/* Card hover lift */
+.card-hover {
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.08);
 }
 
 /* Elegant divider */
@@ -58,18 +68,21 @@ a {
   background: var(--color-border);
 }
 
-/* Button base */
+/* Button base — refined with rounded corners */
 .btn-primary {
   background: var(--color-primary);
   color: #FAF8F5;
   letter-spacing: 0.08em;
   font-size: 0.8125rem;
+  font-weight: 500;
   padding: 0.875rem 2.5rem;
-  transition: opacity 0.3s ease;
+  border-radius: 9999px;
+  transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
   opacity: 0.85;
+  transform: translateY(-1px);
 }
 
 .btn-outline {
@@ -77,12 +90,63 @@ a {
   color: var(--color-primary);
   letter-spacing: 0.08em;
   font-size: 0.8125rem;
+  font-weight: 500;
   padding: 0.875rem 2.5rem;
-  transition: border-color 0.3s ease;
+  border-radius: 9999px;
+  transition: all 0.3s ease;
 }
 
 .btn-outline:hover {
   border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #FAF8F5;
+}
+
+/* Scroll-triggered fade-in */
+.fade-up {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Staggered animation delays */
+.stagger-1 { transition-delay: 0.1s; }
+.stagger-2 { transition-delay: 0.2s; }
+.stagger-3 { transition-delay: 0.3s; }
+.stagger-4 { transition-delay: 0.4s; }
+
+/* Marquee / ticker */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+/* Feature icon circle */
+.feature-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.feature-icon:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #FAF8F5;
 }
 
 /* Scrollbar refinement */
