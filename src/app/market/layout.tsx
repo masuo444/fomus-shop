@@ -24,10 +24,7 @@ export default function MarketLayout({ children }: { children: React.ReactNode }
             <Link href="/market" className="text-[10px] tracking-[0.15em] uppercase text-white/40 hover:text-white transition-colors">
               Market
             </Link>
-            <Link href="/market/crowdfunding" className="text-[10px] tracking-[0.15em] uppercase text-white/40 hover:text-white transition-colors">
-              Funding
-            </Link>
-            <Link href="/market/submit" className="text-[10px] tracking-[0.15em] uppercase text-white/40 hover:text-white transition-colors">
+<Link href="/market/submit" className="text-[10px] tracking-[0.15em] uppercase text-white/40 hover:text-white transition-colors">
               Submit
             </Link>
             <Link href="/" className="text-[10px] tracking-[0.1em] text-white/20 hover:text-white/50 transition-colors">

@@ -8,13 +8,33 @@ const ERC20_ABI = [
   'function decimals() view returns (uint8)',
 ]
 
-export function getProvider() {
-  return new ethers.JsonRpcProvider(siteConfig.jpyc.rpcUrl)
+const RPC_TIMEOUT_MS = 10000
+
+export async function getProvider(): Promise<ethers.JsonRpcProvider> {
+  const urls = [siteConfig.jpyc.rpcUrl, ...siteConfig.jpyc.fallbackRpcUrls]
+
+  for (const url of urls) {
+    try {
+      const provider = new ethers.JsonRpcProvider(url)
+      // Test the connection with a timeout
+      await Promise.race([
+        provider.getBlockNumber(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('RPC timeout')), RPC_TIMEOUT_MS)
+        ),
+      ])
+      return provider
+    } catch (err) {
+      console.warn(`RPC failed for ${url}:`, err)
+      continue
+    }
+  }
+
+  throw new Error('All RPC endpoints failed')
 }
 
-export function getJpycContract(provider?: ethers.JsonRpcProvider) {
-  const p = provider || getProvider()
-  return new ethers.Contract(siteConfig.jpyc.contractAddress, ERC20_ABI, p)
+export function getJpycContract(provider: ethers.JsonRpcProvider) {
+  return new ethers.Contract(siteConfig.jpyc.contractAddress, ERC20_ABI, provider)
 }
 
 /**
@@ -41,7 +61,7 @@ export async function verifyJpycTransfer(params: {
   }
 
   try {
-    const provider = getProvider()
+    const provider = await getProvider()
     const receipt = await provider.getTransactionReceipt(txHash)
 
     if (!receipt) {

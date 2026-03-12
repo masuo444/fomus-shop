@@ -8,6 +8,8 @@ import siteConfig from '@/site.config'
 import type { Product } from '@/lib/types'
 import type { Currency } from '@/lib/currency'
 import { requireString, validateEmail, sanitizeString, ValidationError } from '@/lib/validation'
+import { rateLimit } from '@/lib/rate-limit'
+import { checkOrderFraud } from '@/lib/fraud'
 
 interface CheckoutItem {
   product_id: string
@@ -23,6 +25,12 @@ interface ShippingInfo {
 }
 
 export async function POST(request: Request) {
+  const ip = request.headers.get('x-forwarded-for') || 'unknown'
+  const { success } = rateLimit(`checkout:${ip}`, 5, 60000)
+  if (!success) {
+    return NextResponse.json({ error: 'リクエストが多すぎます。しばらく待ってから再試行してください。' }, { status: 429 })
+  }
+
   try {
     const { items, shipping, currency: requestCurrency } = (await request.json()) as {
       items: CheckoutItem[]
@@ -145,6 +153,9 @@ export async function POST(request: Request) {
       : (isPremiumMember ? 0 : SHIPPING_FEE)
     const total = subtotal + shippingFee
 
+    // Fraud check
+    const fraudCheck = await checkOrderFraud(user?.id || null, shipping.email, ip, total)
+
     // Generate order number
     const orderNumber = `${siteConfig.orderPrefix}${Date.now().toString(36).toUpperCase()}`
 
@@ -164,6 +175,8 @@ export async function POST(request: Request) {
       shipping_address: shipping.address,
       shipping_phone: shipping.phone,
       points_used: 0,
+      is_flagged: fraudCheck.flagged,
+      fraud_reasons: fraudCheck.reasons,
     }).select().single()
 
     if (orderError || !order) {

@@ -1,10 +1,17 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { verifyJpycTransfer } from '@/lib/jpyc'
+import { verifyJpycTransfer, getProvider } from '@/lib/jpyc'
 import { sendOrderConfirmation, sendOrderNotificationToAdmin } from '@/lib/email'
 import siteConfig from '@/site.config'
+import { rateLimit } from '@/lib/rate-limit'
 
 export async function POST(request: Request) {
+  const ip = request.headers.get('x-forwarded-for') || 'unknown'
+  const { success } = rateLimit(`jpyc-verify:${ip}`, 10, 60000)
+  if (!success) {
+    return NextResponse.json({ error: 'リクエストが多すぎます。しばらく待ってから再試行してください。' }, { status: 429 })
+  }
+
   if (!siteConfig.jpyc.enabled) {
     return NextResponse.json({ error: 'JPYC決済は利用できません' }, { status: 400 })
   }
@@ -65,6 +72,27 @@ export async function POST(request: Request) {
         verified: false,
         error: result.error || '送金が確認できませんでした',
       })
+    }
+
+    // Check block confirmations
+    try {
+      const provider = await getProvider()
+      const receipt = await provider.getTransactionReceipt(tx_hash)
+      if (receipt && receipt.blockNumber) {
+        const latestBlock = await provider.getBlockNumber()
+        const confirmations = latestBlock - receipt.blockNumber
+        if (confirmations < siteConfig.jpyc.minConfirmations) {
+          return NextResponse.json({
+            verified: false,
+            confirmations,
+            required: siteConfig.jpyc.minConfirmations,
+            error: `ブロック承認待ちです（${confirmations}/${siteConfig.jpyc.minConfirmations}）。しばらく待ってから再度お試しください。`,
+          })
+        }
+      }
+    } catch (err) {
+      console.error('Confirmation check error:', err)
+      // Continue with verification if confirmation check fails
     }
 
     // Update order to paid

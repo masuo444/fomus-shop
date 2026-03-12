@@ -28,6 +28,18 @@ export async function POST(request: Request) {
 
   const admin = createAdminClient()
 
+  // Idempotency check - skip already-processed events
+  const eventId = event.id
+  const { data: existing } = await admin
+    .from('processed_webhook_events')
+    .select('event_id')
+    .eq('event_id', eventId)
+    .single()
+
+  if (existing) {
+    return NextResponse.json({ received: true, duplicate: true })
+  }
+
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session
@@ -59,6 +71,7 @@ export async function POST(request: Request) {
           .from('orders')
           .update(orderUpdate)
           .eq('id', orderId)
+          .eq('status', 'pending')
 
         // Decrease stock for ordered items
         try {
@@ -146,50 +159,19 @@ export async function POST(request: Request) {
       if (type === 'digital_purchase') {
         const digitalItemId = metadata.digital_item_id
         const userId = metadata.user_id
-        const tokenNumber = parseInt(metadata.token_number || '0')
-        const price = parseInt(metadata.price || '0')
+        const price = metadata.price || '0'
 
-        if (digitalItemId && userId && tokenNumber > 0) {
-          // Re-check supply to prevent overselling
-          const { data: item } = await admin
-            .from('digital_items')
-            .select('issued_count, total_supply')
-            .eq('id', digitalItemId)
-            .single()
+        if (digitalItemId && userId) {
+          // Atomically issue token (locks digital_items row to prevent duplicate token numbers)
+          const { data: tokenResult, error: tokenError } = await admin.rpc('issue_digital_token', {
+            p_digital_item_id: digitalItemId,
+            p_user_id: userId,
+            p_price: parseInt(price)
+          })
 
-          if (item && item.issued_count < item.total_supply) {
-            // Create the digital token
-            const { data: token } = await admin
-              .from('digital_tokens')
-              .insert({
-                digital_item_id: digitalItemId,
-                token_number: item.issued_count + 1,
-                current_owner_id: userId,
-                original_price: price,
-                status: 'owned',
-              })
-              .select()
-              .single()
-
-            if (token) {
-              // Increment issued_count
-              await admin
-                .from('digital_items')
-                .update({ issued_count: item.issued_count + 1 })
-                .eq('id', digitalItemId)
-
-              // Record ownership transfer
-              await admin.from('ownership_transfers').insert({
-                digital_token_id: token.id,
-                from_user_id: null,
-                to_user_id: userId,
-                price,
-                royalty_amount: 0,
-                seller_amount: price,
-                transfer_type: 'purchase',
-                stripe_payment_intent_id: session.payment_intent as string,
-              })
-            }
+          if (tokenError) {
+            console.error('Token issue error:', tokenError)
+            return NextResponse.json({ error: 'Token creation failed' }, { status: 500 })
           }
         }
       }
@@ -274,32 +256,6 @@ export async function POST(request: Request) {
         }
       }
 
-      // Handle crowdfunding support payments
-      if (type === 'crowdfunding') {
-        const projectId = metadata.project_id
-        const tierId = metadata.tier_id
-        const backerId = metadata.backer_id
-        const amount = parseInt(metadata.amount || '0')
-
-        if (projectId && tierId && backerId) {
-          // Update backer status to paid
-          await admin
-            .from('crowdfunding_backers')
-            .update({
-              status: 'paid',
-              stripe_payment_intent_id: session.payment_intent as string,
-            })
-            .eq('id', backerId)
-
-          // Atomically increment project amount and tier backers (prevents race conditions)
-          await admin.rpc('increment_crowdfunding_amount', {
-            p_project_id: projectId,
-            p_tier_id: tierId,
-            p_amount: amount,
-          })
-        }
-      }
-
       // Legacy handling for digital purchases without type metadata
       if (!type && !orderId) {
         const digitalTokenId = metadata.digital_token_id
@@ -323,13 +279,15 @@ export async function POST(request: Request) {
     }
 
     case 'checkout.session.expired': {
-      // Handle expired sessions - clean up any pending tokens if applicable
       const session = event.data.object as Stripe.Checkout.Session
-      const metadata = session.metadata || {}
-
-      // For digital purchases that expired, no cleanup needed
-      // since we create tokens only after successful payment
-      console.log('Checkout session expired:', session.id, metadata.type)
+      const orderId = session.metadata?.order_id
+      if (orderId) {
+        await admin
+          .from('orders')
+          .update({ status: 'cancelled' })
+          .eq('id', orderId)
+          .eq('status', 'pending')
+      }
       break
     }
 
@@ -339,6 +297,11 @@ export async function POST(request: Request) {
       break
     }
   }
+
+  // Record event as processed for idempotency
+  await admin
+    .from('processed_webhook_events')
+    .insert({ event_id: eventId })
 
   return NextResponse.json({ received: true })
 }

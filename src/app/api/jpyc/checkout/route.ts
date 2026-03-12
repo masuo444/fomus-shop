@@ -5,6 +5,7 @@ import { SHIPPING_FEE } from '@/lib/constants'
 import siteConfig from '@/site.config'
 import type { Product } from '@/lib/types'
 import { requireString, validateEmail, sanitizeString, ValidationError } from '@/lib/validation'
+import { rateLimit } from '@/lib/rate-limit'
 
 interface CheckoutItem {
   product_id: string
@@ -20,6 +21,12 @@ interface ShippingInfo {
 }
 
 export async function POST(request: Request) {
+  const ip = request.headers.get('x-forwarded-for') || 'unknown'
+  const { success } = rateLimit(`jpyc-checkout:${ip}`, 5, 60000)
+  if (!success) {
+    return NextResponse.json({ error: 'リクエストが多すぎます。しばらく待ってから再試行してください。' }, { status: 429 })
+  }
+
   if (!siteConfig.jpyc.enabled) {
     return NextResponse.json({ error: 'JPYC決済は現在利用できません' }, { status: 400 })
   }

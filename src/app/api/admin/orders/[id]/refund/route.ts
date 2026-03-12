@@ -47,13 +47,36 @@ export async function POST(
   }
 
   try {
-    await stripe.refunds.create({
+    const refund = await stripe.refunds.create({
       payment_intent: order.stripe_payment_intent_id,
     })
 
+    if (refund.status === 'failed') {
+      return NextResponse.json({ error: '返金に失敗しました' }, { status: 500 })
+    }
+
+    if (refund.status === 'pending') {
+      // Store refund ID even for pending refunds so we can track it
+      await admin
+        .from('orders')
+        .update({ stripe_refund_id: refund.id, updated_at: new Date().toISOString() })
+        .eq('id', id)
+
+      return NextResponse.json({
+        success: true,
+        message: '返金処理中です。完了までお待ちください。',
+        refund_status: 'pending',
+      })
+    }
+
+    // refund.status === 'succeeded'
     const { error: updateError } = await admin
       .from('orders')
-      .update({ status: 'refunded', updated_at: new Date().toISOString() })
+      .update({
+        status: 'refunded',
+        stripe_refund_id: refund.id,
+        updated_at: new Date().toISOString(),
+      })
       .eq('id', id)
 
     if (updateError) {

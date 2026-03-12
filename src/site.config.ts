@@ -42,6 +42,11 @@ const siteConfig = {
     // JPYC V2 on Polygon
     contractAddress: process.env.JPYC_CONTRACT_ADDRESS || '0x431D5dfF03120AFA4bDf332c61A6e1766eF37BDB',
     rpcUrl: process.env.POLYGON_RPC_URL || 'https://polygon-rpc.com',
+    fallbackRpcUrls: [
+      'https://polygon-rpc.com',
+      'https://rpc-mainnet.matic.quiknode.pro',
+    ],
+    minConfirmations: 12,
     chainId: 137,
     // Confirmation polling
     pollIntervalMs: 5000,

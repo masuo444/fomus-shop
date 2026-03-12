@@ -14,7 +14,6 @@ import {
   Tag,
   Ticket,
   Banknote,
-  Rocket,
   Settings,
   LogOut,
   LinkIcon,
@@ -35,8 +34,7 @@ const menuItems = [
   { href: '/admin/partners', label: 'パートナー', icon: Handshake },
   { href: '/admin/coupons', label: 'クーポン', icon: Tag },
   { href: '/admin/payouts', label: '振込申請', icon: Banknote },
-  { href: '/admin/crowdfunding', label: 'クラファン', icon: Rocket },
-  { href: '/admin/settings', label: '設定', icon: Settings },
+{ href: '/admin/settings', label: '設定', icon: Settings },
 ]
 
 export default function AdminSidebar() {

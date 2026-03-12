@@ -106,37 +106,3 @@ export function BreadcrumbJsonLd({ items }: { items: BreadcrumbItem[] }) {
   )
 }
 
-// Crowdfunding / Event schema
-interface CrowdfundingJsonLdProps {
-  name: string
-  description: string
-  url: string
-  startDate: string
-  endDate: string
-  image?: string
-  organizer: string
-}
-
-export function CrowdfundingJsonLd({ name, description, url, startDate, endDate, image, organizer }: CrowdfundingJsonLdProps) {
-  const data: Record<string, unknown> = {
-    '@context': 'https://schema.org',
-    '@type': 'Event',
-    name,
-    description,
-    url: `${baseUrl}${url}`,
-    startDate,
-    endDate,
-    eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode',
-    organizer: {
-      '@type': 'Person',
-      name: organizer,
-    },
-  }
-  if (image) data.image = image
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-    />
-  )
-}

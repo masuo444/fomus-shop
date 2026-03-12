@@ -15,7 +15,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/shop/masu`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/shop/masu/custom`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${baseUrl}/market`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.7 },
-    { url: `${baseUrl}/market/crowdfunding`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.7 },
   ]
 
   // Product pages
@@ -54,19 +53,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
   }
 
-  // Crowdfunding pages
-  const { data: projects } = await admin
-    .from('crowdfunding_projects')
-    .select('id, updated_at')
-    .in('status', ['active', 'funded', 'ended'])
-    .order('updated_at', { ascending: false })
-
-  const crowdfundingPages: MetadataRoute.Sitemap = (projects || []).map((p) => ({
-    url: `${baseUrl}/market/crowdfunding/${p.id}`,
-    lastModified: new Date(p.updated_at),
-    changeFrequency: 'daily' as const,
-    priority: 0.7,
-  }))
-
-  return [...staticPages, ...productPages, ...digitalPages, ...crowdfundingPages]
+  return [...staticPages, ...productPages, ...digitalPages]
 }

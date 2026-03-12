@@ -313,65 +313,6 @@ export interface PayoutRequest {
   user?: Profile
 }
 
-// Crowdfunding types
-export interface CrowdfundingProject {
-  id: string
-  creator_id: string
-  title: string
-  description: string | null
-  image_url: string | null
-  goal_amount: number
-  current_amount: number
-  backer_count: number
-  deadline: string
-  status: 'draft' | 'pending' | 'active' | 'funded' | 'ended' | 'cancelled'
-  bank_name: string
-  branch_name: string
-  account_type: 'ordinary' | 'current'
-  account_number: string
-  account_holder: string
-  commission_rate: number
-  payout_status: 'pending' | 'completed'
-  payout_completed_at: string | null
-  admin_note: string | null
-  created_at: string
-  updated_at: string
-  creator?: Profile
-  tiers?: CrowdfundingTier[]
-}
-
-export interface CrowdfundingTier {
-  id: string
-  project_id: string
-  title: string
-  description: string | null
-  amount: number
-  max_backers: number | null
-  current_backers: number
-  sort_order: number
-  created_at: string
-}
-
-export interface CrowdfundingBacker {
-  id: string
-  project_id: string
-  tier_id: string
-  user_id: string
-  amount: number
-  stripe_payment_intent_id: string | null
-  status: 'pending' | 'paid' | 'refunded'
-  created_at: string
-}
-
-export const CROWDFUNDING_STATUS_LABELS: Record<CrowdfundingProject['status'], string> = {
-  draft: '下書き',
-  pending: '審査中',
-  active: '募集中',
-  funded: '目標達成',
-  ended: '募集終了',
-  cancelled: 'キャンセル',
-}
-
 export const ORDER_STATUS_LABELS: Record<Order['status'], string> = {
   pending: '未決済',
   paid: '入金済み',

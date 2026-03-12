@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+import { rateLimit } from '@/lib/rate-limit'
 
 export async function POST(request: Request) {
   try {
@@ -19,6 +20,11 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ error: 'ログインが必要です' }, { status: 401 })
+    }
+
+    const { success } = rateLimit(`digital-purchase:${user.id}`, 5, 60000)
+    if (!success) {
+      return NextResponse.json({ error: 'リクエストが多すぎます。しばらく待ってから再試行してください。' }, { status: 429 })
     }
 
     const admin = createAdminClient()
@@ -51,8 +57,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'このアイテムは完売しました' }, { status: 400 })
     }
 
-    // Reserve the next token number (optimistic lock via issued_count)
-    const nextTokenNumber = item.issued_count + 1
+    // Advisory token number for display only; actual number is assigned
+    // atomically in the webhook via issue_digital_token() to prevent duplicates
+    const estimatedTokenNumber = item.issued_count + 1
 
     // Create Stripe Checkout session for payment
     // Token creation happens in the webhook after payment succeeds
@@ -69,7 +76,7 @@ export async function POST(request: Request) {
             currency: 'jpy',
             product_data: {
               name: item.name,
-              description: `デジタルアイテム #${nextTokenNumber} / ${item.total_supply}`,
+              description: `デジタルアイテム #${estimatedTokenNumber} / ${item.total_supply}`,
               images: item.image_url ? [item.image_url] : [],
             },
             unit_amount: item.price,
@@ -82,7 +89,7 @@ export async function POST(request: Request) {
         type: 'digital_purchase',
         digital_item_id: item.id,
         user_id: user.id,
-        token_number: nextTokenNumber.toString(),
+        token_number: estimatedTokenNumber.toString(),
         price: item.price.toString(),
       },
       success_url: `${origin}/account/digital?purchased=true`,
