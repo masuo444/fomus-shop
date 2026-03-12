@@ -226,16 +226,25 @@ export default async function HomePage() {
             <div className="border-t border-b border-[var(--color-border)] py-10 md:py-12">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-6">
                 {[
-                  { label: '多彩な決済', desc: 'Visa / Mastercard / 振込 / JPYC' },
+                  { label: '多彩な決済', desc: 'Visa / Mastercard / 振込 / JPYC', href: '/jpyc' },
                   { label: '国内送料', desc: '¥1,000〜（GUILD会員無料）' },
                   { label: '海外発送', desc: 'EUR決済・国際配送対応' },
                   { label: 'カスタマイズ', desc: '防水コーティング・名入れ' },
-                ].map((item) => (
-                  <div key={item.label}>
-                    <p className="text-xs font-medium text-[var(--foreground)] mb-1.5">{item.label}</p>
-                    <p className="text-[11px] leading-relaxed text-[var(--color-muted)]">{item.desc}</p>
-                  </div>
-                ))}
+                ].map((item) => {
+                  const inner = (
+                    <>
+                      <p className="text-xs font-medium text-[var(--foreground)] mb-1.5">{item.label}</p>
+                      <p className="text-[11px] leading-relaxed text-[var(--color-muted)]">{item.desc}</p>
+                    </>
+                  )
+                  return item.href ? (
+                    <Link key={item.label} href={item.href} className="group hover:opacity-70 transition-opacity">
+                      {inner}
+                    </Link>
+                  ) : (
+                    <div key={item.label}>{inner}</div>
+                  )
+                })}
               </div>
             </div>
           </ScrollReveal>

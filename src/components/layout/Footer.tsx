@@ -64,6 +64,7 @@ export default function Footer() {
                 <li><Link href="/contact" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">お問い合わせ</Link></li>
                 <li><Link href="/shop/masu/custom" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">オーダーメイド</Link></li>
                 <li><Link href="/legal/commercial-transactions" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">配送について</Link></li>
+                <li><Link href="/jpyc" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">JPYC決済</Link></li>
               </ul>
             </div>
             <div>
