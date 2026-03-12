@@ -175,7 +175,7 @@ export default function CartPage() {
                 <div className="flex items-center border border-gray-200 rounded-lg">
                   <button
                     onClick={() => updateQuantity(item.product_id, item.quantity - 1)}
-                    className="p-1.5 text-gray-400 hover:text-gray-600"
+                    className="p-2.5 text-gray-400 hover:text-gray-600"
                   >
                     <Minus className="w-3 h-3" />
                   </button>
@@ -187,14 +187,14 @@ export default function CartPage() {
                         Math.min(item.product?.stock || 99, item.quantity + 1)
                       )
                     }
-                    className="p-1.5 text-gray-400 hover:text-gray-600"
+                    className="p-2.5 text-gray-400 hover:text-gray-600"
                   >
                     <Plus className="w-3 h-3" />
                   </button>
                 </div>
                 <button
                   onClick={() => removeItem(item.product_id)}
-                  className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                  className="p-2.5 text-gray-400 hover:text-red-500 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

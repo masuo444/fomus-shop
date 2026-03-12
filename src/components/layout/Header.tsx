@@ -94,8 +94,8 @@ export default function Header() {
                 {siteConfig.features.marketplaceName}
               </Link>
             )}
-            <Link href="/about" className="text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
-              About
+            <Link href="/contact" className="text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
+              Contact
             </Link>
           </nav>
 
@@ -105,7 +105,7 @@ export default function Header() {
             <SearchBar />
 
             {/* Cart */}
-            <Link href="/cart" className="relative p-1 text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
+            <Link href="/cart" className="relative p-2 text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
               <ShoppingCart className="w-[18px] h-[18px]" strokeWidth={1.5} />
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1.5 bg-[var(--foreground)] text-[var(--background)] text-[9px] font-medium w-4 h-4 rounded-full flex items-center justify-center">
@@ -119,7 +119,7 @@ export default function Header() {
               <div className="relative">
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-1.5 p-1 text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors"
+                  className="flex items-center gap-1.5 p-2 text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors"
                 >
                   <User className="w-[18px] h-[18px]" strokeWidth={1.5} />
                   {isPremiumMember && siteConfig.features.membershipProgram && (
@@ -205,7 +205,7 @@ export default function Header() {
 
             {/* Mobile menu button */}
             <button
-              className="md:hidden p-1 text-[var(--color-muted)]"
+              className="md:hidden p-2.5 text-[var(--color-muted)]"
               onClick={() => setMenuOpen(!menuOpen)}
             >
               {menuOpen ? <X className="w-5 h-5" strokeWidth={1.5} /> : <Menu className="w-5 h-5" strokeWidth={1.5} />}
@@ -227,8 +227,8 @@ export default function Header() {
                 {siteConfig.features.marketplaceName}
               </Link>
             )}
-            <Link href="/about" className="block text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
-              About
+            <Link href="/contact" className="block text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
+              Contact
             </Link>
             {!user && (
               <div className="pt-5 border-t border-[var(--color-border)] space-y-4">

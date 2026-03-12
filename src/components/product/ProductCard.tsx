@@ -39,7 +39,7 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
       </div>
 
       <Link href={`/shop/${product.id}`} className="block">
-        <div className="relative aspect-[3/4] bg-[var(--color-subtle)] overflow-hidden">
+        <div className="relative aspect-square bg-[var(--color-subtle)] overflow-hidden rounded-lg">
           {product.images && product.images.length > 0 ? (
             <Image
               src={product.images[0]}

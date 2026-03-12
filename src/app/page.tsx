@@ -58,7 +58,7 @@ export default async function HomePage() {
               <p className="text-[10px] tracking-[0.4em] uppercase text-white/25 mb-6">
                 Official Online Shop
               </p>
-              <h1 className="font-display text-5xl sm:text-6xl md:text-7xl font-light tracking-wide text-white leading-[0.9]">
+              <h1 className="font-display text-3xl sm:text-5xl md:text-7xl font-light tracking-wide text-white leading-[0.9]">
                 FOMUS
               </h1>
               <p className="mt-6 text-sm leading-[2] text-white/35 max-w-md">
@@ -110,7 +110,7 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
               {newProducts.map((product) => (
                 <ProductCard
                   key={product.id}
@@ -135,7 +135,7 @@ export default async function HomePage() {
       <section className="py-0 pb-16 md:pb-24">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[var(--color-border)]">
-            <Link href="/shop" className="group bg-[var(--background)] p-8 md:p-12 hover:bg-[var(--color-subtle)] transition-colors duration-500">
+            <Link href="/shop" className="group bg-[var(--background)] p-5 sm:p-8 md:p-12 hover:bg-[var(--color-subtle)] transition-colors duration-500">
               <p className="text-[10px] tracking-[0.3em] uppercase text-[var(--color-muted)] mb-4">01</p>
               <h3 className="font-display text-2xl md:text-3xl font-light text-[var(--foreground)] mb-4">Shop</h3>
               <p className="text-xs leading-[2] text-[var(--color-muted)]">
@@ -148,7 +148,7 @@ export default async function HomePage() {
                 </span>
               </div>
             </Link>
-            <Link href="/digital" className="group bg-[var(--background)] p-8 md:p-12 hover:bg-[var(--color-subtle)] transition-colors duration-500">
+            <Link href="/digital" className="group bg-[var(--background)] p-5 sm:p-8 md:p-12 hover:bg-[var(--color-subtle)] transition-colors duration-500">
               <p className="text-[10px] tracking-[0.3em] uppercase text-[var(--color-muted)] mb-4">02</p>
               <h3 className="font-display text-2xl md:text-3xl font-light text-[var(--foreground)] mb-4">Digital</h3>
               <p className="text-xs leading-[2] text-[var(--color-muted)]">
@@ -162,7 +162,7 @@ export default async function HomePage() {
               </div>
             </Link>
             {siteConfig.features.marketplace && (
-              <Link href="/market" className="group bg-[var(--background)] p-8 md:p-12 hover:bg-[var(--color-subtle)] transition-colors duration-500">
+              <Link href="/market" className="group bg-[var(--background)] p-5 sm:p-8 md:p-12 hover:bg-[var(--color-subtle)] transition-colors duration-500">
                 <p className="text-[10px] tracking-[0.3em] uppercase text-[var(--color-muted)] mb-4">03</p>
                 <h3 className="font-display text-2xl md:text-3xl font-light text-[var(--foreground)] mb-4">{mpName}</h3>
                 <p className="text-xs leading-[2] text-[var(--color-muted)]">

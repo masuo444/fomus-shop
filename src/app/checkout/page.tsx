@@ -249,7 +249,7 @@ export default function CheckoutPage() {
 
       <form onSubmit={handleSubmit}>
         {showConfirmation && (
-          <div className="mb-8 bg-white border border-gray-200 rounded-xl p-6">
+          <div className="mb-8 bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
             <h2 className="text-lg font-bold text-gray-900 mb-6">ご注文内容の確認</h2>
 
             {/* Shipping info review */}
@@ -349,7 +349,7 @@ export default function CheckoutPage() {
                 required
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black"
               />
             </div>
 
@@ -362,7 +362,7 @@ export default function CheckoutPage() {
                 required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black"
               />
             </div>
 
@@ -375,7 +375,7 @@ export default function CheckoutPage() {
                 required
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black"
               />
             </div>
 
@@ -389,7 +389,7 @@ export default function CheckoutPage() {
                 value={form.postal_code}
                 onChange={(e) => handlePostalCodeChange(e.target.value)}
                 placeholder={isEur ? '' : '000-0000'}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black"
               />
               {addressLoading && (
                 <p className="text-xs text-gray-400 mt-1">住所を検索中...</p>
@@ -405,7 +405,7 @@ export default function CheckoutPage() {
                 value={form.address}
                 onChange={(e) => setForm({ ...form, address: e.target.value })}
                 rows={3}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black resize-none"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black resize-none"
               />
             </div>
           </div>
