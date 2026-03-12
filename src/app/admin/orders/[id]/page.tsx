@@ -10,6 +10,7 @@ import { ArrowLeft, Loader2, Package, FileText, Receipt } from 'lucide-react'
 
 const statusBadgeColors: Record<string, string> = {
   pending: 'bg-yellow-50 text-yellow-700',
+  awaiting_payment: 'bg-orange-50 text-orange-700',
   paid: 'bg-blue-50 text-blue-700',
   processing: 'bg-indigo-50 text-indigo-700',
   shipped: 'bg-purple-50 text-purple-700',

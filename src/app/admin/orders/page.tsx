@@ -9,6 +9,7 @@ import { ShoppingCart, Loader2, Download } from 'lucide-react'
 
 const statusTabs = [
   { key: 'all', label: 'すべて' },
+  { key: 'awaiting_payment', label: '入金待ち' },
   { key: 'paid', label: '入金済み' },
   { key: 'processing', label: '準備中' },
   { key: 'shipped', label: '発送済み' },
@@ -18,6 +19,7 @@ const statusTabs = [
 
 const statusBadgeColors: Record<string, string> = {
   pending: 'bg-yellow-50 text-yellow-700',
+  awaiting_payment: 'bg-orange-50 text-orange-700',
   paid: 'bg-blue-50 text-blue-700',
   processing: 'bg-indigo-50 text-indigo-700',
   shipped: 'bg-purple-50 text-purple-700',

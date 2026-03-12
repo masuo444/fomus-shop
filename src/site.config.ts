@@ -53,6 +53,17 @@ const siteConfig = {
     maxPollMinutes: 30,
   },
 
+  // Bank Transfer
+  bankTransfer: {
+    enabled: true,
+    bankName: process.env.BANK_TRANSFER_BANK_NAME || '三菱UFJ銀行',
+    branchName: process.env.BANK_TRANSFER_BRANCH_NAME || '渋谷支店',
+    accountType: process.env.BANK_TRANSFER_ACCOUNT_TYPE || '普通',
+    accountNumber: process.env.BANK_TRANSFER_ACCOUNT_NUMBER || '1234567',
+    accountHolder: process.env.BANK_TRANSFER_ACCOUNT_HOLDER || 'カ）フォムス',
+    deadlineDays: 3,
+  },
+
   // Feature flags
   features: {
     membershipProgram: process.env.FEATURE_MEMBERSHIP === 'true',

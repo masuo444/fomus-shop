@@ -119,7 +119,7 @@ export interface Order {
   shop_id: string
   user_id: string | null
   email: string
-  status: 'pending' | 'paid' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded'
+  status: 'pending' | 'awaiting_payment' | 'paid' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded'
   subtotal: number
   shipping_fee: number
   total: number
@@ -315,6 +315,7 @@ export interface PayoutRequest {
 
 export const ORDER_STATUS_LABELS: Record<Order['status'], string> = {
   pending: '未決済',
+  awaiting_payment: '入金待ち',
   paid: '入金済み',
   processing: '準備中',
   shipped: '発送済み',
