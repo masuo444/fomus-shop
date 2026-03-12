@@ -36,6 +36,8 @@ export default async function HomePage() {
   }
 
   let newProducts: Product[] = []
+  let shopCoverImage: string | null = null
+  let digitalCoverImage: string | null = null
   if (shopIds.length > 0) {
     const { data } = await supabase
       .from('products')
@@ -46,6 +48,19 @@ export default async function HomePage() {
       .order('created_at', { ascending: false })
       .limit(8)
     newProducts = data || []
+    // Get cover images for categories
+    const physicalWithImg = (data || []).find(p => p.images && p.images.length > 0)
+    if (physicalWithImg) shopCoverImage = physicalWithImg.images[0]
+
+    const { data: digitalData } = await supabase
+      .from('products')
+      .select('images')
+      .in('shop_id', shopIds)
+      .eq('is_published', true)
+      .eq('item_type', 'digital')
+      .order('created_at', { ascending: false })
+      .limit(1)
+    if (digitalData?.[0]?.images?.[0]) digitalCoverImage = digitalData[0].images[0]
   }
 
   return (
@@ -140,34 +155,52 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
           <ScrollReveal>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[var(--color-border)]">
-              <Link href="/shop" className="group bg-[var(--background)] p-10 md:p-14 transition-colors hover:bg-[var(--color-subtle)]">
-                <p className="text-[10px] tracking-[0.25em] uppercase text-[var(--color-muted)] mb-6">01</p>
-                <h3 className="font-display text-3xl md:text-4xl font-light text-[var(--foreground)] mb-4 italic">Shop</h3>
-                <p className="text-xs leading-[2] text-[var(--color-muted)]">
-                  FOMUS枡・SILVA・バッジ・コラボ枡。
-                  <br />防水コーティング対応。
-                </p>
-                <div className="mt-8 flex items-center gap-2 text-[10px] tracking-[0.15em] uppercase text-[var(--color-muted)] group-hover:text-[var(--foreground)] transition-colors">
-                  <span>View</span>
-                  <svg className="w-3 h-3 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+              <Link href="/shop" className="group bg-[var(--background)] transition-colors hover:bg-[var(--color-subtle)]">
+                {shopCoverImage && (
+                  <div className="aspect-[4/3] overflow-hidden">
+                    <img src={shopCoverImage} alt="Shop" className="w-full h-full object-cover img-hover" />
+                  </div>
+                )}
+                <div className="p-10 md:p-14">
+                  <p className="text-[10px] tracking-[0.25em] uppercase text-[var(--color-muted)] mb-6">01</p>
+                  <h3 className="font-display text-3xl md:text-4xl font-light text-[var(--foreground)] mb-4 italic">Shop</h3>
+                  <p className="text-xs leading-[2] text-[var(--color-muted)]">
+                    FOMUS枡・SILVA・バッジ・コラボ枡。
+                    <br />防水コーティング対応。
+                  </p>
+                  <div className="mt-8 flex items-center gap-2 text-[10px] tracking-[0.15em] uppercase text-[var(--color-muted)] group-hover:text-[var(--foreground)] transition-colors">
+                    <span>View</span>
+                    <svg className="w-3 h-3 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                  </div>
                 </div>
               </Link>
 
-              <Link href="/digital" className="group bg-[var(--background)] p-10 md:p-14 transition-colors hover:bg-[var(--color-subtle)]">
-                <p className="text-[10px] tracking-[0.25em] uppercase text-[var(--color-muted)] mb-6">02</p>
-                <h3 className="font-display text-3xl md:text-4xl font-light text-[var(--foreground)] mb-4 italic">Digital</h3>
-                <p className="text-xs leading-[2] text-[var(--color-muted)]">
-                  活動記・限定デジタルアイテム・
-                  <br />チケット。
-                </p>
-                <div className="mt-8 flex items-center gap-2 text-[10px] tracking-[0.15em] uppercase text-[var(--color-muted)] group-hover:text-[var(--foreground)] transition-colors">
-                  <span>View</span>
-                  <svg className="w-3 h-3 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+              <Link href="/digital" className="group bg-[var(--background)] transition-colors hover:bg-[var(--color-subtle)]">
+                {digitalCoverImage && (
+                  <div className="aspect-[4/3] overflow-hidden">
+                    <img src={digitalCoverImage} alt="Digital" className="w-full h-full object-cover img-hover" />
+                  </div>
+                )}
+                <div className="p-10 md:p-14">
+                  <p className="text-[10px] tracking-[0.25em] uppercase text-[var(--color-muted)] mb-6">02</p>
+                  <h3 className="font-display text-3xl md:text-4xl font-light text-[var(--foreground)] mb-4 italic">Digital</h3>
+                  <p className="text-xs leading-[2] text-[var(--color-muted)]">
+                    活動記・限定デジタルアイテム・
+                    <br />チケット。
+                  </p>
+                  <div className="mt-8 flex items-center gap-2 text-[10px] tracking-[0.15em] uppercase text-[var(--color-muted)] group-hover:text-[var(--foreground)] transition-colors">
+                    <span>View</span>
+                    <svg className="w-3 h-3 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                  </div>
                 </div>
               </Link>
 
               {siteConfig.features.marketplace && (
-                <Link href="/market" className="group bg-[var(--background)] p-10 md:p-14 transition-colors hover:bg-[var(--color-subtle)]">
+                <Link href="/market" className="group bg-[var(--background)] transition-colors hover:bg-[var(--color-subtle)]">
+                  <div className="aspect-[4/3] overflow-hidden bg-[var(--color-subtle)]">
+                    <img src="/fomus-guild.png" alt={mpName} className="w-full h-full object-cover img-hover" />
+                  </div>
+                  <div className="p-10 md:p-14">
                   <p className="text-[10px] tracking-[0.25em] uppercase text-[var(--color-muted)] mb-6">03</p>
                   <h3 className="font-display text-3xl md:text-4xl font-light text-[var(--foreground)] mb-4 italic">{mpName}</h3>
                   <p className="text-xs leading-[2] text-[var(--color-muted)]">
@@ -177,6 +210,7 @@ export default async function HomePage() {
                   <div className="mt-8 flex items-center gap-2 text-[10px] tracking-[0.15em] uppercase text-[var(--color-muted)] group-hover:text-[var(--foreground)] transition-colors">
                     <span>View</span>
                     <svg className="w-3 h-3 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                  </div>
                   </div>
                 </Link>
               )}
