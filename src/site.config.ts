@@ -76,6 +76,14 @@ const siteConfig = {
     partnerMarketplace: process.env.FEATURE_PARTNERS !== 'false',
     birthdayCoupons: process.env.FEATURE_BIRTHDAY_COUPONS !== 'false',
   },
+  // Legal
+  legal: {
+    companyName: process.env.LEGAL_COMPANY_NAME || '',
+    representative: process.env.LEGAL_REPRESENTATIVE || '',
+    address: process.env.LEGAL_ADDRESS || '',
+    phone: process.env.LEGAL_PHONE || '',
+    email: process.env.LEGAL_EMAIL || process.env.ADMIN_NOTIFICATION_EMAIL || '',
+  },
 } as const
 
 export default siteConfig

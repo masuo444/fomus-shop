@@ -53,11 +53,34 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="text-[10px] tracking-[0.2em] uppercase text-white/30 mb-5">Information</h4>
+            <h4 className="text-[10px] tracking-[0.2em] uppercase text-white/30 mb-5">Customer Service</h4>
             <ul className="space-y-3">
               <li>
-                <Link href="/about" className="text-xs text-white/60 hover:text-white transition-colors">
-                  About
+                <Link href="/contact" className="text-xs text-white/60 hover:text-white transition-colors">
+                  お問い合わせ
+                </Link>
+              </li>
+              <li>
+                <Link href="/legal/commercial-transactions" className="text-xs text-white/60 hover:text-white transition-colors">
+                  配送について
+                </Link>
+              </li>
+            </ul>
+            <h4 className="text-[10px] tracking-[0.2em] uppercase text-white/30 mb-5 mt-8">Legal</h4>
+            <ul className="space-y-3">
+              <li>
+                <Link href="/legal/commercial-transactions" className="text-xs text-white/60 hover:text-white transition-colors">
+                  特定商取引法に基づく表記
+                </Link>
+              </li>
+              <li>
+                <Link href="/legal/privacy" className="text-xs text-white/60 hover:text-white transition-colors">
+                  プライバシーポリシー
+                </Link>
+              </li>
+              <li>
+                <Link href="/legal/terms" className="text-xs text-white/60 hover:text-white transition-colors">
+                  利用規約
                 </Link>
               </li>
             </ul>
