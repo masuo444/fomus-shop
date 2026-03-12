@@ -51,81 +51,45 @@ export default async function HomePage() {
   return (
     <div>
       {/* ===== HERO ===== */}
-      <section className="relative bg-[var(--foreground)] overflow-hidden min-h-[85vh] flex items-center">
-        {/* Animated gradient orbs */}
-        <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-[var(--color-accent)] opacity-[0.07] blur-[120px] animate-float" />
-        <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] rounded-full bg-[#F4A261] opacity-[0.05] blur-[100px] animate-float" style={{ animationDelay: '2s' }} />
+      <section className="relative bg-[var(--foreground)] overflow-hidden">
+        <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 py-24 md:py-36 lg:py-44">
+          <div className="flex flex-col items-center text-center">
+            {/* Logo */}
+            <img
+              src="/fomus-logo.png"
+              alt="FOMUS"
+              className="w-32 sm:w-40 md:w-52 mb-10 animate-float"
+            />
 
-        <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 py-20 md:py-28 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            {/* Left */}
-            <div className="lg:col-span-7">
-              <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 mb-8">
-                <span className="w-2 h-2 rounded-full bg-[var(--color-accent)] animate-pulse-glow" />
-                <span className="text-[11px] tracking-wide text-white/50">New items available</span>
-              </div>
+            <h1 className="sr-only">FOMUS Official Online Shop</h1>
 
-              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-white leading-[0.95]">
-                MAKE
-                <br />
-                <span className="gradient-text">CULTURE</span>
-                <br />
-                HAPPEN<span className="text-[var(--color-accent)]">.</span>
-              </h1>
+            <p className="text-sm md:text-base leading-relaxed text-white/40 max-w-md mb-10">
+              枡・カードゲーム・七宝焼・デジタルアイテム。
+              <br />
+              FOUMSの公式オンラインショップ。
+            </p>
 
-              <p className="mt-8 text-base md:text-lg leading-relaxed text-white/40 max-w-md">
-                枡、カードゲーム、七宝焼、デジタルアイテム。
-                <br />
-                FOUMSが仕掛けるモノとコトの公式ショップ。
-              </p>
-
-              <div className="mt-10 flex items-center gap-4 flex-wrap">
-                <Link
-                  href="/shop"
-                  className="btn-accent inline-flex items-center gap-3"
-                >
-                  ショップへ
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                </Link>
-                <Link
-                  href="/digital"
-                  className="inline-flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors"
-                >
-                  デジタルアイテム
-                  <span className="text-white/20">→</span>
-                </Link>
-              </div>
-            </div>
-
-            {/* Right — Feature cards */}
-            <div className="lg:col-span-5 hidden lg:block">
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  { emoji: '🪵', title: 'FOMUS枡', desc: '国産ヒノキ', tag: '¥1,500〜' },
-                  { emoji: '🃏', title: 'SILVA', desc: 'カードゲーム', tag: '¥990' },
-                  { emoji: '🎨', title: '七宝焼コラボ', desc: 'オーダーメイド', tag: 'お問い合わせ' },
-                  { emoji: '📱', title: 'デジタル', desc: '活動記・限定品', tag: 'NEW' },
-                ].map((item, i) => (
-                  <div
-                    key={item.title}
-                    className="bg-white/[0.04] backdrop-blur-sm border border-white/[0.06] rounded-2xl p-5 hover:bg-white/[0.08] hover:border-white/[0.12] transition-all duration-300 cursor-default"
-                    style={{ animationDelay: `${i * 0.15}s` }}
-                  >
-                    <span className="text-2xl">{item.emoji}</span>
-                    <h3 className="text-sm font-semibold text-white mt-3">{item.title}</h3>
-                    <p className="text-[11px] text-white/30 mt-1">{item.desc}</p>
-                    <span className="inline-block mt-3 text-[10px] tracking-wide font-medium text-[var(--color-accent)] bg-[var(--color-accent)]/10 px-2.5 py-1 rounded-full">
-                      {item.tag}
-                    </span>
-                  </div>
-                ))}
-              </div>
+            <div className="flex items-center gap-4 flex-wrap justify-center">
+              <Link
+                href="/shop"
+                className="btn-accent inline-flex items-center gap-3"
+              >
+                ショップへ
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+              </Link>
+              <Link
+                href="/digital"
+                className="inline-flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors"
+              >
+                デジタルアイテム
+                <span className="text-white/20">→</span>
+              </Link>
             </div>
           </div>
         </div>
 
         {/* Ticker */}
-        <div className="absolute bottom-0 left-0 right-0 border-t border-white/5 py-3 overflow-hidden">
+        <div className="border-t border-white/5 py-3 overflow-hidden">
           <div className="animate-marquee whitespace-nowrap flex gap-16">
             {Array.from({ length: 2 }).map((_, i) => (
               <span key={i} className="flex gap-16 text-[10px] tracking-[0.3em] uppercase text-white/10 font-medium">
@@ -356,44 +320,54 @@ export default async function HomePage() {
         <section className="py-20 md:py-32 bg-gradient-to-b from-[var(--color-subtle)] to-[var(--background)]">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
             <ScrollReveal>
-              <div className="text-center mb-14">
-                <p className="text-xs font-semibold tracking-widest uppercase text-[var(--color-member)] mb-2">Membership</p>
-                <h2 className="text-3xl md:text-5xl font-bold text-[var(--foreground)] mb-4">
-                  FOMUS {siteConfig.features.membershipName}
-                </h2>
-                <p className="text-sm text-[var(--color-muted)] max-w-md mx-auto">
-                  メンバーになって、FOUMSの世界をもっと楽しもう。
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-3xl mx-auto mb-12">
-                {[
-                  { icon: '🏷️', label: 'メンバー限定価格', desc: '対象商品が特別価格に' },
-                  { icon: '📦', label: '送料無料', desc: '国内配送がいつでも無料' },
-                  { icon: '⭐', label: 'ポイント還元', desc: 'お買い物でポイントが貯まる' },
-                ].map((item) => (
-                  <div key={item.label} className="bg-white rounded-2xl p-6 text-center card-hover border border-[var(--color-border)]">
-                    <span className="text-2xl block mb-3">{item.icon}</span>
-                    <p className="text-sm font-semibold text-[var(--foreground)] mb-1">{item.label}</p>
-                    <p className="text-[11px] text-[var(--color-muted)]">{item.desc}</p>
-                  </div>
-                ))}
-              </div>
-
-              {siteConfig.features.membershipUrl && (
-                <div className="text-center">
-                  <a
-                    href={siteConfig.features.membershipUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-primary inline-flex items-center gap-2"
-                    style={{ background: 'var(--color-member)' }}
-                  >
-                    {siteConfig.features.membershipName}について
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                  </a>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+                {/* Image */}
+                <div className="relative rounded-3xl overflow-hidden aspect-square max-w-md mx-auto lg:mx-0">
+                  <img
+                    src="/fomus-guild.png"
+                    alt="FOMUS枡"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-              )}
+
+                {/* Content */}
+                <div>
+                  <p className="text-xs font-semibold tracking-widest uppercase text-[var(--color-member)] mb-2">Membership</p>
+                  <h2 className="text-3xl md:text-5xl font-bold text-[var(--foreground)] mb-4">
+                    FOMUS {siteConfig.features.membershipName}
+                  </h2>
+                  <p className="text-sm text-[var(--color-muted)] max-w-md mb-10">
+                    メンバーになって、FOUMSの世界をもっと楽しもう。
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+                    {[
+                      { icon: '🏷️', label: 'メンバー限定価格', desc: '対象商品が特別価格に' },
+                      { icon: '📦', label: '送料無料', desc: '国内配送がいつでも無料' },
+                      { icon: '⭐', label: 'ポイント還元', desc: 'お買い物でポイントが貯まる' },
+                    ].map((item) => (
+                      <div key={item.label} className="bg-white rounded-2xl p-5 text-center card-hover border border-[var(--color-border)]">
+                        <span className="text-xl block mb-2">{item.icon}</span>
+                        <p className="text-xs font-semibold text-[var(--foreground)] mb-0.5">{item.label}</p>
+                        <p className="text-[10px] text-[var(--color-muted)]">{item.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {siteConfig.features.membershipUrl && (
+                    <a
+                      href={siteConfig.features.membershipUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-primary inline-flex items-center gap-2"
+                      style={{ background: 'var(--color-member)' }}
+                    >
+                      {siteConfig.features.membershipName}について
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                    </a>
+                  )}
+                </div>
+              </div>
             </ScrollReveal>
           </div>
         </section>
