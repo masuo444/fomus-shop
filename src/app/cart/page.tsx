@@ -8,7 +8,10 @@ import {
   getLocalCart,
   updateLocalCartQuantity,
   removeFromLocalCart,
+  getOptionsAdjustment,
+  formatOptionsText,
   type LocalCartItem,
+  type SelectedOptions,
 } from '@/lib/cart'
 import { createClient } from '@/lib/supabase/client'
 import { formatPrice } from '@/lib/utils'
@@ -73,21 +76,29 @@ export default function CartPage() {
     setLoading(false)
   }
 
-  const updateQuantity = (productId: string, quantity: number) => {
-    updateLocalCartQuantity(productId, quantity)
+  const itemKey = (item: LocalCartItem) => {
+    if (!item.selected_options || Object.keys(item.selected_options).length === 0) return item.product_id
+    const sorted = Object.entries(item.selected_options).sort(([a], [b]) => a.localeCompare(b))
+    return `${item.product_id}__${sorted.map(([k, v]) => `${k}:${v.choiceId}`).join('|')}`
+  }
+
+  const updateQuantity = (item: LocalCartItem, quantity: number) => {
+    updateLocalCartQuantity(item.product_id, quantity, item.selected_options)
+    const key = itemKey(item)
     setItems((prev) =>
       quantity <= 0
-        ? prev.filter((item) => item.product_id !== productId)
-        : prev.map((item) =>
-            item.product_id === productId ? { ...item, quantity } : item
+        ? prev.filter((i) => itemKey(i) !== key)
+        : prev.map((i) =>
+            itemKey(i) === key ? { ...i, quantity } : i
           )
     )
     window.dispatchEvent(new Event('cart-updated'))
   }
 
-  const removeItem = (productId: string) => {
-    removeFromLocalCart(productId)
-    setItems((prev) => prev.filter((item) => item.product_id !== productId))
+  const removeItem = (item: LocalCartItem) => {
+    removeFromLocalCart(item.product_id, item.selected_options)
+    const key = itemKey(item)
+    setItems((prev) => prev.filter((i) => itemKey(i) !== key))
     window.dispatchEvent(new Event('cart-updated'))
   }
 
@@ -95,14 +106,14 @@ export default function CartPage() {
   const shopIds = [...new Set(items.filter(i => i.product).map(i => i.product!.shop_id))]
   const hasMixedShops = shopIds.length > 1
 
-  const getItemPrice = (product: Product | undefined): number => {
+  const getItemPrice = (product: Product | undefined, options?: SelectedOptions): number => {
     if (!product) return 0
-    if (isEur) return product.price_eur ?? product.price
-    return product.price
+    const base = isEur ? (product.price_eur ?? product.price) : product.price
+    return base + getOptionsAdjustment(options)
   }
 
   const subtotal = items.reduce(
-    (sum, item) => sum + getItemPrice(item.product) * item.quantity,
+    (sum, item) => sum + getItemPrice(item.product, item.selected_options) * item.quantity,
     0
   )
   const shippingFee = items.length > 0
@@ -141,7 +152,7 @@ export default function CartPage() {
       <div className="space-y-4">
         {items.map((item) => (
           <div
-            key={item.product_id}
+            key={itemKey(item)}
             className="flex gap-4 p-4 border border-gray-100 rounded-lg"
           >
             <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 relative">
@@ -168,13 +179,18 @@ export default function CartPage() {
                 {item.product?.name || '商品が見つかりません'}
               </Link>
               <p className="text-sm font-medium text-gray-900 mt-1">
-                {item.product ? formatPrice(getItemPrice(item.product), currency) : '-'}
+                {item.product ? formatPrice(getItemPrice(item.product, item.selected_options), currency) : '-'}
               </p>
+              {item.selected_options && Object.keys(item.selected_options).length > 0 && (
+                <p className="text-xs text-gray-500 mt-1">
+                  {formatOptionsText(item.selected_options)}
+                </p>
+              )}
 
               <div className="flex items-center justify-between mt-2">
                 <div className="flex items-center border border-gray-200 rounded-lg">
                   <button
-                    onClick={() => updateQuantity(item.product_id, item.quantity - 1)}
+                    onClick={() => updateQuantity(item, item.quantity - 1)}
                     className="p-2.5 text-gray-400 hover:text-gray-600"
                   >
                     <Minus className="w-3 h-3" />
@@ -183,7 +199,7 @@ export default function CartPage() {
                   <button
                     onClick={() =>
                       updateQuantity(
-                        item.product_id,
+                        item,
                         Math.min(item.product?.stock || 99, item.quantity + 1)
                       )
                     }
@@ -193,7 +209,7 @@ export default function CartPage() {
                   </button>
                 </div>
                 <button
-                  onClick={() => removeItem(item.product_id)}
+                  onClick={() => removeItem(item)}
                   className="p-2.5 text-gray-400 hover:text-red-500 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />

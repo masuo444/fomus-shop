@@ -7,9 +7,16 @@ import type { Product } from '@/lib/types'
 import { requireString, validateEmail, ValidationError } from '@/lib/validation'
 import { rateLimit } from '@/lib/rate-limit'
 
+interface SelectedOption {
+  choiceId: string
+  label: string
+  priceAdjustment: number
+}
+
 interface CheckoutItem {
   product_id: string
   quantity: number
+  selected_options?: Record<string, SelectedOption>
 }
 
 interface ShippingInfo {
@@ -114,9 +121,18 @@ export async function POST(request: Request) {
       return product.price
     }
 
+    const getOptionsAdj = (item: CheckoutItem): number => {
+      if (!item.selected_options) return 0
+      return Object.values(item.selected_options).reduce((sum, opt) => sum + opt.priceAdjustment, 0)
+    }
+    const formatOpts = (item: CheckoutItem): string | null => {
+      if (!item.selected_options || Object.keys(item.selected_options).length === 0) return null
+      return Object.entries(item.selected_options).map(([name, opt]) => `${name}: ${opt.label}`).join(' / ')
+    }
+
     const subtotal = items.reduce((sum, item) => {
       const product = products.find((p) => p.id === item.product_id)!
-      return sum + getUnitPrice(product) * item.quantity
+      return sum + (getUnitPrice(product) + getOptionsAdj(item)) * item.quantity
     }, 0)
 
     const shippingFee = isPremiumMember ? 0 : SHIPPING_FEE
@@ -151,13 +167,15 @@ export async function POST(request: Request) {
     // Create order items
     const orderItems = items.map((item) => {
       const product = products.find((p) => p.id === item.product_id)!
+      const optionsText = formatOpts(item)
       return {
         order_id: order.id,
         product_id: item.product_id,
-        product_name: product.name,
-        price: getUnitPrice(product),
+        product_name: optionsText ? `${product.name}（${optionsText}）` : product.name,
+        price: getUnitPrice(product) + getOptionsAdj(item),
         quantity: item.quantity,
         image_url: product.images?.[0] || null,
+        options_text: optionsText,
       }
     })
 

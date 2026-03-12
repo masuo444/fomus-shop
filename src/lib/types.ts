@@ -148,6 +148,7 @@ export interface OrderItem {
   price: number
   quantity: number
   image_url: string | null
+  options_text: string | null
   product?: Product
 }
 

@@ -6,8 +6,9 @@ import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Minus, Plus, ShoppingCart, ChevronLeft } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
-import { addToLocalCart, wouldMixShops, clearLocalCart } from '@/lib/cart'
+import { addToLocalCart, wouldMixShops, clearLocalCart, getOptionsAdjustment, type SelectedOptions } from '@/lib/cart'
 import type { Product } from '@/lib/types'
+import ProductOptionSelector from '@/components/product/ProductOptionSelector'
 import ShareButtons from '@/components/product/ShareButtons'
 import FavoriteButton from '@/components/product/FavoriteButton'
 import MemberCTA from '@/components/ui/MemberCTA'
@@ -18,6 +19,8 @@ import { useCurrency } from '@/hooks/useCurrency'
 export default function ProductDetailClient({ product, shopName }: { product: Product; shopName?: string }) {
   const [quantity, setQuantity] = useState(1)
   const [selectedImage, setSelectedImage] = useState(0)
+  const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>({})
+  const [optionError, setOptionError] = useState('')
   const [addedToCart, setAddedToCart] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isPremiumMember, setIsGuildMember] = useState(false)
@@ -34,8 +37,10 @@ export default function ProductDetailClient({ product, shopName }: { product: Pr
   const memberPriceVal = isEur ? (product.member_price_eur ?? null) : product.member_price
   const comparePrice = isEur ? (product.compare_at_price_eur ?? null) : product.compare_at_price
 
+  const optionsAdjustment = getOptionsAdjustment(selectedOptions)
   const isSoldOut = product.stock === 0
   const hasMemberPrice = memberPriceVal != null && memberPriceVal < mainPrice
+  const hasOptions = product.product_options && product.product_options.length > 0
 
   // Auto-add to cart when ?add=true
   useEffect(() => {
@@ -88,19 +93,32 @@ export default function ProductDetailClient({ product, shopName }: { product: Pr
   }
 
   const handleAddToCart = () => {
+    // Validate required options
+    if (hasOptions) {
+      const requiredOptions = product.product_options!.filter(o => o.required)
+      const missing = requiredOptions.filter(o => !selectedOptions[o.name])
+      if (missing.length > 0) {
+        setOptionError(`「${missing.map(o => o.name).join('」「')}」を選択してください`)
+        return
+      }
+    }
+    setOptionError('')
+
     if (wouldMixShops(product.shop_id)) {
       if (!confirm('カートには別のショップの商品が入っています。カートを空にしてこの商品を追加しますか？')) {
         return
       }
       clearLocalCart()
     }
-    addToLocalCart(product.id, quantity, product.shop_id)
+    const opts = Object.keys(selectedOptions).length > 0 ? selectedOptions : undefined
+    addToLocalCart(product.id, quantity, product.shop_id, opts)
     window.dispatchEvent(new Event('cart-updated'))
     setAddedToCart(true)
     setTimeout(() => setAddedToCart(false), 2000)
   }
 
-  const displayPrice = isPremiumMember && hasMemberPrice ? memberPriceVal! : mainPrice
+  const baseDisplayPrice = isPremiumMember && hasMemberPrice ? memberPriceVal! : mainPrice
+  const displayPrice = baseDisplayPrice + optionsAdjustment
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -199,7 +217,7 @@ export default function ProductDetailClient({ product, shopName }: { product: Pr
               <div className="space-y-1">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl font-bold" style={{ color: 'var(--color-member)' }}>
-                    {formatPrice(memberPriceVal!, currency)}
+                    {formatPrice(memberPriceVal! + optionsAdjustment, currency)}
                   </span>
                   <span
                     className="text-xs font-bold px-2 py-0.5 rounded-full"
@@ -215,7 +233,7 @@ export default function ProductDetailClient({ product, shopName }: { product: Pr
             ) : (
               <div className="flex items-center gap-3">
                 <span className="text-2xl font-bold text-gray-900">
-                  {formatPrice(mainPrice, currency)}
+                  {formatPrice(mainPrice + optionsAdjustment, currency)}
                 </span>
                 {comparePrice && comparePrice > mainPrice && (
                   <span className="text-lg text-gray-400 line-through">
@@ -268,6 +286,29 @@ export default function ProductDetailClient({ product, shopName }: { product: Pr
           {product.description && (
             <div className="mt-6 text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
               {product.description}
+            </div>
+          )}
+
+          {/* Product Options */}
+          {hasOptions && !isSoldOut && (
+            <div className="mt-6 pt-6 border-t border-gray-100">
+              <ProductOptionSelector
+                options={product.product_options!}
+                selectedOptions={selectedOptions}
+                onOptionsChange={setSelectedOptions}
+                currency={currency}
+              />
+              {optionsAdjustment !== 0 && (
+                <div className="mt-3 flex items-center justify-between text-sm px-1">
+                  <span className="text-gray-500">オプション合計</span>
+                  <span className="font-medium text-gray-900">
+                    +{formatPrice(optionsAdjustment, currency)}
+                  </span>
+                </div>
+              )}
+              {optionError && (
+                <p className="mt-2 text-sm text-red-500">{optionError}</p>
+              )}
             </div>
           )}
 

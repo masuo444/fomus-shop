@@ -47,7 +47,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
   const { data: product } = await supabase
     .from('products')
-    .select('*, category:categories(*)')
+    .select('*, category:categories(*), product_options(*, choices:product_option_choices(*))')
     .eq('id', id)
     .eq('is_published', true)
     .single()

@@ -11,9 +11,16 @@ import { requireString, validateEmail, sanitizeString, ValidationError } from '@
 import { rateLimit } from '@/lib/rate-limit'
 import { checkOrderFraud } from '@/lib/fraud'
 
+interface SelectedOption {
+  choiceId: string
+  label: string
+  priceAdjustment: number
+}
+
 interface CheckoutItem {
   product_id: string
   quantity: number
+  selected_options?: Record<string, SelectedOption>
 }
 
 interface ShippingInfo {
@@ -141,10 +148,22 @@ export async function POST(request: Request) {
       return product.price
     }
 
+    // Helper: get options price adjustment
+    const getOptionsAdj = (item: CheckoutItem): number => {
+      if (!item.selected_options) return 0
+      return Object.values(item.selected_options).reduce((sum, opt) => sum + opt.priceAdjustment, 0)
+    }
+
+    // Helper: format options as text
+    const formatOpts = (item: CheckoutItem): string | null => {
+      if (!item.selected_options || Object.keys(item.selected_options).length === 0) return null
+      return Object.entries(item.selected_options).map(([name, opt]) => `${name}: ${opt.label}`).join(' / ')
+    }
+
     // Calculate totals
     const subtotal = items.reduce((sum, item) => {
       const product = products.find((p) => p.id === item.product_id)!
-      return sum + getUnitPrice(product) * item.quantity
+      return sum + (getUnitPrice(product) + getOptionsAdj(item)) * item.quantity
     }, 0)
 
     // Premium members get free shipping (JPY only; EUR always charges shipping)
@@ -187,13 +206,15 @@ export async function POST(request: Request) {
     // Create order items
     const orderItems = items.map((item) => {
       const product = products.find((p) => p.id === item.product_id)!
+      const optionsText = formatOpts(item)
       return {
         order_id: order.id,
         product_id: item.product_id,
-        product_name: product.name,
-        price: getUnitPrice(product),
+        product_name: optionsText ? `${product.name}（${optionsText}）` : product.name,
+        price: getUnitPrice(product) + getOptionsAdj(item),
         quantity: item.quantity,
         image_url: product.images?.[0] || null,
+        options_text: optionsText,
       }
     })
 
@@ -203,14 +224,16 @@ export async function POST(request: Request) {
     const shippingLabel = currency === 'eur' ? 'Shipping' : '送料'
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map((item) => {
       const product = products.find((p) => p.id === item.product_id)!
+      const optionsText = formatOpts(item)
+      const name = optionsText ? `${product.name}（${optionsText}）` : product.name
       return {
         price_data: {
           currency,
           product_data: {
-            name: product.name,
+            name,
             images: product.images?.slice(0, 1) || [],
           },
-          unit_amount: getUnitPrice(product),
+          unit_amount: getUnitPrice(product) + getOptionsAdj(item),
         },
         quantity: item.quantity,
       }

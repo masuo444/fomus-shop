@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { getLocalCart, type LocalCartItem } from '@/lib/cart'
+import { getLocalCart, getOptionsAdjustment, formatOptionsText, type LocalCartItem } from '@/lib/cart'
 import { createClient } from '@/lib/supabase/client'
 import { formatPrice } from '@/lib/utils'
 import { fetchAddressFromPostalCode } from '@/lib/address'
@@ -104,14 +104,14 @@ export default function CheckoutPage() {
     setLoading(false)
   }
 
-  const getItemPrice = (product: Product | undefined): number => {
-    if (!product) return 0
-    if (isEur) return product.price_eur ?? product.price
-    return product.price
+  const getItemPrice = (item: CartItemWithProduct): number => {
+    if (!item.product) return 0
+    const base = isEur ? (item.product.price_eur ?? item.product.price) : item.product.price
+    return base + getOptionsAdjustment(item.selected_options)
   }
 
   const subtotal = items.reduce(
-    (sum, item) => sum + getItemPrice(item.product) * item.quantity,
+    (sum, item) => sum + getItemPrice(item) * item.quantity,
     0
   )
   const shippingFee = isEur ? SHIPPING_FEE_EUR : (isPremiumMember ? 0 : SHIPPING_FEE)
@@ -179,6 +179,7 @@ export default function CheckoutPage() {
     const cartItems = items.map((item) => ({
       product_id: item.product_id,
       quantity: item.quantity,
+      selected_options: item.selected_options,
     }))
 
     try {
@@ -268,10 +269,15 @@ export default function CheckoutPage() {
             <div className="mb-6">
               <h3 className="text-sm font-semibold text-gray-700 mb-3">注文商品</h3>
               <div className="space-y-2">
-                {items.map((item) => (
-                  <div key={item.product_id} className="flex justify-between text-sm">
-                    <span className="text-gray-700">{item.product?.name} × {item.quantity}</span>
-                    <span className="font-medium">{item.product ? formatPrice(getItemPrice(item.product) * item.quantity, currency) : '-'}</span>
+                {items.map((item, idx) => (
+                  <div key={`${item.product_id}-${idx}`} className="flex justify-between text-sm">
+                    <div>
+                      <span className="text-gray-700">{item.product?.name} × {item.quantity}</span>
+                      {item.selected_options && Object.keys(item.selected_options).length > 0 && (
+                        <p className="text-xs text-gray-400">{formatOptionsText(item.selected_options)}</p>
+                      )}
+                    </div>
+                    <span className="font-medium">{item.product ? formatPrice(getItemPrice(item) * item.quantity, currency) : '-'}</span>
                   </div>
                 ))}
               </div>
@@ -437,12 +443,15 @@ export default function CheckoutPage() {
                     <p className="text-sm text-gray-900 line-clamp-1">
                       {item.product?.name || '商品'}
                     </p>
+                    {item.selected_options && Object.keys(item.selected_options).length > 0 && (
+                      <p className="text-xs text-gray-400">{formatOptionsText(item.selected_options)}</p>
+                    )}
                     <p className="text-xs text-gray-400">
-                      {item.product ? formatPrice(getItemPrice(item.product), currency) : '-'} x {item.quantity}
+                      {item.product ? formatPrice(getItemPrice(item), currency) : '-'} x {item.quantity}
                     </p>
                   </div>
                   <div className="text-sm font-medium text-gray-900">
-                    {item.product ? formatPrice(getItemPrice(item.product) * item.quantity, currency) : '-'}
+                    {item.product ? formatPrice(getItemPrice(item) * item.quantity, currency) : '-'}
                   </div>
                 </div>
               ))}
