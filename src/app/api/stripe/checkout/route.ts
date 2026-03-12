@@ -7,20 +7,15 @@ import { SHIPPING_FEE } from '@/lib/constants'
 import siteConfig from '@/site.config'
 import type { Product } from '@/lib/types'
 import type { Currency } from '@/lib/currency'
-import { requireString, validateEmail, sanitizeString, ValidationError } from '@/lib/validation'
+import { requireString, validateEmail, ValidationError } from '@/lib/validation'
 import { rateLimit } from '@/lib/rate-limit'
 import { checkOrderFraud } from '@/lib/fraud'
-
-interface SelectedOption {
-  choiceId: string
-  label: string
-  priceAdjustment: number
-}
+import { validateItemQuantities, verifyOptionPrices, verifyCouponDiscount, reserveStock, restoreStock } from '@/lib/checkout-validation'
 
 interface CheckoutItem {
   product_id: string
   quantity: number
-  selected_options?: Record<string, SelectedOption>
+  selected_options?: Record<string, { choiceId: string; label: string; priceAdjustment: number }>
 }
 
 interface ShippingInfo {
@@ -39,17 +34,25 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { items, shipping, currency: requestCurrency } = (await request.json()) as {
+    const { items, shipping, currency: requestCurrency, coupon_code } = (await request.json()) as {
       items: CheckoutItem[]
       shipping: ShippingInfo
       currency?: Currency
+      coupon_code?: string
     }
 
-    // Determine currency from request body (sent by client from cookie)
     const currency: Currency = requestCurrency === 'eur' ? 'eur' : 'jpy'
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: 'カートが空です' }, { status: 400 })
+    }
+
+    // P0 Fix: Validate quantities
+    try {
+      validateItemQuantities(items)
+    } catch (err) {
+      if (err instanceof ValidationError) return NextResponse.json({ error: err.message }, { status: 400 })
+      throw err
     }
 
     // Validate shipping fields
@@ -60,9 +63,7 @@ export async function POST(request: Request) {
       shipping.postal_code = requireString(shipping.postal_code, '郵便番号').slice(0, 10)
       shipping.address = requireString(shipping.address, '住所').slice(0, 500)
     } catch (err) {
-      if (err instanceof ValidationError) {
-        return NextResponse.json({ error: err.message }, { status: 400 })
-      }
+      if (err instanceof ValidationError) return NextResponse.json({ error: err.message }, { status: 400 })
       throw err
     }
 
@@ -102,24 +103,27 @@ export async function POST(request: Request) {
       .eq('id', shopId)
       .single()
 
-    // Check stock
+    // Check stock (initial check before reservation)
     for (const item of items) {
       const product = products.find((p) => p.id === item.product_id) as Product
       if (product.stock < item.quantity) {
-        return NextResponse.json(
-          { error: `${product.name} の在庫が不足しています` },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: `${product.name} の在庫が不足しています` }, { status: 400 })
       }
+    }
+
+    // P0 Fix: Verify option prices from DB (not client)
+    let optionAdjustments: Map<string, number>
+    try {
+      optionAdjustments = await verifyOptionPrices(items, productIds)
+    } catch (err) {
+      if (err instanceof ValidationError) return NextResponse.json({ error: err.message }, { status: 400 })
+      throw err
     }
 
     // Get current user if logged in
     const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
 
-    // Load profile for premium member pricing
     let profile = null
     if (user) {
       const { data: profileData } = await admin
@@ -137,21 +141,16 @@ export async function POST(request: Request) {
       if (currency === 'eur') {
         const eurMemberPrice = product.member_price_eur
         const eurPrice = product.price_eur
-        if (isPremiumMember && eurMemberPrice != null && eurMemberPrice < eurPrice) {
-          return eurMemberPrice
-        }
+        if (isPremiumMember && eurMemberPrice != null && eurMemberPrice < eurPrice) return eurMemberPrice
         return eurPrice
       }
-      if (isPremiumMember && product.member_price != null && product.member_price < product.price) {
-        return product.member_price
-      }
+      if (isPremiumMember && product.member_price != null && product.member_price < product.price) return product.member_price
       return product.price
     }
 
-    // Helper: get options price adjustment
-    const getOptionsAdj = (item: CheckoutItem): number => {
-      if (!item.selected_options) return 0
-      return Object.values(item.selected_options).reduce((sum, opt) => sum + opt.priceAdjustment, 0)
+    // Helper: get server-verified options adjustment
+    const getOptionsAdj = (item: CheckoutItem, index: number): number => {
+      return optionAdjustments.get(`${item.product_id}:${index}`) ?? 0
     }
 
     // Helper: format options as text
@@ -160,17 +159,44 @@ export async function POST(request: Request) {
       return Object.entries(item.selected_options).map(([name, opt]) => `${name}: ${opt.label}`).join(' / ')
     }
 
-    // Calculate totals
-    const subtotal = items.reduce((sum, item) => {
+    // Calculate totals with server-verified prices
+    const subtotal = items.reduce((sum, item, i) => {
       const product = products.find((p) => p.id === item.product_id)!
-      return sum + (getUnitPrice(product) + getOptionsAdj(item)) * item.quantity
+      return sum + (getUnitPrice(product) + getOptionsAdj(item, i)) * item.quantity
     }, 0)
 
     // Premium members get free shipping (JPY only; EUR always charges shipping)
     const shippingFee = currency === 'eur'
       ? siteConfig.shippingFeeEur
       : (isPremiumMember ? 0 : SHIPPING_FEE)
-    const total = subtotal + shippingFee
+
+    // P0 Fix: Verify coupon on server side
+    let couponDiscount = 0
+    let couponId: string | null = null
+    try {
+      const couponResult = await verifyCouponDiscount(coupon_code, shopId, subtotal)
+      couponDiscount = couponResult.discount
+      couponId = couponResult.couponId
+    } catch (err) {
+      if (err instanceof ValidationError) return NextResponse.json({ error: err.message }, { status: 400 })
+      throw err
+    }
+
+    const total = subtotal + shippingFee - couponDiscount
+
+    if (total <= 0) {
+      return NextResponse.json({ error: '合計金額が不正です' }, { status: 400 })
+    }
+
+    // P0 Fix: Reserve stock atomically BEFORE creating order
+    const stockItems = items.map((item) => {
+      const product = products.find((p) => p.id === item.product_id)!
+      return { product_id: item.product_id, quantity: item.quantity, product_name: product.name }
+    })
+    const stockResult = await reserveStock(stockItems)
+    if (!stockResult.success) {
+      return NextResponse.json({ error: `${stockResult.failedProduct} の在庫が不足しています` }, { status: 400 })
+    }
 
     // Fraud check
     const fraudCheck = await checkOrderFraud(user?.id || null, shipping.email, ip, total)
@@ -196,22 +222,32 @@ export async function POST(request: Request) {
       points_used: 0,
       is_flagged: fraudCheck.flagged,
       fraud_reasons: fraudCheck.reasons,
+      coupon_id: couponId,
+      coupon_discount: couponDiscount,
     }).select().single()
 
     if (orderError || !order) {
+      // Restore stock on failure
+      await restoreStock(stockItems)
       console.error('Order creation error:', orderError)
       return NextResponse.json({ error: '注文の作成に失敗しました' }, { status: 500 })
     }
 
+    // Increment coupon usage
+    if (couponId) {
+      const { error: couponErr } = await admin.rpc('increment_coupon_usage', { p_coupon_id: couponId })
+      if (couponErr) console.error('Coupon usage increment failed:', couponErr)
+    }
+
     // Create order items
-    const orderItems = items.map((item) => {
+    const orderItems = items.map((item, i) => {
       const product = products.find((p) => p.id === item.product_id)!
       const optionsText = formatOpts(item)
       return {
         order_id: order.id,
         product_id: item.product_id,
         product_name: optionsText ? `${product.name}（${optionsText}）` : product.name,
-        price: getUnitPrice(product) + getOptionsAdj(item),
+        price: getUnitPrice(product) + getOptionsAdj(item, i),
         quantity: item.quantity,
         image_url: product.images?.[0] || null,
         options_text: optionsText,
@@ -222,18 +258,15 @@ export async function POST(request: Request) {
 
     // Create Stripe Checkout session
     const shippingLabel = currency === 'eur' ? 'Shipping' : '送料'
-    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map((item) => {
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map((item, i) => {
       const product = products.find((p) => p.id === item.product_id)!
       const optionsText = formatOpts(item)
       const name = optionsText ? `${product.name}（${optionsText}）` : product.name
       return {
         price_data: {
           currency,
-          product_data: {
-            name,
-            images: product.images?.slice(0, 1) || [],
-          },
-          unit_amount: getUnitPrice(product) + getOptionsAdj(item),
+          product_data: { name, images: product.images?.slice(0, 1) || [] },
+          unit_amount: getUnitPrice(product) + getOptionsAdj(item, i),
         },
         quantity: item.quantity,
       }
@@ -244,11 +277,20 @@ export async function POST(request: Request) {
       lineItems.push({
         price_data: {
           currency,
-          product_data: {
-            name: shippingLabel,
-            images: [],
-          },
+          product_data: { name: shippingLabel, images: [] },
           unit_amount: shippingFee,
+        },
+        quantity: 1,
+      })
+    }
+
+    // Add coupon discount as a negative line item
+    if (couponDiscount > 0) {
+      lineItems.push({
+        price_data: {
+          currency,
+          product_data: { name: `クーポン割引 (${coupon_code?.toUpperCase()})`, images: [] },
+          unit_amount: -couponDiscount,
         },
         quantity: 1,
       })
@@ -256,7 +298,6 @@ export async function POST(request: Request) {
 
     const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
-    // Invoice creation is only enabled when the shop has a registered invoice number
     const invoiceEnabled = !!shop?.invoice_registration_number
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
@@ -277,10 +318,7 @@ export async function POST(request: Request) {
       sessionParams.invoice_creation = {
         enabled: true,
         invoice_data: {
-          metadata: {
-            order_id: order.id,
-            order_number: orderNumber,
-          },
+          metadata: { order_id: order.id, order_number: orderNumber },
           custom_fields: [
             { name: '注文番号', value: orderNumber },
             { name: '適格請求書発行事業者登録番号', value: shop!.invoice_registration_number! },
@@ -290,7 +328,14 @@ export async function POST(request: Request) {
       }
     }
 
-    const session = await stripe.checkout.sessions.create(sessionParams)
+    let session: Stripe.Checkout.Session
+    try {
+      session = await stripe.checkout.sessions.create(sessionParams)
+    } catch (stripeErr) {
+      // Restore stock if Stripe session creation fails
+      await restoreStock(stockItems)
+      throw stripeErr
+    }
 
     // Store stripe session id on order
     await admin

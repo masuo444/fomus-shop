@@ -6,17 +6,12 @@ import siteConfig from '@/site.config'
 import type { Product } from '@/lib/types'
 import { requireString, validateEmail, ValidationError } from '@/lib/validation'
 import { rateLimit } from '@/lib/rate-limit'
-
-interface SelectedOption {
-  choiceId: string
-  label: string
-  priceAdjustment: number
-}
+import { validateItemQuantities, verifyOptionPrices, verifyCouponDiscount, reserveStock, restoreStock } from '@/lib/checkout-validation'
 
 interface CheckoutItem {
   product_id: string
   quantity: number
-  selected_options?: Record<string, SelectedOption>
+  selected_options?: Record<string, { choiceId: string; label: string; priceAdjustment: number }>
 }
 
 interface ShippingInfo {
@@ -46,13 +41,22 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { items, shipping } = (await request.json()) as {
+    const { items, shipping, coupon_code } = (await request.json()) as {
       items: CheckoutItem[]
       shipping: ShippingInfo
+      coupon_code?: string
     }
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: 'カートが空です' }, { status: 400 })
+    }
+
+    // P0 Fix: Validate quantities
+    try {
+      validateItemQuantities(items)
+    } catch (err) {
+      if (err instanceof ValidationError) return NextResponse.json({ error: err.message }, { status: 400 })
+      throw err
     }
 
     // Validate shipping
@@ -63,9 +67,7 @@ export async function POST(request: Request) {
       shipping.postal_code = requireString(shipping.postal_code, '郵便番号').slice(0, 10)
       shipping.address = requireString(shipping.address, '住所').slice(0, 500)
     } catch (err) {
-      if (err instanceof ValidationError) {
-        return NextResponse.json({ error: err.message }, { status: 400 })
-      }
+      if (err instanceof ValidationError) return NextResponse.json({ error: err.message }, { status: 400 })
       throw err
     }
 
@@ -98,6 +100,15 @@ export async function POST(request: Request) {
       }
     }
 
+    // P0 Fix: Verify option prices from DB
+    let optionAdjustments: Map<string, number>
+    try {
+      optionAdjustments = await verifyOptionPrices(items, productIds)
+    } catch (err) {
+      if (err instanceof ValidationError) return NextResponse.json({ error: err.message }, { status: 400 })
+      throw err
+    }
+
     // Get current user
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -115,32 +126,57 @@ export async function POST(request: Request) {
     const isPremiumMember = profile?.is_premium_member === true
 
     const getUnitPrice = (product: any): number => {
-      if (isPremiumMember && product.member_price != null && product.member_price < product.price) {
-        return product.member_price
-      }
+      if (isPremiumMember && product.member_price != null && product.member_price < product.price) return product.member_price
       return product.price
     }
 
-    const getOptionsAdj = (item: CheckoutItem): number => {
-      if (!item.selected_options) return 0
-      return Object.values(item.selected_options).reduce((sum, opt) => sum + opt.priceAdjustment, 0)
+    const getOptionsAdj = (item: CheckoutItem, index: number): number => {
+      return optionAdjustments.get(`${item.product_id}:${index}`) ?? 0
     }
+
     const formatOpts = (item: CheckoutItem): string | null => {
       if (!item.selected_options || Object.keys(item.selected_options).length === 0) return null
       return Object.entries(item.selected_options).map(([name, opt]) => `${name}: ${opt.label}`).join(' / ')
     }
 
-    const subtotal = items.reduce((sum, item) => {
+    const subtotal = items.reduce((sum, item, i) => {
       const product = products.find((p) => p.id === item.product_id)!
-      return sum + (getUnitPrice(product) + getOptionsAdj(item)) * item.quantity
+      return sum + (getUnitPrice(product) + getOptionsAdj(item, i)) * item.quantity
     }, 0)
 
     const shippingFee = isPremiumMember ? 0 : SHIPPING_FEE
-    const total = subtotal + shippingFee
+
+    // P0 Fix: Verify coupon on server side
+    let couponDiscount = 0
+    let couponId: string | null = null
+    try {
+      const couponResult = await verifyCouponDiscount(coupon_code, shopId, subtotal)
+      couponDiscount = couponResult.discount
+      couponId = couponResult.couponId
+    } catch (err) {
+      if (err instanceof ValidationError) return NextResponse.json({ error: err.message }, { status: 400 })
+      throw err
+    }
+
+    const total = subtotal + shippingFee - couponDiscount
+
+    if (total <= 0) {
+      return NextResponse.json({ error: '合計金額が不正です' }, { status: 400 })
+    }
+
+    // P0 Fix: Reserve stock atomically
+    const stockItems = items.map((item) => {
+      const product = products.find((p) => p.id === item.product_id)!
+      return { product_id: item.product_id, quantity: item.quantity, product_name: product.name }
+    })
+    const stockResult = await reserveStock(stockItems)
+    if (!stockResult.success) {
+      return NextResponse.json({ error: `${stockResult.failedProduct} の在庫が不足しています` }, { status: 400 })
+    }
 
     const orderNumber = generateOrderNumber()
 
-    // Create order with status 'awaiting_payment'
+    // Create order
     const { data: order, error: orderError } = await admin.from('orders').insert({
       order_number: orderNumber,
       shop_id: shopId,
@@ -157,22 +193,31 @@ export async function POST(request: Request) {
       shipping_address: shipping.address,
       shipping_phone: shipping.phone,
       points_used: 0,
+      coupon_id: couponId,
+      coupon_discount: couponDiscount,
     }).select().single()
 
     if (orderError || !order) {
+      await restoreStock(stockItems)
       console.error('Bank transfer order creation error:', orderError)
       return NextResponse.json({ error: '注文の作成に失敗しました' }, { status: 500 })
     }
 
+    // Increment coupon usage
+    if (couponId) {
+      const { error: couponErr } = await admin.rpc('increment_coupon_usage', { p_coupon_id: couponId })
+      if (couponErr) console.error('Coupon usage increment failed:', couponErr)
+    }
+
     // Create order items
-    const orderItems = items.map((item) => {
+    const orderItems = items.map((item, i) => {
       const product = products.find((p) => p.id === item.product_id)!
       const optionsText = formatOpts(item)
       return {
         order_id: order.id,
         product_id: item.product_id,
         product_name: optionsText ? `${product.name}（${optionsText}）` : product.name,
-        price: getUnitPrice(product) + getOptionsAdj(item),
+        price: getUnitPrice(product) + getOptionsAdj(item, i),
         quantity: item.quantity,
         image_url: product.images?.[0] || null,
         options_text: optionsText,

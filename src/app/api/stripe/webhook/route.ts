@@ -73,24 +73,7 @@ export async function POST(request: Request) {
           .eq('id', orderId)
           .eq('status', 'pending')
 
-        // Decrease stock for ordered items
-        try {
-          const { data: orderItems } = await admin
-            .from('order_items')
-            .select('product_id, quantity')
-            .eq('order_id', orderId)
-
-          if (orderItems) {
-            for (const item of orderItems) {
-              await admin.rpc('decrement_stock', {
-                p_product_id: item.product_id,
-                p_quantity: item.quantity,
-              })
-            }
-          }
-        } catch (stockError) {
-          console.error('Stock decrement failed for order:', orderId, stockError)
-        }
+        // Stock already decremented at checkout time (pre-reservation)
 
         // Send email notifications
         const { data: orderData } = await admin
@@ -282,6 +265,21 @@ export async function POST(request: Request) {
       const session = event.data.object as Stripe.Checkout.Session
       const orderId = session.metadata?.order_id
       if (orderId) {
+        // Restore pre-reserved stock
+        const { data: orderItems } = await admin
+          .from('order_items')
+          .select('product_id, quantity')
+          .eq('order_id', orderId)
+        if (orderItems) {
+          for (const item of orderItems) {
+            const { error: stockErr } = await admin.rpc('increment_stock', {
+              p_product_id: item.product_id,
+              p_quantity: item.quantity,
+            })
+            if (stockErr) console.error(`Stock restore failed for ${item.product_id}:`, stockErr)
+          }
+        }
+
         await admin
           .from('orders')
           .update({ status: 'cancelled' })
