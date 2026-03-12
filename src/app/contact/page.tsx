@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Mail } from 'lucide-react'
 import siteConfig from '@/site.config'
 
@@ -9,11 +10,27 @@ const subjects = [
   '注文について',
   '返品・交換',
   '配送について',
+  'オーダーメイド・コラボ相談',
   'その他',
 ]
 
-export default function ContactPage() {
+function ContactContent() {
+  const searchParams = useSearchParams()
+  const prefillSubject = searchParams.get('subject')
+
   const [form, setForm] = useState({ name: '', email: '', subject: subjects[0], message: '' })
+
+  useEffect(() => {
+    if (prefillSubject) {
+      // If it matches a subject, select it; otherwise use it as message prefix
+      const matched = subjects.find(s => s === prefillSubject)
+      if (matched) {
+        setForm(f => ({ ...f, subject: matched }))
+      } else {
+        setForm(f => ({ ...f, subject: '商品について', message: `${prefillSubject}\n\n` }))
+      }
+    }
+  }, [prefillSubject])
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
@@ -81,5 +98,13 @@ export default function ContactPage() {
         </button>
       </form>
     </div>
+  )
+}
+
+export default function ContactPage() {
+  return (
+    <Suspense fallback={<div className="max-w-lg mx-auto px-4 py-16 text-center"><div className="animate-pulse text-gray-400">読み込み中...</div></div>}>
+      <ContactContent />
+    </Suspense>
   )
 }

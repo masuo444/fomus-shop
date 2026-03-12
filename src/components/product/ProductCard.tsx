@@ -88,7 +88,11 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
             {product.name}
           </h3>
           <div className="mt-2">
-            {isPremiumMember && hasMemberPrice ? (
+            {mainPrice === 0 ? (
+              <span className="text-xs tracking-wide text-[var(--color-muted)]">
+                価格はお問い合わせ
+              </span>
+            ) : isPremiumMember && hasMemberPrice ? (
               <div className="flex items-center gap-2.5">
                 <span className="text-xs tracking-wide" style={{ color: 'var(--color-member)' }}>
                   {formatPrice(memberPriceVal!, currency)}

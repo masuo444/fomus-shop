@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Minus, Plus, ShoppingCart, ChevronLeft } from 'lucide-react'
+import { Minus, Plus, ShoppingCart, ChevronLeft, Mail } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import { addToLocalCart, wouldMixShops, clearLocalCart, getOptionsAdjustment, type SelectedOptions } from '@/lib/cart'
 import type { Product } from '@/lib/types'
@@ -39,6 +39,7 @@ export default function ProductDetailClient({ product, shopName }: { product: Pr
 
   const optionsAdjustment = getOptionsAdjustment(selectedOptions)
   const isSoldOut = product.stock === 0
+  const isInquiryOnly = mainPrice === 0
   const hasMemberPrice = memberPriceVal != null && memberPriceVal < mainPrice
   const hasOptions = product.product_options && product.product_options.length > 0
 
@@ -213,7 +214,9 @@ export default function ProductDetailClient({ product, shopName }: { product: Pr
           </div>
 
           <div className="mt-4">
-            {isPremiumMember && hasMemberPrice ? (
+            {isInquiryOnly ? (
+              <span className="text-lg font-medium text-gray-900">価格はお問い合わせください</span>
+            ) : isPremiumMember && hasMemberPrice ? (
               <div className="space-y-1">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl font-bold" style={{ color: 'var(--color-member)' }}>
@@ -312,8 +315,24 @@ export default function ProductDetailClient({ product, shopName }: { product: Pr
             </div>
           )}
 
+          {/* Inquiry button for price=0 products */}
+          {isInquiryOnly && (
+            <div className="mt-8">
+              <Link
+                href={`/contact?subject=${encodeURIComponent(`「${product.name}」について`)}`}
+                className="w-full bg-black text-white py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
+              >
+                <Mail className="w-4 h-4" />
+                お問い合わせ・ご相談
+              </Link>
+              <p className="mt-2 text-xs text-gray-500 text-center">
+                デザイン・価格など、お気軽にご相談ください
+              </p>
+            </div>
+          )}
+
           {/* Quantity & Add to Cart */}
-          {!isSoldOut && (
+          {!isSoldOut && !isInquiryOnly && (
             <div className="mt-8 space-y-4">
               <div className="flex items-center gap-3">
                 <span className="text-sm text-gray-600">数量</span>
