@@ -17,7 +17,7 @@ const siteConfig = {
   currency: 'jpy' as const,
 
   // Pricing
-  shippingFee: Number(process.env.SHIPPING_FEE || 500),
+  shippingFee: Number(process.env.SHIPPING_FEE || 1000),
   shippingFeeEur: Number(process.env.SHIPPING_FEE_EUR || 1500), // EUR in cents (€15.00)
   defaultCommissionRate: Number(process.env.DEFAULT_COMMISSION_RATE || 10),
 

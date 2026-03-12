@@ -12,7 +12,7 @@ const items = [
   { label: '電話番号', value: siteConfig.legal.phone || '（電話番号）' },
   { label: 'メールアドレス', value: siteConfig.legal.email || '（メールアドレス）' },
   { label: '販売価格', value: '各商品ページに記載' },
-  { label: '商品代金以外の必要料金', value: '送料、振込手数料（銀行振込の場合）' },
+  { label: '商品代金以外の必要料金', value: '送料（国内1,000円〜）、振込手数料（銀行振込の場合）' },
   { label: '支払方法', value: 'クレジットカード（Visa, Mastercard, American Express）、銀行振込' },
   { label: '支払時期', value: 'クレジットカード：注文時 / 銀行振込：注文後3営業日以内' },
   { label: '商品の引渡時期', value: '入金確認後、7営業日以内に発送' },

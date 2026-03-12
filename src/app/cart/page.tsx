@@ -228,7 +228,7 @@ export default function CartPage() {
         {isEur ? (
           <p className="text-xs text-gray-400">International shipping included</p>
         ) : (
-          <p className="text-xs text-gray-400">※ 日本国内のみ配送</p>
+          <p className="text-xs text-gray-400">※ 国内送料1,000円〜 / 銀行振込OK</p>
         )}
         <div className="flex justify-between text-base font-bold pt-3 border-t border-gray-100">
           <span>{isEur ? 'Total' : '合計'}</span>
