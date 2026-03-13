@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { formatPrice } from '@/lib/utils'
 import type { Product } from '@/lib/types'
 import FavoriteButton from '@/components/product/FavoriteButton'
+import QuickAddToCart from '@/components/product/QuickAddToCart'
 import siteConfig from '@/site.config'
 
 interface ProductCardProps {
@@ -12,9 +13,10 @@ interface ProductCardProps {
   isPremiumMember?: boolean
   isFavorited?: boolean
   currency?: 'jpy' | 'eur'
+  hasOptions?: boolean
 }
 
-export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMember, isFavorited, currency = 'jpy' }: ProductCardProps) {
+export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMember, isFavorited, currency = 'jpy', hasOptions }: ProductCardProps) {
   const isSoldOut = product.stock === 0
 
   // Determine prices based on currency
@@ -133,6 +135,16 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
           </div>
         </div>
       </Link>
+      {/* Quick Add to Cart */}
+      {!isSoldOut && mainPrice > 0 && (
+        <QuickAddToCart
+          productId={product.id}
+          shopId={product.shop_id}
+          stock={product.stock}
+          hasOptions={hasOptions}
+          price={mainPrice}
+        />
+      )}
     </div>
   )
 }

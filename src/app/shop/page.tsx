@@ -29,6 +29,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   let products: Product[] = []
   let categories: Category[] = []
   let shopNames: Record<string, string> = {}
+  let productsWithOptions: Set<string> = new Set()
 
   // Check current user's GUILD status
   let isLoggedIn = false
@@ -94,6 +95,20 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
     const { data: productsData } = await query
     products = productsData || []
+
+    // Check which products have required options (for quick-add vs detail-page)
+    if (products.length > 0) {
+      const productIds = products.map(p => p.id)
+      const { data: optionsData } = await supabase
+        .from('product_options')
+        .select('product_id')
+        .in('product_id', productIds)
+        .eq('required', true)
+      if (optionsData) {
+        const idsWithOptions = new Set(optionsData.map(o => o.product_id))
+        productsWithOptions = idsWithOptions
+      }
+    }
   }
 
   return (
@@ -159,6 +174,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
               isLoggedIn={isLoggedIn}
               isPremiumMember={isPremiumMember}
               currency={currency}
+              hasOptions={productsWithOptions.has(product.id)}
             />
           ))}
         </div>
