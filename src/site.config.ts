@@ -22,7 +22,7 @@ const siteConfig = {
   defaultCommissionRate: Number(process.env.DEFAULT_COMMISSION_RATE || 10),
 
   // Admin
-  adminEmails: (process.env.ADMIN_EMAILS || '').split(',').filter(Boolean),
+  adminEmails: (process.env.NEXT_PUBLIC_ADMIN_EMAILS || process.env.ADMIN_EMAILS || '').split(',').filter(Boolean),
 
   // Email
   emailFrom: process.env.EMAIL_FROM || 'noreply@example.com',
