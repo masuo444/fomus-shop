@@ -31,10 +31,15 @@ export async function checkShopAccess(requiredRole?: 'admin' | 'partner'): Promi
 
   if (isAdmin) {
     if (requiredRole && requiredRole !== 'admin') return null
-    // Admins operate on the platform shop
-    const shopId = await getPlatformShopId()
-    if (!shopId) return null
-    return { user: { id: user.id, email: user.email ?? '' }, shopId, role: 'admin' }
+    // Admins operate on the platform shop, fallback to first published shop
+    let shopId = await getPlatformShopId()
+    if (!shopId) {
+      const { getPublishedShopIds } = await import('@/lib/shop')
+      const publishedIds = await getPublishedShopIds()
+      shopId = publishedIds[0] ?? null
+    }
+    // Admin access even without a shop (shopId may be empty string)
+    return { user: { id: user.id, email: user.email ?? '' }, shopId: shopId ?? '', role: 'admin' }
   }
 
   if (profile.role === 'partner' && profile.shop_id) {
