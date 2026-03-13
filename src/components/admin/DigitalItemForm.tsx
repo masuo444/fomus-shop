@@ -27,6 +27,7 @@ export default function DigitalItemForm({ item, shopId, apiBasePath = '/api/admi
     royalty_percentage: item?.royalty_percentage ?? 10,
     resale_enabled: item?.resale_enabled ?? true,
     is_published: item?.is_published ?? false,
+    secret_content: item?.secret_content ?? '',
     metadata: item?.metadata ? JSON.stringify(item.metadata, null, 2) : '{}',
   })
 
@@ -54,6 +55,7 @@ export default function DigitalItemForm({ item, shopId, apiBasePath = '/api/admi
       royalty_percentage: Number(form.royalty_percentage),
       resale_enabled: form.resale_enabled,
       is_published: form.is_published,
+      secret_content: form.secret_content || null,
       metadata,
     }
 
@@ -197,6 +199,20 @@ export default function DigitalItemForm({ item, shopId, apiBasePath = '/api/admi
           />
           <span className="text-sm font-medium text-gray-700">公開する</span>
         </label>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          購入者限定コンテンツ
+        </label>
+        <textarea
+          rows={3}
+          value={form.secret_content}
+          onChange={(e) => setForm({ ...form, secret_content: e.target.value })}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+          placeholder="購入後に表示されるパスワード、URL、メッセージなど"
+        />
+        <p className="text-xs text-gray-400 mt-1">購入者のマイページにのみ表示されます（公開ページには表示されません）</p>
       </div>
 
       <div>

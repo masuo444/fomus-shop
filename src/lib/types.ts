@@ -247,6 +247,7 @@ export interface DigitalItem {
   is_published: boolean
   item_category: 'collectible' | 'ticket' | 'art' | 'other'
   created_by: string | null
+  secret_content: string | null
   metadata: Record<string, unknown>
   created_at: string
   updated_at: string

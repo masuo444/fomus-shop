@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
         royalty_percentage: clampNumber(body.royalty_percentage, 0, 100, 10),
         resale_enabled: body.resale_enabled === true,
         is_published: body.is_published === true,
+        secret_content: typeof body.secret_content === 'string' ? body.secret_content : null,
         metadata: body.metadata && typeof body.metadata === 'object' ? body.metadata : {},
         issued_count: 0,
       })

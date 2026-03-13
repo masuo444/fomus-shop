@@ -20,12 +20,12 @@ export default async function DigitalPage() {
   if (shopIds.length > 0) {
     const { data } = await supabase
       .from('digital_items')
-      .select('*')
+      .select('id, shop_id, name, description, image_url, price, total_supply, issued_count, royalty_percentage, resale_enabled, is_published, item_category, created_by, metadata, created_at, updated_at')
       .in('shop_id', shopIds)
       .eq('is_published', true)
       .order('created_at', { ascending: false })
 
-    items = data || []
+    items = (data || []).map(d => ({ ...d, secret_content: null })) as DigitalItem[]
   }
 
   return (

@@ -263,6 +263,14 @@ function MyDigitalContent() {
                       <span>取得日: {formatDate(token.created_at)}</span>
                     </div>
 
+                    {/* Secret content (revealed to owner) */}
+                    {token.digital_item?.secret_content && (
+                      <div className="mt-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                        <p className="text-[10px] font-medium text-amber-700 mb-0.5">購入者限定</p>
+                        <p className="text-xs text-amber-900 whitespace-pre-wrap">{token.digital_item.secret_content}</p>
+                      </div>
+                    )}
+
                     {/* Listing price */}
                     {activeListing && (
                       <div className="mt-1.5 text-xs text-blue-600 font-medium">

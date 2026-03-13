@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import type { DigitalItem } from '@/lib/types'
 import DigitalItemDetailClient from './DigitalItemDetailClient'
 import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import siteConfig from '@/site.config'
@@ -44,16 +45,19 @@ export default async function DigitalItemDetailPage({ params }: Props) {
   const { id } = await params
   const supabase = await createClient()
 
-  const { data: item } = await supabase
+  const { data: rawItem } = await supabase
     .from('digital_items')
-    .select('*')
+    .select('id, shop_id, name, description, image_url, price, total_supply, issued_count, royalty_percentage, resale_enabled, is_published, item_category, created_by, metadata, created_at, updated_at')
     .eq('id', id)
     .eq('is_published', true)
     .single()
 
-  if (!item) {
+  if (!rawItem) {
     notFound()
   }
+
+  // Exclude secret_content from public page
+  const item = { ...rawItem, secret_content: null } as DigitalItem
 
   // Check if user is logged in and has digital access
   const {
@@ -108,7 +112,7 @@ export default async function DigitalItemDetailPage({ params }: Props) {
         description={item.description || siteConfig.description}
         price={item.price}
         currency="JPY"
-        image={item.image_url}
+        image={item.image_url ?? undefined}
         url={`/digital/${item.id}`}
         inStock={item.issued_count < item.total_supply}
       />
