@@ -6,6 +6,7 @@ import { getCurrency } from '@/lib/currency'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import siteConfig from '@/site.config'
+import { ItemListJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 
 export const metadata: Metadata = {
   title: '商品一覧',
@@ -116,6 +117,19 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <BreadcrumbJsonLd items={[
+        { name: 'ホーム', href: '/' },
+        { name: '商品一覧', href: '/shop' },
+      ]} />
+      <ItemListJsonLd
+        name="FOMUS 商品一覧"
+        items={products.slice(0, 20).map((p, i) => ({
+          name: p.name,
+          url: `${process.env.NEXT_PUBLIC_BASE_URL || ''}/shop/${p.id}`,
+          image: p.images?.[0],
+          position: i + 1,
+        }))}
+      />
       <h1 className="text-2xl font-bold text-gray-900 mb-8">商品一覧</h1>
 
       {/* Filters */}

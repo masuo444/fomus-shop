@@ -80,6 +80,7 @@ export default async function ProductDetailPage({ params }: Props) {
         url={`/shop/${p.id}`}
         inStock={p.stock !== 0}
         sku={p.id}
+        brand="FOMUS"
       />
       <BreadcrumbJsonLd items={[
         { name: 'ホーム', href: '/' },

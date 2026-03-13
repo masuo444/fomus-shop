@@ -4,6 +4,7 @@ import { getPublishedShopIds } from '@/lib/shop'
 import type { DigitalItem } from '@/lib/types'
 import type { Metadata } from 'next'
 import DigitalItemCard from '@/components/digital/DigitalItemCard'
+import { BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 
 export const metadata: Metadata = {
   title: 'デジタルアイテム',
@@ -33,6 +34,11 @@ export default async function DigitalPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <BreadcrumbJsonLd items={[
+        { name: 'ホーム', href: '/' },
+        { name: 'デジタルアイテム', href: '/digital' },
+      ]} />
+
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>

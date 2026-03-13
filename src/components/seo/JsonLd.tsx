@@ -11,6 +11,9 @@ export function OrganizationJsonLd() {
     description: siteConfig.description,
     url: baseUrl,
     logo: siteConfig.logoUrl || undefined,
+    sameAs: ['https://www.fomus.jp'],
+    contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', availableLanguage: ['Japanese', 'English'] },
+    knowsAbout: ['枡', 'masu', 'ヒノキ', '日本の伝統工芸', '木製品', 'Japanese traditional crafts'],
   }
   return (
     <script
@@ -54,25 +57,31 @@ interface ProductJsonLdProps {
   url: string
   inStock: boolean
   sku?: string
+  brand?: string
+  material?: string
 }
 
-export function ProductJsonLd({ name, description, price, currency = 'JPY', image, url, inStock, sku }: ProductJsonLdProps) {
+export function ProductJsonLd({ name, description, price, currency = 'JPY', image, url, inStock, sku, brand, material }: ProductJsonLdProps) {
   const data: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name,
     description,
     url: `${baseUrl}${url}`,
+    itemCondition: 'https://schema.org/NewCondition',
     offers: {
       '@type': 'Offer',
       price,
       priceCurrency: currency,
       availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut',
       url: `${baseUrl}${url}`,
+      seller: { '@type': 'Organization', name: 'FOMUS' },
     },
   }
   if (image) data.image = image
   if (sku) data.sku = sku
+  if (brand) data.brand = { '@type': 'Brand', name: brand }
+  if (material) data.material = material
   return (
     <script
       type="application/ld+json"
@@ -130,6 +139,44 @@ export function FAQPageJsonLd({ items }: { items: FAQItem[] }) {
       dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
     />
   )
+}
+
+// ItemList schema
+export function ItemListJsonLd({ name, items }: { name: string; items: Array<{ name: string; url: string; image?: string; position: number }> }) {
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name,
+    numberOfItems: items.length,
+    itemListElement: items.map(item => ({
+      '@type': 'ListItem',
+      position: item.position,
+      item: {
+        '@type': 'Product',
+        name: item.name,
+        url: item.url,
+        ...(item.image && { image: item.image }),
+      },
+    })),
+  }
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+}
+
+// HowTo schema
+export function HowToJsonLd({ name, description, steps }: { name: string; description?: string; steps: Array<{ name: string; text: string }> }) {
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name,
+    ...(description && { description }),
+    step: steps.map((s, i) => ({
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: s.name,
+      text: s.text,
+    })),
+  }
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
 }
 
 // BreadcrumbList schema

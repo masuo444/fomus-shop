@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import siteConfig from '@/site.config'
+import { BreadcrumbJsonLd, HowToJsonLd, FAQPageJsonLd } from '@/components/seo/JsonLd'
 
 export const metadata: Metadata = {
   title: 'JPYC決済について',
@@ -21,6 +22,29 @@ export default function JpycPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-6 sm:px-8 lg:px-10">
+      <BreadcrumbJsonLd items={[
+        { name: 'ホーム', href: '/' },
+        { name: 'JPYC決済について', href: '/jpyc' },
+      ]} />
+      <HowToJsonLd
+        name="JPYCでFOUMSの商品を購入する方法"
+        description="日本円ステーブルコインJPYCを使ってFOUMSオンラインショップで商品を購入する手順"
+        steps={[
+          { name: '商品を選んでカートへ', text: '通常のお買い物と同じように、商品を選んでカートに入れます。' },
+          { name: '決済方法で「JPYC」を選択', text: 'チェックアウト画面で決済方法に「JPYC（Polygon）」を選びます。' },
+          { name: '指定アドレスへJPYCを送金', text: '表示されるウォレットアドレスに合計金額分のJPYCをPolygonネットワークで送金します。' },
+          { name: 'トランザクションハッシュを入力', text: '送金後に表示されるトランザクションハッシュを入力して送信します。' },
+          { name: '決済完了', text: '12ブロック承認後、注文が確定します。' },
+        ]}
+      />
+      <FAQPageJsonLd items={[
+        { question: 'JPYCとは何ですか？', answer: 'JPYC（Japanese Yen Coin）は日本円に連動したステーブルコインです。1 JPYC = 1円として利用でき、Polygonネットワーク上で送金できます。' },
+        { question: 'FOUMSでJPYCで何が買えますか？', answer: '枡、カードゲーム、ランニングウェアなど、FOUMSの全商品をJPYCで購入できます。' },
+        { question: 'JPYC決済の手数料はかかりますか？', answer: '商品代金以外に、Polygonネットワークのガス代（通常数円程度）がお客様負担となります。' },
+        { question: 'どのウォレットが必要ですか？', answer: 'MetaMaskなど、Polygonネットワーク対応のウォレットが必要です。' },
+        { question: '送金額を間違えた場合はどうなりますか？', answer: '注文金額と送金額が一致しない場合、決済が承認されません。お問い合わせください。' },
+      ]} />
+
       {/* Hero */}
       <section className="pt-20 pb-16 md:pt-32 md:pb-24">
         <p className="text-[10px] tracking-[0.25em] uppercase text-[var(--color-muted)] mb-4">Payment</p>
@@ -120,6 +144,27 @@ export default function JpycPage() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <div className="h-px bg-[var(--color-border)]" />
+
+      {/* FAQ */}
+      <section className="py-16 md:py-20">
+        <h2 className="text-lg font-medium text-[var(--foreground)] mb-8">よくあるご質問</h2>
+        <div className="space-y-6">
+          {[
+            { q: 'JPYCとは何ですか？', a: 'JPYC（Japanese Yen Coin）は日本円に連動したステーブルコインです。1 JPYC = 1円として利用でき、Polygonネットワーク上で送金できます。' },
+            { q: 'FOUMSでJPYCで何が買えますか？', a: '枡、カードゲーム、ランニングウェアなど、FOUMSの全商品をJPYCで購入できます。' },
+            { q: 'JPYC決済の手数料はかかりますか？', a: '商品代金以外に、Polygonネットワークのガス代（通常数円程度）がお客様負担となります。' },
+            { q: 'どのウォレットが必要ですか？', a: 'MetaMaskなど、Polygonネットワーク対応のウォレットが必要です。' },
+            { q: '送金額を間違えた場合はどうなりますか？', a: '注文金額と送金額が一致しない場合、決済が承認されません。お問い合わせください。' },
+          ].map((item, i) => (
+            <div key={i}>
+              <h3 className="text-sm font-medium text-[var(--foreground)] mb-2">{item.q}</h3>
+              <p className="text-xs leading-[2] text-[var(--color-muted)]">{item.a}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       <div className="h-px bg-[var(--color-border)]" />

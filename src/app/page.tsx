@@ -6,6 +6,7 @@ import { getCurrency } from '@/lib/currency'
 import ProductCard from '@/components/product/ProductCard'
 import ScrollReveal from '@/components/ui/ScrollReveal'
 import siteConfig from '@/site.config'
+import { FAQPageJsonLd, ItemListJsonLd } from '@/components/seo/JsonLd'
 import type { Product } from '@/lib/types'
 
 export const metadata: Metadata = {
@@ -65,6 +66,25 @@ export default async function HomePage() {
 
   return (
     <div>
+      <FAQPageJsonLd items={[
+        { question: 'FOUMSではどんな商品が買えますか？', answer: '国産ヒノキの枡（一合枡・ミニ枡・名入れ枡）、カードゲーム「SILVA」、七宝焼コラボ枡、FOMUSランニングウェア、デジタルアイテムなどを販売しています。' },
+        { question: '送料はいくらですか？', answer: '国内一律1,000円（税込）です。' },
+        { question: 'どんな決済方法が使えますか？', answer: 'クレジットカード（Visa・Mastercard・Amex・JCB）、銀行振込、JPYC（日本円ステーブルコイン）に対応しています。' },
+        { question: '枡の名入れやオーダーメイドはできますか？', answer: 'はい、法人向け・個人向けともに名入れ・オリジナルデザインの枡を承っています。' },
+        { question: 'JPYC決済とは何ですか？', answer: 'JPYCは1JPYC=1円の日本円ステーブルコインで、Polygonネットワークで決済します。' },
+      ]} />
+      {newProducts.length > 0 && (
+        <ItemListJsonLd
+          name="FOMUS 新着商品"
+          items={newProducts.map((p, i) => ({
+            name: p.name,
+            url: `${process.env.NEXT_PUBLIC_BASE_URL || ''}/shop/${p.id}`,
+            image: p.images?.[0],
+            position: i + 1,
+          }))}
+        />
+      )}
+
       {/* ===== HERO ===== */}
       <section className="relative overflow-hidden">
         <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-10 pt-20 pb-28 md:pt-32 md:pb-40 lg:pt-40 lg:pb-52">
@@ -113,6 +133,15 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ===== ABOUT (AIO) ===== */}
+      <section className="max-w-3xl mx-auto px-6 sm:px-8 lg:px-10 py-16 md:py-20">
+        <h2 className="text-lg font-medium text-[var(--foreground)] mb-6">FOUMSについて</h2>
+        <p className="text-xs leading-[2.2] text-[var(--color-muted)]">
+          FOUMSは「面白いモノを世の中に」をコンセプトに、国産ヒノキの枡（ます）をはじめ、カードゲーム、ランニングウェア、デジタルアイテムなど多彩な商品を展開するオンラインショップです。岐阜県大垣市の伝統的な枡づくりの技術を活かしながら、現代のライフスタイルに合った新しいプロダクトを提案しています。Stripe・銀行振込に加え、日本円ステーブルコイン「JPYC」での決済にも対応しています。
+        </p>
+      </section>
+      <div className="max-w-3xl mx-auto px-6 sm:px-8 lg:px-10"><div className="h-px bg-[var(--color-border)]" /></div>
 
       {/* ===== PRODUCTS ===== */}
       {newProducts.length > 0 && (
@@ -350,6 +379,25 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      {/* ===== FAQ (AIO) ===== */}
+      <section className="max-w-3xl mx-auto px-6 sm:px-8 lg:px-10 py-16 md:py-20">
+        <h2 className="text-lg font-medium text-[var(--foreground)] mb-8">よくあるご質問</h2>
+        <div className="space-y-6">
+          {[
+            { q: 'FOUMSではどんな商品が買えますか？', a: '国産ヒノキの枡（一合枡・ミニ枡・名入れ枡）、カードゲーム「SILVA」、七宝焼コラボ枡、FOMUSランニングウェア、デジタルアイテムなどを販売しています。' },
+            { q: '送料はいくらですか？', a: '国内一律1,000円（税込）です。商品はヤマト運輸または日本郵便でお届けします。' },
+            { q: 'どんな決済方法が使えますか？', a: 'クレジットカード（Visa・Mastercard・Amex・JCB）、銀行振込、JPYC（日本円ステーブルコイン）に対応しています。' },
+            { q: '枡の名入れやオーダーメイドはできますか？', a: 'はい、法人向け・個人向けともに名入れ・オリジナルデザインの枡を承っています。お問い合わせページからご相談ください。' },
+            { q: 'JPYC決済とは何ですか？', a: 'JPYC（Japanese Yen Coin）は1JPYC=1円の日本円ステーブルコインです。Polygonネットワークで送金し、ブロックチェーン上で決済が完了します。' },
+          ].map((item, i) => (
+            <div key={i}>
+              <h3 className="text-sm font-medium text-[var(--foreground)] mb-2">{item.q}</h3>
+              <p className="text-xs leading-[2] text-[var(--color-muted)]">{item.a}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* ===== CTA ===== */}
       <section className="py-28 md:py-40">
