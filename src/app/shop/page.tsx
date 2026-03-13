@@ -10,6 +10,9 @@ import siteConfig from '@/site.config'
 export const metadata: Metadata = {
   title: '商品一覧',
   description: `${siteConfig.name}の商品一覧。最新のアイテムをチェックしよう。`,
+  alternates: {
+    canonical: '/shop',
+  },
 }
 
 interface ShopPageProps {

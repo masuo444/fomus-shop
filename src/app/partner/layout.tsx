@@ -4,6 +4,7 @@ import PartnerSidebar from '@/components/partner/PartnerSidebar'
 
 export const metadata = {
   title: 'Partner Dashboard',
+  robots: { index: false, follow: false },
 }
 
 export default async function PartnerLayout({

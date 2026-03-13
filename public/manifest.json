@@ -1,0 +1,12 @@
+{
+  "name": "FOMUS SHOP",
+  "short_name": "FOMUS",
+  "description": "FOMUS公式オンラインショップ。枡・カードゲーム・デジタルアイテム。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF9F7",
+  "theme_color": "#111111",
+  "icons": [
+    { "src": "/fomus-logo.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

@@ -5,6 +5,9 @@ import siteConfig from '@/site.config'
 export const metadata: Metadata = {
   title: 'JPYC決済について',
   description: 'FOUMSショップではJPYC（日本円ステーブルコイン）で枡やグッズを購入できます。Polygonネットワーク対応。暗号資産で伝統工芸品を買える、ちょっと面白い体験。',
+  alternates: {
+    canonical: '/jpyc',
+  },
 }
 
 export default function JpycPage() {

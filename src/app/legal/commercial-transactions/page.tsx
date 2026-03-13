@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: '特定商取引法に基づく表記',
+  description: 'FOUMSの特定商取引法に基づく表記。販売業者情報・支払方法・返品交換ポリシー。',
 }
 
 const items = [

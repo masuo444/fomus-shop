@@ -7,6 +7,7 @@ import NotificationBell from '@/components/admin/NotificationBell'
 
 export const metadata = {
   title: `${siteConfig.name} Admin`,
+  robots: { index: false, follow: false },
 }
 
 export default async function AdminLayout({

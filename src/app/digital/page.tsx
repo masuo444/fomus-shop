@@ -8,6 +8,9 @@ import DigitalItemCard from '@/components/digital/DigitalItemCard'
 export const metadata: Metadata = {
   title: 'デジタルアイテム',
   description: '限定デジタルアイテム・デジタルチケットのコレクション',
+  alternates: {
+    canonical: '/digital',
+  },
 }
 
 export default async function DigitalPage() {

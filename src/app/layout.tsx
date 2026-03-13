@@ -4,7 +4,7 @@ import { Cormorant_Garamond } from 'next/font/google'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import GoogleAnalytics from '@/components/layout/GoogleAnalytics'
-import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/seo/JsonLd'
+import { OrganizationJsonLd, WebSiteJsonLd, LocalBusinessJsonLd } from '@/components/seo/JsonLd'
 import { SITE_NAME, SITE_DESCRIPTION } from '@/lib/constants'
 import siteConfig from '@/site.config'
 import './globals.css'
@@ -43,6 +43,7 @@ export const metadata: Metadata = {
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
     locale: 'ja_JP',
+    images: [{ url: '/fomus-logo.png', width: 512, height: 512 }],
   },
   twitter: {
     card: 'summary_large_image',
@@ -83,6 +84,7 @@ export default function RootLayout({
         <GoogleAnalytics />
         <OrganizationJsonLd />
         <WebSiteJsonLd />
+        <LocalBusinessJsonLd />
         <div className="flex flex-col min-h-screen">
           <Header />
           <main className="flex-1">{children}</main>
