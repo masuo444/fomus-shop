@@ -101,9 +101,7 @@ export default async function HomePage() {
             <div className="w-8 h-px bg-[var(--color-border)] mb-10" />
 
             <p className="text-[13px] md:text-sm leading-[2.2] tracking-[0.08em] text-[var(--color-muted)] max-w-sm mb-14">
-              枡・カードゲーム・七宝焼・デジタルアイテム。
-              <br />
-              FOUMSの公式オンラインショップ。
+              FOMUSの公式オンラインショップです。
             </p>
 
             <div className="flex items-center gap-6 flex-wrap justify-center">
