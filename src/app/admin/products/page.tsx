@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Plus, Package, Search, Copy, Trash2, Share2, GripVertical, ChevronDown, Check } from 'lucide-react'
+import { Plus, Package, Search, Copy, Trash2, Share2, GripVertical, ChevronDown, Loader2 } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import type { Product } from '@/lib/types'
 import ProductLinkModal from '@/components/admin/ProductLinkModal'
@@ -244,7 +244,7 @@ export default function AdminProductsPage() {
     }
   })
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
     if (!over || active.id === over.id) return
 
@@ -252,27 +252,18 @@ export default function AdminProductsPage() {
     const newIndex = sortedProducts.findIndex((p) => p.id === over.id)
 
     const reordered = arrayMove(sortedProducts, oldIndex, newIndex)
-    // Update sort_order based on new positions
     const updated = reordered.map((p, i) => ({ ...p, sort_order: i }))
     setProducts(updated)
-  }
 
-  const saveReorder = async () => {
+    // Auto-save immediately
+    const items = updated.map((p, i) => ({ id: p.id, sort_order: i }))
     setReorderSaving(true)
     try {
-      const sorted = [...products].sort((a, b) => a.sort_order - b.sort_order)
-      const items = sorted.map((p, i) => ({ id: p.id, sort_order: i }))
-
-      const res = await fetch('/api/admin/products/reorder', {
+      await fetch('/api/admin/products/reorder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items }),
       })
-
-      if (res.ok) {
-        setProducts(sorted.map((p, i) => ({ ...p, sort_order: i })))
-        setReorderMode(false)
-      }
     } catch {
       // ignore
     } finally {
@@ -419,32 +410,18 @@ export default function AdminProductsPage() {
 
       {/* Sub bar */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
-        {reorderMode ? (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={saveReorder}
-              disabled={reorderSaving}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-member text-white rounded text-sm font-medium hover:opacity-90 transition-colors disabled:opacity-50"
-            >
-              <Check size={14} />
-              {reorderSaving ? '保存中...' : '並び順を保存'}
-            </button>
-            <button
-              onClick={() => { setReorderMode(false); fetchProducts() }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              キャンセル
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => { setReorderMode(true); setSortBy('sort_order') }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            <GripVertical size={14} />
-            並び替え
-          </button>
-        )}
+        <button
+          onClick={() => { setReorderMode(!reorderMode); if (!reorderMode) setSortBy('sort_order') }}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 border rounded text-sm transition-colors ${
+            reorderMode
+              ? 'border-member bg-member/10 text-member font-medium'
+              : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          <GripVertical size={14} />
+          {reorderMode ? '並び替え中' : '並び替え'}
+          {reorderSaving && <Loader2 size={14} className="animate-spin ml-1" />}
+        </button>
         <div className="relative">
           <button
             onClick={() => setBatchMenuOpen(!batchMenuOpen)}
@@ -507,7 +484,7 @@ export default function AdminProductsPage() {
       {/* Reorder hint */}
       {reorderMode && (
         <div className="mb-4 bg-blue-50 border border-blue-200 rounded px-4 py-2 text-sm text-blue-700">
-          ドラッグ&ドロップで商品の表示順を変更できます。完了したら「並び順を保存」をクリックしてください。
+          ドラッグ&ドロップで商品の表示順を変更できます。移動するとすぐに保存されます。
         </div>
       )}
 
