@@ -59,9 +59,13 @@ interface ProductJsonLdProps {
   sku?: string
   brand?: string
   material?: string
+  aggregateRating?: {
+    ratingValue: number
+    reviewCount: number
+  }
 }
 
-export function ProductJsonLd({ name, description, price, currency = 'JPY', image, url, inStock, sku, brand, material }: ProductJsonLdProps) {
+export function ProductJsonLd({ name, description, price, currency = 'JPY', image, url, inStock, sku, brand, material, aggregateRating }: ProductJsonLdProps) {
   const data: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -82,6 +86,13 @@ export function ProductJsonLd({ name, description, price, currency = 'JPY', imag
   if (sku) data.sku = sku
   if (brand) data.brand = { '@type': 'Brand', name: brand }
   if (material) data.material = material
+  if (aggregateRating) {
+    data.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: aggregateRating.ratingValue,
+      reviewCount: aggregateRating.reviewCount,
+    }
+  }
   return (
     <script
       type="application/ld+json"

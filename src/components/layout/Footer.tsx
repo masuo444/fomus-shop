@@ -48,6 +48,8 @@ export default function Footer() {
                 <li><Link href="/shop/masu" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">枡について</Link></li>
                 <li><Link href="/digital" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">デジタルアイテム</Link></li>
                 <li><Link href="/market" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{siteConfig.features.marketplaceName}</Link></li>
+                <li><Link href="/gallery" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">ギャラリー</Link></li>
+                <li><Link href="/story" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">FOMUSについて</Link></li>
               </ul>
             </div>
             <div>

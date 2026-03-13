@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import type { Product } from '@/lib/types'
 import type { Metadata } from 'next'
 import ProductDetailClient from './ProductDetailClient'
+import ProductReviews from '@/components/product/ProductReviews'
+import type { ProductReview } from '@/components/product/ProductReviews'
 import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import siteConfig from '@/site.config'
 
@@ -69,6 +71,20 @@ export default async function ProductDetailPage({ params }: Props) {
 
   const p = product as Product
 
+  // Fetch published reviews
+  const { data: reviewsData } = await supabase
+    .from('product_reviews')
+    .select('id, reviewer_name, rating, title, body, verified_purchase, created_at')
+    .eq('product_id', id)
+    .eq('is_published', true)
+    .order('created_at', { ascending: false })
+
+  const reviews: ProductReview[] = (reviewsData || []) as ProductReview[]
+  const reviewCount = reviews.length
+  const averageRating = reviewCount > 0
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
+    : 0
+
   return (
     <>
       <ProductJsonLd
@@ -81,6 +97,10 @@ export default async function ProductDetailPage({ params }: Props) {
         inStock={p.stock !== 0}
         sku={p.id}
         brand="FOMUS"
+        aggregateRating={reviewCount > 0 ? {
+          ratingValue: Math.round(averageRating * 10) / 10,
+          reviewCount,
+        } : undefined}
       />
       <BreadcrumbJsonLd items={[
         { name: 'ホーム', href: '/' },
@@ -88,6 +108,9 @@ export default async function ProductDetailPage({ params }: Props) {
         { name: p.name, href: `/shop/${p.id}` },
       ]} />
       <ProductDetailClient product={p} shopName={shopName} />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <ProductReviews reviews={reviews} />
+      </div>
     </>
   )
 }

@@ -34,11 +34,13 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { items, shipping, currency: requestCurrency, coupon_code } = (await request.json()) as {
+    const { items, shipping, currency: requestCurrency, coupon_code, gift_wrapping, gift_message } = (await request.json()) as {
       items: CheckoutItem[]
       shipping: ShippingInfo
       currency?: Currency
       coupon_code?: string
+      gift_wrapping?: boolean
+      gift_message?: string
     }
 
     const currency: Currency = requestCurrency === 'eur' ? 'eur' : 'jpy'
@@ -224,6 +226,8 @@ export async function POST(request: Request) {
       fraud_reasons: fraudCheck.reasons,
       coupon_id: couponId,
       coupon_discount: couponDiscount,
+      gift_wrapping: gift_wrapping || false,
+      gift_message: gift_message || null,
     }).select().single()
 
     if (orderError || !order) {

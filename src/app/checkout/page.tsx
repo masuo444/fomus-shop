@@ -34,6 +34,8 @@ export default function CheckoutPage() {
   const [couponError, setCouponError] = useState('')
   const [couponApplied, setCouponApplied] = useState(false)
   const [couponLoading, setCouponLoading] = useState(false)
+  const [giftWrapping, setGiftWrapping] = useState(false)
+  const [giftMessage, setGiftMessage] = useState('')
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -188,7 +190,7 @@ export default function CheckoutPage() {
         const res = await fetch('/api/bank-transfer/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ items: cartItems, shipping: form, coupon_code: couponApplied ? couponCode : undefined }),
+          body: JSON.stringify({ items: cartItems, shipping: form, coupon_code: couponApplied ? couponCode : undefined, gift_wrapping: giftWrapping, gift_message: giftWrapping ? giftMessage : undefined }),
         })
 
         const data = await res.json()
@@ -204,7 +206,7 @@ export default function CheckoutPage() {
         const res = await fetch('/api/jpyc/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ items: cartItems, shipping: form, coupon_code: couponApplied ? couponCode : undefined }),
+          body: JSON.stringify({ items: cartItems, shipping: form, coupon_code: couponApplied ? couponCode : undefined, gift_wrapping: giftWrapping, gift_message: giftWrapping ? giftMessage : undefined }),
         })
 
         const data = await res.json()
@@ -222,7 +224,7 @@ export default function CheckoutPage() {
         const res = await fetch('/api/stripe/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ items: cartItems, shipping: form, currency, coupon_code: couponApplied ? couponCode : undefined }),
+          body: JSON.stringify({ items: cartItems, shipping: form, currency, coupon_code: couponApplied ? couponCode : undefined, gift_wrapping: giftWrapping, gift_message: giftWrapping ? giftMessage : undefined }),
         })
 
         const data = await res.json()
@@ -523,6 +525,36 @@ export default function CheckoutPage() {
               {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
             </div>
           </div>
+        </div>
+
+        {/* Gift Wrapping */}
+        <div className="border border-[var(--color-border)] p-4 mt-4">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={giftWrapping}
+              onChange={(e) => setGiftWrapping(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300"
+            />
+            <div>
+              <span className="text-sm font-medium text-[var(--foreground)]">ギフトラッピング</span>
+              <span className="text-[10px] text-[var(--color-muted)] ml-2">無料</span>
+            </div>
+          </label>
+          {giftWrapping && (
+            <div className="mt-3 ml-7">
+              <label className="text-[11px] text-[var(--color-muted)] block mb-1">メッセージ（任意）</label>
+              <textarea
+                value={giftMessage}
+                onChange={(e) => setGiftMessage(e.target.value)}
+                maxLength={200}
+                rows={2}
+                placeholder="お祝いのメッセージなど"
+                className="w-full text-xs border border-[var(--color-border)] px-3 py-2 bg-transparent focus:outline-none focus:border-[var(--foreground)] transition-colors"
+              />
+              <p className="text-[10px] text-[var(--color-border)] mt-1">{giftMessage.length}/200</p>
+            </div>
+          )}
         </div>
 
         {/* Payment Method Selection */}
