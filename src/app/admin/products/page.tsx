@@ -3,10 +3,183 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Plus, Package, Search, Copy, Trash2, Share2, GripVertical, ChevronDown } from 'lucide-react'
+import { Plus, Package, Search, Copy, Trash2, Share2, GripVertical, ChevronDown, Check } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import type { Product } from '@/lib/types'
 import ProductLinkModal from '@/components/admin/ProductLinkModal'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+
+// Sortable table row component
+function SortableRow({
+  product,
+  reorderMode,
+  selectedIds,
+  toggleSelect,
+  togglingId,
+  togglePublish,
+  deletingId,
+  deleteProduct,
+  duplicatingId,
+  duplicateProduct,
+  setShareLinkProduct,
+}: {
+  product: Product
+  reorderMode: boolean
+  selectedIds: Set<string>
+  toggleSelect: (id: string) => void
+  togglingId: string | null
+  togglePublish: (product: Product) => void
+  deletingId: string | null
+  deleteProduct: (product: Product) => void
+  duplicatingId: string | null
+  duplicateProduct: (product: Product) => void
+  setShareLinkProduct: (product: Product) => void
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: product.id, disabled: !reorderMode })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 50 : 'auto' as const,
+    position: 'relative' as const,
+  }
+
+  return (
+    <tr
+      ref={setNodeRef}
+      style={style}
+      className={`hover:bg-gray-50 transition-colors group ${selectedIds.has(product.id) ? 'bg-blue-50' : ''} ${isDragging ? 'bg-blue-50 shadow-lg' : ''}`}
+    >
+      <td className="py-2.5 px-3">
+        {reorderMode ? (
+          <button
+            {...attributes}
+            {...listeners}
+            className="cursor-grab active:cursor-grabbing p-1 text-gray-400 hover:text-gray-700 touch-none"
+          >
+            <GripVertical size={16} />
+          </button>
+        ) : (
+          <input
+            type="checkbox"
+            checked={selectedIds.has(product.id)}
+            onChange={() => toggleSelect(product.id)}
+            className="w-4 h-4 rounded border-gray-300 text-member focus:ring-member"
+          />
+        )}
+      </td>
+      <td className="py-2.5 px-3 text-gray-500 text-center">{product.sort_order}</td>
+      <td className="py-2.5 px-3">
+        <Link href={`/admin/products/${product.id}`}>
+          {product.images?.[0] ? (
+            <img
+              src={product.images[0]}
+              alt=""
+              className="w-10 h-10 rounded object-cover bg-gray-100"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded bg-gray-100 flex items-center justify-center">
+              <Package size={16} className="text-gray-400" />
+            </div>
+          )}
+        </Link>
+      </td>
+      <td className="py-2.5 px-3">
+        <Link
+          href={`/admin/products/${product.id}`}
+          className="font-medium text-gray-900 hover:text-member transition-colors"
+        >
+          {product.name}
+        </Link>
+      </td>
+      <td className="py-2.5 px-3 text-right text-gray-900">
+        {formatPrice(product.price)}
+      </td>
+      <td className="py-2.5 px-3 text-right">
+        <span className={product.stock <= 5 ? 'text-orange-600 font-medium' : 'text-gray-600'}>
+          {product.stock}
+        </span>
+      </td>
+      <td className="py-2.5 px-3 text-center">
+        <button
+          onClick={() => togglePublish(product)}
+          disabled={togglingId === product.id}
+          className="inline-flex items-center gap-2 cursor-pointer disabled:opacity-50"
+        >
+          <div
+            className={`relative w-10 h-5 rounded-full transition-colors ${
+              product.is_published ? 'bg-member' : 'bg-gray-300'
+            }`}
+          >
+            <div
+              className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                product.is_published ? 'translate-x-5' : 'translate-x-0.5'
+              }`}
+            />
+          </div>
+          <span
+            className={`text-xs font-medium ${
+              product.is_published ? 'text-member' : 'text-gray-500'
+            }`}
+          >
+            {product.is_published ? '公開' : '非公開'}
+          </span>
+        </button>
+      </td>
+      <td className="py-2.5 px-3 text-center">
+        <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={() => setShareLinkProduct(product)}
+            className="p-1.5 text-gray-400 hover:text-gray-600 rounded hover:bg-gray-100 transition-colors"
+            title="シェア"
+          >
+            <Share2 size={15} />
+          </button>
+          <button
+            onClick={() => duplicateProduct(product)}
+            disabled={duplicatingId === product.id}
+            className="p-1.5 text-gray-400 hover:text-gray-600 rounded hover:bg-gray-100 transition-colors disabled:opacity-50"
+            title="複製"
+          >
+            <Copy size={15} />
+          </button>
+          <button
+            onClick={() => deleteProduct(product)}
+            disabled={deletingId === product.id}
+            className="p-1.5 text-gray-400 hover:text-red-600 rounded hover:bg-red-50 transition-colors disabled:opacity-50"
+            title="削除"
+          >
+            <Trash2 size={15} />
+          </button>
+        </div>
+      </td>
+    </tr>
+  )
+}
 
 export default function AdminProductsPage() {
   const router = useRouter()
@@ -21,6 +194,13 @@ export default function AdminProductsPage() {
   const [batchMenuOpen, setBatchMenuOpen] = useState(false)
   const [batchLoading, setBatchLoading] = useState(false)
   const [shareLinkProduct, setShareLinkProduct] = useState<Product | null>(null)
+  const [reorderMode, setReorderMode] = useState(false)
+  const [reorderSaving, setReorderSaving] = useState(false)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -63,6 +243,42 @@ export default function AdminProductsPage() {
         return 0
     }
   })
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const oldIndex = sortedProducts.findIndex((p) => p.id === active.id)
+    const newIndex = sortedProducts.findIndex((p) => p.id === over.id)
+
+    const reordered = arrayMove(sortedProducts, oldIndex, newIndex)
+    // Update sort_order based on new positions
+    const updated = reordered.map((p, i) => ({ ...p, sort_order: i }))
+    setProducts(updated)
+  }
+
+  const saveReorder = async () => {
+    setReorderSaving(true)
+    try {
+      const sorted = [...products].sort((a, b) => a.sort_order - b.sort_order)
+      const items = sorted.map((p, i) => ({ id: p.id, sort_order: i }))
+
+      const res = await fetch('/api/admin/products/reorder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items }),
+      })
+
+      if (res.ok) {
+        setProducts(sorted.map((p, i) => ({ ...p, sort_order: i })))
+        setReorderMode(false)
+      }
+    } catch {
+      // ignore
+    } finally {
+      setReorderSaving(false)
+    }
+  }
 
   const togglePublish = async (product: Product) => {
     setTogglingId(product.id)
@@ -203,10 +419,32 @@ export default function AdminProductsPage() {
 
       {/* Sub bar */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
-        <button className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-          <GripVertical size={14} />
-          並び替え
-        </button>
+        {reorderMode ? (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={saveReorder}
+              disabled={reorderSaving}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-member text-white rounded text-sm font-medium hover:opacity-90 transition-colors disabled:opacity-50"
+            >
+              <Check size={14} />
+              {reorderSaving ? '保存中...' : '並び順を保存'}
+            </button>
+            <button
+              onClick={() => { setReorderMode(false); fetchProducts() }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              キャンセル
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => { setReorderMode(true); setSortBy('sort_order') }}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <GripVertical size={14} />
+            並び替え
+          </button>
+        )}
         <div className="relative">
           <button
             onClick={() => setBatchMenuOpen(!batchMenuOpen)}
@@ -256,7 +494,8 @@ export default function AdminProductsPage() {
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-          className="px-3 py-1.5 border border-gray-300 rounded text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-member focus:border-member"
+          disabled={reorderMode}
+          className="px-3 py-1.5 border border-gray-300 rounded text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-member focus:border-member disabled:opacity-50"
         >
           <option value="sort_order">ショップ表示順</option>
           <option value="created_at">登録日順</option>
@@ -265,131 +504,70 @@ export default function AdminProductsPage() {
         </select>
       </div>
 
+      {/* Reorder hint */}
+      {reorderMode && (
+        <div className="mb-4 bg-blue-50 border border-blue-200 rounded px-4 py-2 text-sm text-blue-700">
+          ドラッグ&ドロップで商品の表示順を変更できます。完了したら「並び順を保存」をクリックしてください。
+        </div>
+      )}
+
       {/* Product table */}
       <div className="bg-white rounded border border-gray-200 overflow-hidden">
         {loading ? (
           <div className="p-12 text-center text-gray-400">読み込み中...</div>
         ) : sortedProducts.length > 0 ? (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="py-2.5 px-3 w-10">
-                  <input
-                    type="checkbox"
-                    checked={sortedProducts.length > 0 && selectedIds.size === sortedProducts.length}
-                    onChange={toggleSelectAll}
-                    className="w-4 h-4 rounded border-gray-300 text-member focus:ring-member"
-                  />
-                </th>
-                <th className="text-left py-2.5 px-3 font-medium text-gray-500 w-16">順番</th>
-                <th className="text-left py-2.5 px-3 font-medium text-gray-500 w-16"></th>
-                <th className="text-left py-2.5 px-3 font-medium text-gray-500">商品名</th>
-                <th className="text-right py-2.5 px-3 font-medium text-gray-500 w-28">価格</th>
-                <th className="text-right py-2.5 px-3 font-medium text-gray-500 w-20">在庫</th>
-                <th className="text-center py-2.5 px-3 font-medium text-gray-500 w-28">公開状態</th>
-                <th className="text-center py-2.5 px-3 font-medium text-gray-500 w-32"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {sortedProducts.map((product) => (
-                <tr key={product.id} className={`hover:bg-gray-50 transition-colors group ${selectedIds.has(product.id) ? 'bg-blue-50' : ''}`}>
-                  <td className="py-2.5 px-3">
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.has(product.id)}
-                      onChange={() => toggleSelect(product.id)}
-                      className="w-4 h-4 rounded border-gray-300 text-member focus:ring-member"
-                    />
-                  </td>
-                  <td className="py-2.5 px-3 text-gray-500 text-center">{product.sort_order}</td>
-                  <td className="py-2.5 px-3">
-                    <Link href={`/admin/products/${product.id}`}>
-                      {product.images?.[0] ? (
-                        <img
-                          src={product.images[0]}
-                          alt=""
-                          className="w-10 h-10 rounded object-cover bg-gray-100"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded bg-gray-100 flex items-center justify-center">
-                          <Package size={16} className="text-gray-400" />
-                        </div>
-                      )}
-                    </Link>
-                  </td>
-                  <td className="py-2.5 px-3">
-                    <Link
-                      href={`/admin/products/${product.id}`}
-                      className="font-medium text-gray-900 hover:text-member transition-colors"
-                    >
-                      {product.name}
-                    </Link>
-                  </td>
-                  <td className="py-2.5 px-3 text-right text-gray-900">
-                    {formatPrice(product.price)}
-                  </td>
-                  <td className="py-2.5 px-3 text-right">
-                    <span className={product.stock <= 5 ? 'text-orange-600 font-medium' : 'text-gray-600'}>
-                      {product.stock}
-                    </span>
-                  </td>
-                  <td className="py-2.5 px-3 text-center">
-                    <button
-                      onClick={() => togglePublish(product)}
-                      disabled={togglingId === product.id}
-                      className="inline-flex items-center gap-2 cursor-pointer disabled:opacity-50"
-                    >
-                      <div
-                        className={`relative w-10 h-5 rounded-full transition-colors ${
-                          product.is_published ? 'bg-member' : 'bg-gray-300'
-                        }`}
-                      >
-                        <div
-                          className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
-                            product.is_published ? 'translate-x-5' : 'translate-x-0.5'
-                          }`}
-                        />
-                      </div>
-                      <span
-                        className={`text-xs font-medium ${
-                          product.is_published ? 'text-member' : 'text-gray-500'
-                        }`}
-                      >
-                        {product.is_published ? '公開' : '非公開'}
-                      </span>
-                    </button>
-                  </td>
-                  <td className="py-2.5 px-3 text-center">
-                    <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => setShareLinkProduct(product)}
-                        className="p-1.5 text-gray-400 hover:text-gray-600 rounded hover:bg-gray-100 transition-colors"
-                        title="シェア"
-                      >
-                        <Share2 size={15} />
-                      </button>
-                      <button
-                        onClick={() => duplicateProduct(product)}
-                        disabled={duplicatingId === product.id}
-                        className="p-1.5 text-gray-400 hover:text-gray-600 rounded hover:bg-gray-100 transition-colors disabled:opacity-50"
-                        title="複製"
-                      >
-                        <Copy size={15} />
-                      </button>
-                      <button
-                        onClick={() => deleteProduct(product)}
-                        disabled={deletingId === product.id}
-                        className="p-1.5 text-gray-400 hover:text-red-600 rounded hover:bg-red-50 transition-colors disabled:opacity-50"
-                        title="削除"
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    </div>
-                  </td>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 bg-gray-50">
+                  <th className="py-2.5 px-3 w-10">
+                    {reorderMode ? '' : (
+                      <input
+                        type="checkbox"
+                        checked={sortedProducts.length > 0 && selectedIds.size === sortedProducts.length}
+                        onChange={toggleSelectAll}
+                        className="w-4 h-4 rounded border-gray-300 text-member focus:ring-member"
+                      />
+                    )}
+                  </th>
+                  <th className="text-left py-2.5 px-3 font-medium text-gray-500 w-16">順番</th>
+                  <th className="text-left py-2.5 px-3 font-medium text-gray-500 w-16"></th>
+                  <th className="text-left py-2.5 px-3 font-medium text-gray-500">商品名</th>
+                  <th className="text-right py-2.5 px-3 font-medium text-gray-500 w-28">価格</th>
+                  <th className="text-right py-2.5 px-3 font-medium text-gray-500 w-20">在庫</th>
+                  <th className="text-center py-2.5 px-3 font-medium text-gray-500 w-28">公開状態</th>
+                  <th className="text-center py-2.5 px-3 font-medium text-gray-500 w-32"></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <SortableContext
+                items={sortedProducts.map((p) => p.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <tbody className="divide-y divide-gray-100">
+                  {sortedProducts.map((product) => (
+                    <SortableRow
+                      key={product.id}
+                      product={product}
+                      reorderMode={reorderMode}
+                      selectedIds={selectedIds}
+                      toggleSelect={toggleSelect}
+                      togglingId={togglingId}
+                      togglePublish={togglePublish}
+                      deletingId={deletingId}
+                      deleteProduct={deleteProduct}
+                      duplicatingId={duplicatingId}
+                      duplicateProduct={duplicateProduct}
+                      setShareLinkProduct={setShareLinkProduct}
+                    />
+                  ))}
+                </tbody>
+              </SortableContext>
+            </table>
+          </DndContext>
         ) : (
           <div className="p-12 text-center text-gray-400">
             <Package size={32} className="mx-auto mb-3 text-gray-300" />
