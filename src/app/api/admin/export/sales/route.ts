@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { checkShopAccess } from '@/lib/auth'
+import { checkAdmin } from '@/lib/auth'
+import { getPublishedShopIds } from '@/lib/shop'
 
 export async function GET(request: NextRequest) {
-  const access = await checkShopAccess('admin')
-  if (!access) {
+  const user = await checkAdmin()
+  if (!user) {
     return NextResponse.json({ error: '権限がありません' }, { status: 403 })
   }
 
-  const shopId = access.shopId
+  const publishedIds = await getPublishedShopIds()
+  const shopId = publishedIds[0] ?? ''
   const supabase = await createClient()
 
   const { searchParams } = new URL(request.url)

@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { checkShopAccess } from '@/lib/auth'
+import { checkAdmin } from '@/lib/auth'
+import { getPublishedShopIds } from '@/lib/shop'
 import { SHIPPING_FEE } from '@/lib/constants'
 
 export async function GET() {
-  const access = await checkShopAccess('admin')
-  if (!access) {
+  const user = await checkAdmin()
+  if (!user) {
     return NextResponse.json({ error: '権限がありません' }, { status: 403 })
   }
 
-  const shopId = access.shopId
+  const publishedIds = await getPublishedShopIds()
+  const shopId = publishedIds[0] ?? ''
   const supabase = await createClient()
 
   const { data: shop } = await supabase
@@ -26,12 +28,13 @@ export async function GET() {
 }
 
 export async function PUT(request: NextRequest) {
-  const access = await checkShopAccess('admin')
-  if (!access) {
+  const user = await checkAdmin()
+  if (!user) {
     return NextResponse.json({ error: '権限がありません' }, { status: 403 })
   }
 
-  const shopId = access.shopId
+  const publishedIds = await getPublishedShopIds()
+  const shopId = publishedIds[0] ?? ''
   const body = await request.json()
   const admin = createAdminClient()
 

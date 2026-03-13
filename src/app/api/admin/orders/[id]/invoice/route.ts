@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { createClient } from '@/lib/supabase/server'
-import { checkShopAccess } from '@/lib/auth'
+import { checkAdmin } from '@/lib/auth'
+import { getPublishedShopIds } from '@/lib/shop'
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const access = await checkShopAccess('admin')
-  if (!access) {
+  const user = await checkAdmin()
+  if (!user) {
     return NextResponse.json({ error: '権限がありません' }, { status: 403 })
   }
 
@@ -19,7 +20,7 @@ export async function GET(
     .from('orders')
     .select('stripe_invoice_id')
     .eq('id', id)
-    .eq('shop_id', access.shopId)
+    .eq('shop_id', (await getPublishedShopIds())[0] ?? '')
     .single()
 
   if (!order?.stripe_invoice_id) {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { checkShopAccess } from '@/lib/auth'
+import { checkAdmin } from '@/lib/auth'
+import { getPublishedShopIds } from '@/lib/shop'
 import { sendShippingNotification } from '@/lib/email'
 import type { Order } from '@/lib/types'
 
@@ -8,12 +9,13 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const access = await checkShopAccess('admin')
-  if (!access) {
+  const user = await checkAdmin()
+  if (!user) {
     return NextResponse.json({ error: '権限がありません' }, { status: 403 })
   }
 
-  const shopId = access.shopId
+  const publishedIds = await getPublishedShopIds()
+  const shopId = publishedIds[0] ?? ''
   const { id } = await params
   const body = await request.json()
   const { tracking_number, shipping_carrier } = body

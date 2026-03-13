@@ -1,23 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { checkShopAccess } from '@/lib/auth'
+import { checkAdmin } from '@/lib/auth'
+import { getPublishedShopIds } from '@/lib/shop'
 import { requireString, sanitizeString, validatePositiveInt, clampNumber, ValidationError } from '@/lib/validation'
 
 export async function POST(request: NextRequest) {
-  const access = await checkShopAccess('admin')
-  if (!access) {
+  const user = await checkAdmin()
+  if (!user) {
     return NextResponse.json({ error: '権限がありません' }, { status: 403 })
   }
 
   const body = await request.json()
 
   try {
+    const publishedIds = await getPublishedShopIds()
+    const shopId = publishedIds[0] ?? ''
     const admin = createAdminClient()
 
     const { data, error } = await admin
       .from('digital_items')
       .insert({
-        shop_id: access.shopId,
+        shop_id: shopId,
         name: requireString(body.name, '名前'),
         description: sanitizeString(body.description, 5000),
         image_url: sanitizeString(body.image_url, 500) || null,

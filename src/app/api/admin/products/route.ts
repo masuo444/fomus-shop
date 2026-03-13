@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { checkShopAccess } from '@/lib/auth'
+import { checkAdmin } from '@/lib/auth'
+import { getPublishedShopIds } from '@/lib/shop'
 
 // GET: List all products (admin sees all shops)
 export async function GET() {
-  const access = await checkShopAccess('admin')
-  if (!access) {
+  const user = await checkAdmin()
+  if (!user) {
     return NextResponse.json({ error: '権限がありません' }, { status: 403 })
   }
 
@@ -25,12 +26,14 @@ export async function GET() {
 
 // POST: Create a product with options and shipping methods
 export async function POST(request: NextRequest) {
-  const access = await checkShopAccess('admin')
-  if (!access) {
+  const user = await checkAdmin()
+  if (!user) {
     return NextResponse.json({ error: '権限がありません' }, { status: 403 })
   }
 
-  const shopId = access.shopId
+  // Get default shop ID for new products
+  const publishedIds = await getPublishedShopIds()
+  const shopId = publishedIds[0] ?? ''
   const body = await request.json()
   const { product: productData, options, shipping_method_ids } = body
 
