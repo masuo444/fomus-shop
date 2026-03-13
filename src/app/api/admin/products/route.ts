@@ -1,22 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkShopAccess } from '@/lib/auth'
 
-// GET: List all products for the shop
+// GET: List all products (admin sees all shops)
 export async function GET() {
   const access = await checkShopAccess('admin')
   if (!access) {
     return NextResponse.json({ error: '権限がありません' }, { status: 403 })
   }
 
-  const shopId = access.shopId
-  const supabase = await createClient()
+  const admin = createAdminClient()
 
-  const { data: products, error } = await supabase
+  const { data: products, error } = await admin
     .from('products')
     .select('*, category:categories(*)')
-    .eq('shop_id', shopId)
     .order('sort_order', { ascending: true })
 
   if (error) {

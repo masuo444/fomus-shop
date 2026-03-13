@@ -100,6 +100,15 @@ export default async function HomePage() {
               >
                 Digital Items
               </Link>
+              <span className="text-[var(--color-border)]">/</span>
+              <a
+                href="https://www.fomus.jp/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[11px] tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors"
+              >
+                FOMUS.jp
+              </a>
             </div>
           </div>
         </div>
