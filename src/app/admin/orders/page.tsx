@@ -51,6 +51,11 @@ export default function AdminOrdersPage() {
     ? orders
     : orders.filter((o) => o.status === activeTab)
 
+  const statusCounts: Record<string, number> = {}
+  for (const o of orders) {
+    statusCounts[o.status] = (statusCounts[o.status] || 0) + 1
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -78,6 +83,17 @@ export default function AdminOrdersPage() {
             }`}
           >
             {tab.label}
+            {tab.key === 'all' ? (
+              orders.length > 0 && <span className="ml-1.5 text-xs text-gray-400">({orders.length})</span>
+            ) : (
+              (statusCounts[tab.key] ?? 0) > 0 && (
+                <span className={`ml-1.5 text-xs inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full px-1 ${
+                  tab.key === 'paid' ? 'bg-red-500 text-white' : 'text-gray-400'
+                }`}>
+                  {statusCounts[tab.key]}
+                </span>
+              )
+            )}
           </button>
         ))}
       </div>

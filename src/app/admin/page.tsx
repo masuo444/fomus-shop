@@ -25,6 +25,7 @@ export default async function AdminDashboard() {
     { data: recentOrders },
     { data: lowStockProducts },
     { data: monthCommissions },
+    { data: actionRequiredOrders },
   ] = await Promise.all([
     supabase
       .from('orders')
@@ -65,6 +66,13 @@ export default async function AdminDashboard() {
       .from('commissions')
       .select('commission_amount')
       .gte('created_at', monthStart),
+    supabase
+      .from('orders')
+      .select('*')
+      .eq('shop_id', shopId)
+      .in('status', ['paid', 'awaiting_payment'])
+      .order('created_at', { ascending: true })
+      .limit(10),
   ])
 
   const todaySales = todayOrders?.reduce((sum, o) => sum + o.total, 0) ?? 0
@@ -100,6 +108,43 @@ export default async function AdminDashboard() {
           )
         })}
       </div>
+
+      {/* Action Required */}
+      {actionRequiredOrders && actionRequiredOrders.length > 0 && (
+        <div className="bg-red-50 border border-red-200 rounded-xl mb-8">
+          <div className="p-5 border-b border-red-200 flex items-center justify-between">
+            <h2 className="font-semibold text-red-800 flex items-center gap-2">
+              <AlertTriangle size={16} className="text-red-500" />
+              要対応の注文（{actionRequiredOrders.length}件）
+            </h2>
+            <Link href="/admin/orders" className="text-sm text-red-600 hover:text-red-800">
+              注文管理へ
+            </Link>
+          </div>
+          <div className="divide-y divide-red-100">
+            {actionRequiredOrders.map((order: Order) => (
+              <Link
+                key={order.id}
+                href={`/admin/orders/${order.id}`}
+                className="flex items-center justify-between p-4 hover:bg-red-100/50 transition-colors"
+              >
+                <div>
+                  <p className="text-sm font-medium text-gray-900">#{order.order_number}</p>
+                  <p className="text-xs text-gray-500">{order.shipping_name} / {formatDate(order.created_at)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-medium text-gray-900">{formatPrice(order.total)}</p>
+                  <span className={`inline-block text-xs px-2 py-0.5 rounded-full ${
+                    order.status === 'paid' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'
+                  }`}>
+                    {ORDER_STATUS_LABELS[order.status]}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Orders */}

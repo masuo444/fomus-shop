@@ -17,6 +17,8 @@ import {
   Settings,
   LogOut,
   LinkIcon,
+  ExternalLink,
+  Star,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import siteConfig from '@/site.config'
@@ -33,8 +35,9 @@ const menuItems = [
   { href: '/admin/members', label: '会員権限', icon: Ticket },
   { href: '/admin/partners', label: 'パートナー', icon: Handshake },
   { href: '/admin/coupons', label: 'クーポン', icon: Tag },
+  { href: '/admin/reviews', label: 'レビュー', icon: Star },
   { href: '/admin/payouts', label: '振込申請', icon: Banknote },
-{ href: '/admin/settings', label: '設定', icon: Settings },
+  { href: '/admin/settings', label: '設定', icon: Settings },
 ]
 
 export default function AdminSidebar() {
@@ -83,7 +86,16 @@ export default function AdminSidebar() {
         })}
       </nav>
 
-      <div className="p-3 border-t border-gray-200">
+      <div className="p-3 border-t border-gray-200 space-y-1">
+        <a
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors"
+        >
+          <ExternalLink size={18} />
+          ショップをプレビュー
+        </a>
         <Link
           href="/"
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
