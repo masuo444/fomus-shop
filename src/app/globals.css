@@ -8,7 +8,7 @@
   --color-accent-light: #FFF6F1;
   --color-subtle: #F3F2EF;
   --color-border: #E8E6E1;
-  --color-muted: #9B978F;
+  --color-muted: #6B6760;
   --color-member: #00A8A0;
   --color-member-bg: #E6F7F6;
   --color-member-dark: #00857E;
@@ -70,7 +70,7 @@ a {
   background: var(--color-primary);
   color: #fff;
   letter-spacing: 0.12em;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   padding: 0.9375rem 2.75rem;
   transition: all 0.4s ease;
@@ -83,7 +83,7 @@ a {
   background: var(--color-accent);
   color: #fff;
   letter-spacing: 0.12em;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   padding: 0.9375rem 2.75rem;
   transition: all 0.4s ease;
@@ -96,7 +96,7 @@ a {
   border: 1px solid var(--color-border);
   color: var(--color-primary);
   letter-spacing: 0.12em;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   padding: 0.9375rem 2.75rem;
   transition: all 0.4s ease;
@@ -138,6 +138,28 @@ a {
 }
 .animate-float {
   animation: float 5s ease-in-out infinite;
+}
+
+/* ===== PC TEXT SIZE BOOST ===== */
+@media (min-width: 768px) {
+  body {
+    font-size: 1.0625rem; /* 17px base */
+  }
+
+  /* Bump very small text to readable sizes on desktop */
+  .text-xs {
+    font-size: 0.8125rem !important; /* 12px → 13px */
+    line-height: 2;
+  }
+  .text-\[10px\] {
+    font-size: 0.6875rem !important; /* 10px → 11px */
+  }
+  .text-\[11px\] {
+    font-size: 0.8125rem !important; /* 11px → 13px */
+  }
+  .text-\[13px\] {
+    font-size: 0.9375rem !important; /* 13px → 15px */
+  }
 }
 
 /* ===== SCROLLBAR ===== */
