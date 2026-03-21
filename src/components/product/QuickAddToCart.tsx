@@ -11,9 +11,10 @@ interface QuickAddToCartProps {
   stock: number
   hasOptions?: boolean
   price: number
+  productName?: string
 }
 
-export default function QuickAddToCart({ productId, shopId, stock, hasOptions, price }: QuickAddToCartProps) {
+export default function QuickAddToCart({ productId, shopId, stock, hasOptions, price, productName }: QuickAddToCartProps) {
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
   const [showQty, setShowQty] = useState(false)
@@ -46,6 +47,7 @@ export default function QuickAddToCart({ productId, shopId, stock, hasOptions, p
 
     addToLocalCart(productId, quantity, shopId)
     window.dispatchEvent(new Event('cart-updated'))
+    window.dispatchEvent(new CustomEvent('cart-toast', { detail: { name: productName } }))
     setAdded(true)
     setShowQty(false)
     setQuantity(1)

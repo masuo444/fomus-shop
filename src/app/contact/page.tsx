@@ -4,7 +4,7 @@ import { FAQPageJsonLd } from '@/components/seo/JsonLd'
 
 export const metadata: Metadata = {
   title: 'お問い合わせ',
-  description: 'FOUMSへのお問い合わせ。商品・配送・オーダーメイドに関するご質問はこちらから。',
+  description: 'FOMUSへのお問い合わせ。商品・配送・オーダーメイドに関するご質問はこちらから。',
   alternates: {
     canonical: '/contact',
   },

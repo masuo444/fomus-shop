@@ -43,13 +43,24 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
       <Link href={`/shop/${product.id}`} className="block">
         <div className="relative aspect-square bg-[var(--color-subtle)] overflow-hidden rounded-xl">
           {product.images && product.images.length > 0 ? (
-            <Image
-              src={product.images[0]}
-              alt={product.name}
-              fill
-              className="object-cover img-hover"
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            />
+            <>
+              <Image
+                src={product.images[0]}
+                alt={product.name}
+                fill
+                className="object-cover img-hover transition-opacity duration-500 group-hover:opacity-0"
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              />
+              {product.images.length > 1 && (
+                <Image
+                  src={product.images[1]}
+                  alt={`${product.name} - 別アングル`}
+                  fill
+                  className="object-cover img-hover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                />
+              )}
+            </>
           ) : (
             <div className="w-full h-full flex items-center justify-center text-[var(--color-muted)]">
               <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={0.5}>
@@ -69,6 +80,13 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
             <div className="absolute inset-0 bg-[var(--foreground)]/40 flex items-center justify-center">
               <span className="text-[10px] tracking-[0.2em] uppercase text-white font-medium">
                 Sold Out
+              </span>
+            </div>
+          )}
+          {!isSoldOut && product.stock > 0 && product.stock <= 5 && (
+            <div className="absolute bottom-3 left-3">
+              <span className="bg-amber-500 text-white text-[9px] tracking-wider font-medium px-2.5 py-1 rounded-full">
+                残り{product.stock}点
               </span>
             </div>
           )}
@@ -143,6 +161,7 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
           stock={product.stock}
           hasOptions={hasOptions}
           price={mainPrice}
+          productName={product.name}
         />
       )}
     </div>

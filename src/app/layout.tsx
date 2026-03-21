@@ -1,8 +1,11 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Geist, Geist_Mono, Noto_Sans_JP } from 'next/font/google'
 import { Cormorant_Garamond } from 'next/font/google'
 import Header from '@/components/layout/Header'
+import AnnouncementBar from '@/components/layout/AnnouncementBar'
 import Footer from '@/components/layout/Footer'
+import CartToast from '@/components/ui/CartToast'
+import MobileCartBar from '@/components/layout/MobileCartBar'
 import GoogleAnalytics from '@/components/layout/GoogleAnalytics'
 import { OrganizationJsonLd, WebSiteJsonLd, LocalBusinessJsonLd } from '@/components/seo/JsonLd'
 import { SITE_NAME, SITE_DESCRIPTION } from '@/lib/constants'
@@ -19,6 +22,12 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
+})
+
+const notoSansJP = Noto_Sans_JP({
+  variable: '--font-noto-sans-jp',
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
 })
 
 const cormorant = Cormorant_Garamond({
@@ -71,7 +80,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} antialiased`}>
+      <head>
+        <meta name="theme-color" content="#1A1A18" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <link rel="apple-touch-icon" href="/fomus-logo.png" />
+      </head>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${notoSansJP.variable} antialiased`}>
         <style dangerouslySetInnerHTML={{ __html: `
           :root {
             --color-primary: ${siteConfig.theme.primary};
@@ -87,10 +102,13 @@ export default function RootLayout({
         <WebSiteJsonLd />
         <LocalBusinessJsonLd />
         <div className="flex flex-col min-h-screen">
+          <AnnouncementBar />
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
         </div>
+        <CartToast />
+        <MobileCartBar />
       </body>
     </html>
   )

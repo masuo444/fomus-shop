@@ -5,7 +5,11 @@ import type { Metadata } from 'next'
 import ProductDetailClient from './ProductDetailClient'
 import ProductReviews from '@/components/product/ProductReviews'
 import type { ProductReview } from '@/components/product/ProductReviews'
+import ProductCard from '@/components/product/ProductCard'
 import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd'
+import { getPublishedShopIds } from '@/lib/shop'
+import { getCurrency } from '@/lib/currency'
+import RecentlyViewed from '@/components/product/RecentlyViewed'
 import siteConfig from '@/site.config'
 
 interface Props {
@@ -28,6 +32,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
+    alternates: {
+      canonical: `/shop/${id}`,
+    },
     openGraph: {
       title,
       description,
@@ -85,6 +92,43 @@ export default async function ProductDetailPage({ params }: Props) {
     ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
     : 0
 
+  // Fetch related products (same category or same shop)
+  const currency = await getCurrency()
+  let relatedProducts: Product[] = []
+  const shopIds = await getPublishedShopIds()
+  if (shopIds.length > 0) {
+    let query = supabase
+      .from('products')
+      .select('*')
+      .in('shop_id', shopIds)
+      .eq('is_published', true)
+      .eq('item_type', 'physical')
+      .neq('id', id)
+      .limit(4)
+
+    if (p.category_id) {
+      query = query.eq('category_id', p.category_id)
+    }
+
+    const { data: relatedData } = await query.order('created_at', { ascending: false })
+    relatedProducts = (relatedData || []) as Product[]
+
+    // If not enough from same category, fill with other products
+    if (relatedProducts.length < 4) {
+      const existingIds = [id, ...relatedProducts.map(r => r.id)]
+      const { data: moreData } = await supabase
+        .from('products')
+        .select('*')
+        .in('shop_id', shopIds)
+        .eq('is_published', true)
+        .eq('item_type', 'physical')
+        .not('id', 'in', `(${existingIds.join(',')})`)
+        .order('created_at', { ascending: false })
+        .limit(4 - relatedProducts.length)
+      if (moreData) relatedProducts = [...relatedProducts, ...(moreData as Product[])]
+    }
+  }
+
   return (
     <>
       <ProductJsonLd
@@ -107,10 +151,27 @@ export default async function ProductDetailPage({ params }: Props) {
         { name: '商品一覧', href: '/shop' },
         { name: p.name, href: `/shop/${p.id}` },
       ]} />
-      <ProductDetailClient product={p} shopName={shopName} />
+      <ProductDetailClient product={p} shopName={shopName} reviewCount={reviewCount} averageRating={averageRating} />
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <ProductReviews reviews={reviews} />
       </div>
+
+      {/* Related Products */}
+      {relatedProducts.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+          <div className="border-t border-[var(--color-border)] pt-12">
+            <h2 className="text-lg font-medium text-[var(--foreground)] mb-8">関連商品</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+              {relatedProducts.map((rp) => (
+                <ProductCard key={rp.id} product={rp} currency={currency} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Recently Viewed */}
+      <RecentlyViewed excludeId={id} />
     </>
   )
 }

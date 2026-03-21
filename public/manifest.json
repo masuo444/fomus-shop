@@ -1,12 +1,17 @@
 {
-  "name": "FOMUS SHOP",
+  "name": "FOMUS Official Shop",
   "short_name": "FOMUS",
-  "description": "FOMUS公式オンラインショップ。枡・カードゲーム・デジタルアイテム。",
+  "description": "FOMUS公式オンラインショップ。国産ヒノキの枡・カードゲーム・デジタルアイテム。",
   "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#FAF9F7",
-  "theme_color": "#111111",
+  "theme_color": "#1A1A18",
+  "categories": ["shopping", "lifestyle"],
   "icons": [
-    { "src": "/fomus-logo.png", "sizes": "512x512", "type": "image/png" }
-  ]
+    { "src": "/fomus-logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/fomus-logo.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
 }

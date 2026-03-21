@@ -64,10 +64,32 @@ export default async function HomePage() {
     if (digitalData?.[0]?.images?.[0]) digitalCoverImage = digitalData[0].images[0]
   }
 
+  // Fetch top reviews for homepage
+  const { data: topReviews } = await supabase
+    .from('product_reviews')
+    .select('id, reviewer_name, rating, title, body, product_id, created_at')
+    .eq('is_published', true)
+    .gte('rating', 4)
+    .order('created_at', { ascending: false })
+    .limit(3)
+
+  // Get product names for reviews
+  let reviewProducts: Record<string, string> = {}
+  if (topReviews && topReviews.length > 0) {
+    const productIds = [...new Set(topReviews.map(r => r.product_id))]
+    const { data: prods } = await supabase
+      .from('products')
+      .select('id, name')
+      .in('id', productIds)
+    if (prods) {
+      reviewProducts = Object.fromEntries(prods.map(p => [p.id, p.name]))
+    }
+  }
+
   return (
     <div>
       <FAQPageJsonLd items={[
-        { question: 'FOUMSではどんな商品が買えますか？', answer: '国産ヒノキの枡（一合枡・ミニ枡・名入れ枡）、カードゲーム「SILVA」、七宝焼コラボ枡、FOMUSランニングウェア、デジタルアイテムなどを販売しています。' },
+        { question: 'FOMUSではどんな商品が買えますか？', answer: '国産ヒノキの枡（一合枡・ミニ枡・名入れ枡）、カードゲーム「SILVA」、七宝焼コラボ枡、FOMUSランニングウェア、デジタルアイテムなどを販売しています。' },
         { question: '送料はいくらですか？', answer: '国内一律1,000円（税込）です。' },
         { question: 'どんな決済方法が使えますか？', answer: 'クレジットカード（Visa・Mastercard・Amex・JCB）、銀行振込、JPYC（日本円ステーブルコイン）に対応しています。' },
         { question: '枡の名入れやオーダーメイドはできますか？', answer: 'はい、法人向け・個人向けともに名入れ・オリジナルデザインの枡を承っています。' },
@@ -86,47 +108,46 @@ export default async function HomePage() {
       )}
 
       {/* ===== HERO ===== */}
-      <section className="relative overflow-hidden">
-        <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-10 pt-20 pb-28 md:pt-32 md:pb-40 lg:pt-40 lg:pb-52">
-          <div className="flex flex-col items-center text-center">
+      <section className="relative overflow-hidden min-h-[70vh] md:min-h-[80vh] flex items-center">
+        <div className="absolute inset-0">
+          <img
+            src="/hero.jpg"
+            alt="枡で乾杯するシーン"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+        </div>
+        <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 py-20 md:py-32">
+          <div className="max-w-lg">
             <img
               src="/fomus-logo.png"
               alt="FOMUS"
-              className="w-28 sm:w-36 md:w-44 mb-12 animate-float"
+              className="w-20 sm:w-24 mb-8 brightness-0 invert"
             />
 
             <h1 className="sr-only">FOMUS Official Online Shop</h1>
 
-            {/* Thin horizontal rule */}
-            <div className="w-8 h-px bg-[var(--color-border)] mb-10" />
-
-            <p className="text-[13px] md:text-sm leading-[2.2] tracking-[0.08em] text-[var(--color-muted)] max-w-sm mb-14">
-              FOMUSの公式オンラインショップです。
+            <p className="text-white/90 text-lg md:text-xl leading-relaxed tracking-wide mb-4">
+              面白いモノを、世の中に。
+            </p>
+            <p className="text-white/60 text-sm md:text-base leading-relaxed mb-10">
+              国産ヒノキの枡をはじめ、ここでしか手に入らないプロダクトをお届けします。
             </p>
 
-            <div className="flex items-center gap-6 flex-wrap justify-center">
+            <div className="flex items-center gap-5 flex-wrap">
               <Link
                 href="/shop"
-                className="btn-primary inline-flex items-center gap-3"
+                className="inline-flex items-center gap-3 bg-white text-[var(--foreground)] text-sm font-medium tracking-[0.1em] uppercase px-8 py-4 hover:bg-white/90 transition-colors"
               >
                 SHOP
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
               </Link>
               <Link
                 href="/digital"
-                className="text-[11px] tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors"
+                className="text-sm tracking-[0.12em] uppercase text-white/70 hover:text-white transition-colors"
               >
                 Digital Items
               </Link>
-              <span className="text-[var(--color-border)]">/</span>
-              <a
-                href="https://www.fomus.jp/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[11px] tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors"
-              >
-                FOMUS.jp
-              </a>
             </div>
           </div>
         </div>
@@ -134,9 +155,9 @@ export default async function HomePage() {
 
       {/* ===== ABOUT (AIO) ===== */}
       <section className="max-w-3xl mx-auto px-6 sm:px-8 lg:px-10 py-16 md:py-20">
-        <h2 className="text-lg font-medium text-[var(--foreground)] mb-6">FOUMSについて</h2>
+        <h2 className="text-lg font-medium text-[var(--foreground)] mb-6">FOMUSについて</h2>
         <p className="text-xs leading-[2.2] text-[var(--color-muted)]">
-          FOUMSは「面白いモノを世の中に」をコンセプトに、国産ヒノキの枡（ます）をはじめ、カードゲーム、ランニングウェア、デジタルアイテムなど多彩な商品を展開するオンラインショップです。岐阜県大垣市の伝統的な枡づくりの技術を活かしながら、現代のライフスタイルに合った新しいプロダクトを提案しています。Stripe・銀行振込に加え、日本円ステーブルコイン「JPYC」での決済にも対応しています。
+          FOMUSは「面白いモノを世の中に」をコンセプトに、国産ヒノキの枡（ます）をはじめ、カードゲーム、ランニングウェア、デジタルアイテムなど多彩な商品を展開するオンラインショップです。岐阜県大垣市の伝統的な枡づくりの技術を活かしながら、現代のライフスタイルに合った新しいプロダクトを提案しています。Stripe・銀行振込に加え、日本円ステーブルコイン「JPYC」での決済にも対応しています。
         </p>
       </section>
       <div className="max-w-3xl mx-auto px-6 sm:px-8 lg:px-10"><div className="h-px bg-[var(--color-border)]" /></div>
@@ -340,7 +361,7 @@ export default async function HomePage() {
                     FOMUS {siteConfig.features.membershipName}
                   </h2>
                   <p className="text-xs leading-[2.2] text-[var(--color-muted)] mb-12 max-w-sm">
-                    メンバーになって、FOUMSの世界をもっと楽しもう。
+                    メンバーになって、FOMUSの世界をもっと楽しもう。
                   </p>
 
                   <div className="space-y-6 mb-12">
@@ -383,7 +404,7 @@ export default async function HomePage() {
         <h2 className="text-lg font-medium text-[var(--foreground)] mb-8">よくあるご質問</h2>
         <div className="space-y-6">
           {[
-            { q: 'FOUMSではどんな商品が買えますか？', a: '国産ヒノキの枡（一合枡・ミニ枡・名入れ枡）、カードゲーム「SILVA」、七宝焼コラボ枡、FOMUSランニングウェア、デジタルアイテムなどを販売しています。' },
+            { q: 'FOMUSではどんな商品が買えますか？', a: '国産ヒノキの枡（一合枡・ミニ枡・名入れ枡）、カードゲーム「SILVA」、七宝焼コラボ枡、FOMUSランニングウェア、デジタルアイテムなどを販売しています。' },
             { q: '送料はいくらですか？', a: '国内一律1,000円（税込）です。商品はヤマト運輸または日本郵便でお届けします。' },
             { q: 'どんな決済方法が使えますか？', a: 'クレジットカード（Visa・Mastercard・Amex・JCB）、銀行振込、JPYC（日本円ステーブルコイン）に対応しています。' },
             { q: '枡の名入れやオーダーメイドはできますか？', a: 'はい、法人向け・個人向けともに名入れ・オリジナルデザインの枡を承っています。お問い合わせページからご相談ください。' },
@@ -397,6 +418,45 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ===== CUSTOMER REVIEWS ===== */}
+      {topReviews && topReviews.length > 0 && (
+        <section className="py-16 md:py-24 bg-[var(--color-subtle)]">
+          <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-10">
+            <ScrollReveal>
+              <p className="text-[10px] tracking-[0.25em] uppercase text-[var(--color-muted)] mb-3 text-center">Reviews</p>
+              <h2 className="text-2xl md:text-3xl font-light tracking-tight text-[var(--foreground)] text-center mb-12">お客様の声</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {topReviews.map((review) => (
+                  <div key={review.id} className="bg-white rounded-xl p-6">
+                    <div className="flex items-center gap-0.5 mb-3">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <svg key={star} className={`w-4 h-4 ${star <= review.rating ? 'text-yellow-400' : 'text-gray-200'}`} fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ))}
+                    </div>
+                    {review.title && (
+                      <p className="text-sm font-medium text-[var(--foreground)] mb-2">{review.title}</p>
+                    )}
+                    <p className="text-xs leading-relaxed text-[var(--color-muted)] line-clamp-3 mb-4">
+                      {review.body}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-[var(--color-muted)]">{review.reviewer_name || '匿名'}</span>
+                      {reviewProducts[review.product_id] && (
+                        <Link href={`/shop/${review.product_id}`} className="text-[10px] text-[var(--color-accent)] hover:underline">
+                          {reviewProducts[review.product_id]}
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollReveal>
+          </div>
+        </section>
+      )}
+
       {/* ===== CTA ===== */}
       <section className="py-28 md:py-40">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
@@ -404,7 +464,7 @@ export default async function HomePage() {
             <div className="text-center">
               <div className="w-8 h-px bg-[var(--color-border)] mx-auto mb-10" />
               <p className="text-[11px] tracking-[0.2em] uppercase text-[var(--color-muted)] mb-12">
-                FOUMSのプロダクトを手に取って、新しい体験を。
+                FOMUSのプロダクトを手に取って、新しい体験を。
               </p>
               <div className="flex items-center justify-center gap-6 flex-wrap">
                 <Link href="/shop" className="btn-primary inline-flex items-center gap-3">

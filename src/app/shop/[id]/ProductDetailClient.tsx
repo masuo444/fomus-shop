@@ -12,11 +12,12 @@ import ProductOptionSelector from '@/components/product/ProductOptionSelector'
 import ShareButtons from '@/components/product/ShareButtons'
 import FavoriteButton from '@/components/product/FavoriteButton'
 import MemberCTA from '@/components/ui/MemberCTA'
+import { trackProductView } from '@/components/product/RecentlyViewed'
 import { createClient } from '@/lib/supabase/client'
 import siteConfig from '@/site.config'
 import { useCurrency } from '@/hooks/useCurrency'
 
-export default function ProductDetailClient({ product, shopName }: { product: Product; shopName?: string }) {
+export default function ProductDetailClient({ product, shopName, reviewCount = 0, averageRating = 0 }: { product: Product; shopName?: string; reviewCount?: number; averageRating?: number }) {
   const [quantity, setQuantity] = useState(1)
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>({})
@@ -61,6 +62,7 @@ export default function ProductDetailClient({ product, shopName }: { product: Pr
   }, [searchParams, product.id, isSoldOut, router])
 
   useEffect(() => {
+    trackProductView(product.id)
     checkAuth()
   }, [])
 
@@ -114,6 +116,7 @@ export default function ProductDetailClient({ product, shopName }: { product: Pr
     const opts = Object.keys(selectedOptions).length > 0 ? selectedOptions : undefined
     addToLocalCart(product.id, quantity, product.shop_id, opts)
     window.dispatchEvent(new Event('cart-updated'))
+    window.dispatchEvent(new CustomEvent('cart-toast', { detail: { name: product.name } }))
     setAddedToCart(true)
     setTimeout(() => setAddedToCart(false), 2000)
   }
@@ -131,13 +134,13 @@ export default function ProductDetailClient({ product, shopName }: { product: Pr
         </div>
       )}
 
-      <Link
-        href="/shop"
-        className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 mb-6 transition-colors"
-      >
-        <ChevronLeft className="w-4 h-4" />
-        商品一覧に戻る
-      </Link>
+      <nav className="flex items-center gap-2 text-xs text-[var(--color-muted)] mb-6">
+        <Link href="/" className="hover:text-[var(--foreground)] transition-colors">ホーム</Link>
+        <span>/</span>
+        <Link href="/shop" className="hover:text-[var(--foreground)] transition-colors">商品一覧</Link>
+        <span>/</span>
+        <span className="text-[var(--foreground)] line-clamp-1">{product.name}</span>
+      </nav>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
         {/* Images */}
@@ -212,6 +215,21 @@ export default function ProductDetailClient({ product, shopName }: { product: Pr
               size="md"
             />
           </div>
+
+          {reviewCount > 0 && (
+            <div className="mt-2 flex items-center gap-2">
+              <div className="flex items-center gap-0.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <svg key={star} className={`w-4 h-4 ${star <= Math.round(averageRating) ? 'text-yellow-400' : 'text-gray-200'}`} fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+              <span className="text-sm text-[var(--color-muted)]">
+                {averageRating.toFixed(1)} ({reviewCount}件のレビュー)
+              </span>
+            </div>
+          )}
 
           <div className="mt-4">
             {isInquiryOnly ? (
@@ -375,6 +393,22 @@ export default function ProductDetailClient({ product, shopName }: { product: Pr
               </button>
             </div>
           )}
+
+          {/* Shipping & Return Info */}
+          <div className="mt-6 space-y-2.5 text-xs text-[var(--color-muted)]">
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H18.75m-7.5-10.5H6.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+              <span>{isPremiumMember ? '送料無料（会員特典）' : '国内送料 ¥1,000'} / 3〜5営業日でお届け</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
+              <span>安心の品質保証 / 不良品は無料交換対応</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" /></svg>
+              <span>Visa / Mastercard / Amex / JCB / 銀行振込 / JPYC</span>
+            </div>
+          </div>
 
           {/* Member CTA for non-premium members */}
           {!isPremiumMember && hasMemberPrice && (

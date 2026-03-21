@@ -4,8 +4,11 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle, UserPlus, Gift } from 'lucide-react'
+import Image from 'next/image'
 import { clearLocalCart } from '@/lib/cart'
 import { createClient } from '@/lib/supabase/client'
+import { formatPrice } from '@/lib/utils'
+import type { Product } from '@/lib/types'
 
 export default function CheckoutSuccessPage() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
@@ -16,18 +19,29 @@ export default function CheckoutSuccessPage() {
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
   const [bonusMessage, setBonusMessage] = useState('')
+  const [recommended, setRecommended] = useState<Product[]>([])
   const router = useRouter()
 
   useEffect(() => {
     clearLocalCart()
     window.dispatchEvent(new Event('cart-updated'))
 
-    const checkAuth = async () => {
+    const init = async () => {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       setIsLoggedIn(!!user)
+
+      // Load recommended products
+      const { data: products } = await supabase
+        .from('products')
+        .select('*')
+        .eq('is_published', true)
+        .eq('item_type', 'physical')
+        .order('created_at', { ascending: false })
+        .limit(4)
+      if (products) setRecommended(products as Product[])
     }
-    checkAuth()
+    init()
   }, [])
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -222,6 +236,32 @@ export default function CheckoutSuccessPage() {
           ショッピングを続ける
         </Link>
       </div>
+
+      {/* Recommended Products */}
+      {recommended.length > 0 && (
+        <div className="mt-16 border-t border-gray-100 pt-10">
+          <h2 className="text-sm font-medium text-gray-500 mb-6 text-center">こちらもおすすめ</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {recommended.map((product) => (
+              <Link key={product.id} href={`/shop/${product.id}`} className="group">
+                <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden relative">
+                  {product.images?.[0] && (
+                    <Image
+                      src={product.images[0]}
+                      alt={product.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      sizes="(max-width: 640px) 50vw, 200px"
+                    />
+                  )}
+                </div>
+                <p className="mt-2 text-xs text-gray-900 line-clamp-1">{product.name}</p>
+                <p className="text-xs text-gray-500">{formatPrice(product.price)}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

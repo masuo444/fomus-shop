@@ -34,6 +34,8 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   let categories: Category[] = []
   let shopNames: Record<string, string> = {}
   let productsWithOptions: Set<string> = new Set()
+  let categoryCounts: Record<string, number> = {}
+  let totalCount = 0
 
   // Check current user's GUILD status
   let isLoggedIn = false
@@ -71,6 +73,23 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
     const excludeCategories = ['撮影', 'イベント']
     categories = (categoriesData || []).filter((c) => !excludeCategories.includes(c.name))
+
+    // Get counts per category
+    const { data: allProducts } = await supabase
+      .from('products')
+      .select('id, category_id')
+      .in('shop_id', shopIds)
+      .eq('is_published', true)
+      .eq('item_type', 'physical')
+
+    if (allProducts) {
+      totalCount = allProducts.length
+      for (const p of allProducts) {
+        if (p.category_id) {
+          categoryCounts[p.category_id] = (categoryCounts[p.category_id] || 0) + 1
+        }
+      }
+    }
 
     let query = supabase
       .from('products')
@@ -142,7 +161,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
               : 'border-gray-200 text-gray-600 hover:border-gray-400'
           }`}
         >
-          すべて
+          すべて{totalCount > 0 && <span className="ml-1 opacity-60">({totalCount})</span>}
         </Link>
         {categories.map((cat) => (
           <Link
@@ -154,7 +173,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                 : 'border-gray-200 text-gray-600 hover:border-gray-400'
             }`}
           >
-            {cat.name}
+            {cat.name}{categoryCounts[cat.id] > 0 && <span className="ml-1 opacity-60">({categoryCounts[cat.id]})</span>}
           </Link>
         ))}
 

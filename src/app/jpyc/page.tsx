@@ -5,7 +5,7 @@ import { BreadcrumbJsonLd, HowToJsonLd, FAQPageJsonLd } from '@/components/seo/J
 
 export const metadata: Metadata = {
   title: 'JPYC決済について',
-  description: 'FOUMSショップではJPYC（日本円ステーブルコイン）で枡やグッズを購入できます。Polygonネットワーク対応。暗号資産で伝統工芸品を買える、ちょっと面白い体験。',
+  description: 'FOMUSショップではJPYC（日本円ステーブルコイン）で枡やグッズを購入できます。Polygonネットワーク対応。暗号資産で伝統工芸品を買える、ちょっと面白い体験。',
   alternates: {
     canonical: '/jpyc',
   },
@@ -27,8 +27,8 @@ export default function JpycPage() {
         { name: 'JPYC決済について', href: '/jpyc' },
       ]} />
       <HowToJsonLd
-        name="JPYCでFOUMSの商品を購入する方法"
-        description="日本円ステーブルコインJPYCを使ってFOUMSオンラインショップで商品を購入する手順"
+        name="JPYCでFOMUSの商品を購入する方法"
+        description="日本円ステーブルコインJPYCを使ってFOMUSオンラインショップで商品を購入する手順"
         steps={[
           { name: '商品を選んでカートへ', text: '通常のお買い物と同じように、商品を選んでカートに入れます。' },
           { name: '決済方法で「JPYC」を選択', text: 'チェックアウト画面で決済方法に「JPYC（Polygon）」を選びます。' },
@@ -39,7 +39,7 @@ export default function JpycPage() {
       />
       <FAQPageJsonLd items={[
         { question: 'JPYCとは何ですか？', answer: 'JPYC（Japanese Yen Coin）は日本円に連動したステーブルコインです。1 JPYC = 1円として利用でき、Polygonネットワーク上で送金できます。' },
-        { question: 'FOUMSでJPYCで何が買えますか？', answer: '枡、カードゲーム、ランニングウェアなど、FOUMSの全商品をJPYCで購入できます。' },
+        { question: 'FOMUSでJPYCで何が買えますか？', answer: '枡、カードゲーム、ランニングウェアなど、FOMUSの全商品をJPYCで購入できます。' },
         { question: 'JPYC決済の手数料はかかりますか？', answer: '商品代金以外に、Polygonネットワークのガス代（通常数円程度）がお客様負担となります。' },
         { question: 'どのウォレットが必要ですか？', answer: 'MetaMaskなど、Polygonネットワーク対応のウォレットが必要です。' },
         { question: '送金額を間違えた場合はどうなりますか？', answer: '注文金額と送金額が一致しない場合、決済が承認されません。お問い合わせください。' },
@@ -52,7 +52,7 @@ export default function JpycPage() {
           JPYCで枡を買う。
         </h1>
         <p className="text-xs leading-[2.2] text-[var(--color-muted)] max-w-lg">
-          日本円ステーブルコイン「JPYC」で、FOUMSの枡やグッズを購入できます。
+          日本円ステーブルコイン「JPYC」で、FOMUSの枡やグッズを購入できます。
           暗号資産で伝統工芸品を手に入れる — ちょっと面白い体験です。
         </p>
       </section>
@@ -154,7 +154,7 @@ export default function JpycPage() {
         <div className="space-y-6">
           {[
             { q: 'JPYCとは何ですか？', a: 'JPYC（Japanese Yen Coin）は日本円に連動したステーブルコインです。1 JPYC = 1円として利用でき、Polygonネットワーク上で送金できます。' },
-            { q: 'FOUMSでJPYCで何が買えますか？', a: '枡、カードゲーム、ランニングウェアなど、FOUMSの全商品をJPYCで購入できます。' },
+            { q: 'FOMUSでJPYCで何が買えますか？', a: '枡、カードゲーム、ランニングウェアなど、FOMUSの全商品をJPYCで購入できます。' },
             { q: 'JPYC決済の手数料はかかりますか？', a: '商品代金以外に、Polygonネットワークのガス代（通常数円程度）がお客様負担となります。' },
             { q: 'どのウォレットが必要ですか？', a: 'MetaMaskなど、Polygonネットワーク対応のウォレットが必要です。' },
             { q: '送金額を間違えた場合はどうなりますか？', a: '注文金額と送金額が一致しない場合、決済が承認されません。お問い合わせください。' },

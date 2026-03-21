@@ -31,8 +31,9 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-noto-sans-jp), var(--font-sans), 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
+  font-feature-settings: "palt";
 }
 
 .font-display {
@@ -143,23 +144,40 @@ a {
 /* ===== PC TEXT SIZE BOOST ===== */
 @media (min-width: 768px) {
   body {
-    font-size: 1.0625rem; /* 17px base */
+    font-size: 1.125rem; /* 18px base */
   }
 
   /* Bump very small text to readable sizes on desktop */
   .text-xs {
-    font-size: 0.8125rem !important; /* 12px → 13px */
+    font-size: 0.875rem !important; /* 12px → 14px */
     line-height: 2;
   }
+  .text-sm {
+    font-size: 1rem !important; /* 14px → 16px */
+  }
   .text-\[10px\] {
-    font-size: 0.6875rem !important; /* 10px → 11px */
+    font-size: 0.75rem !important; /* 10px → 12px */
   }
   .text-\[11px\] {
-    font-size: 0.8125rem !important; /* 11px → 13px */
+    font-size: 0.875rem !important; /* 11px → 14px */
   }
   .text-\[13px\] {
-    font-size: 0.9375rem !important; /* 13px → 15px */
+    font-size: 1rem !important; /* 13px → 16px */
   }
+}
+
+/* ===== CART TOAST ===== */
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+/* ===== MOBILE SAFE AREA ===== */
+.safe-area-bottom {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
 }
 
 /* ===== SCROLLBAR ===== */
