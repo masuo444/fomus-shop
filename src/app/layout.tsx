@@ -6,6 +6,7 @@ import AnnouncementBar from '@/components/layout/AnnouncementBar'
 import Footer from '@/components/layout/Footer'
 import CartToast from '@/components/ui/CartToast'
 import MobileCartBar from '@/components/layout/MobileCartBar'
+import Concierge from '@/components/ui/Concierge'
 import GoogleAnalytics from '@/components/layout/GoogleAnalytics'
 import { OrganizationJsonLd, WebSiteJsonLd, LocalBusinessJsonLd } from '@/components/seo/JsonLd'
 import { SITE_NAME, SITE_DESCRIPTION } from '@/lib/constants'
@@ -109,6 +110,7 @@ export default function RootLayout({
         </div>
         <CartToast />
         <MobileCartBar />
+        <Concierge />
       </body>
     </html>
   )
