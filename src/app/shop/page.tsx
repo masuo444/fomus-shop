@@ -199,21 +199,81 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         </div>
       </div>
 
-      {/* Products Grid */}
+      {/* Products */}
       {products.length > 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-          {products.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              shopName={shopNames[product.shop_id]}
-              isLoggedIn={isLoggedIn}
-              isPremiumMember={isPremiumMember}
-              currency={currency}
-              hasOptions={productsWithOptions.has(product.id)}
-            />
-          ))}
-        </div>
+        !params.category && !params.sort ? (
+          /* Category-grouped view (default) */
+          <div className="space-y-16">
+            {categories.filter(c => categoryCounts[c.id] > 0).map((cat) => {
+              const catProducts = products.filter(p => p.category_id === cat.id)
+              if (catProducts.length === 0) return null
+              return (
+                <section key={cat.id}>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-lg font-medium text-[var(--foreground)]">{cat.name}</h2>
+                    <Link
+                      href={`/shop?category=${cat.id}`}
+                      className="text-xs text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors"
+                    >
+                      すべて見る ({catProducts.length})
+                    </Link>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+                    {catProducts.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        shopName={shopNames[product.shop_id]}
+                        isLoggedIn={isLoggedIn}
+                        isPremiumMember={isPremiumMember}
+                        currency={currency}
+                        hasOptions={productsWithOptions.has(product.id)}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )
+            })}
+            {/* Uncategorized products */}
+            {(() => {
+              const uncategorized = products.filter(p => !p.category_id)
+              if (uncategorized.length === 0) return null
+              return (
+                <section>
+                  <h2 className="text-lg font-medium text-[var(--foreground)] mb-6">その他</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+                    {uncategorized.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        shopName={shopNames[product.shop_id]}
+                        isLoggedIn={isLoggedIn}
+                        isPremiumMember={isPremiumMember}
+                        currency={currency}
+                        hasOptions={productsWithOptions.has(product.id)}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )
+            })()}
+          </div>
+        ) : (
+          /* Flat grid view (filtered/sorted) */
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+            {products.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                shopName={shopNames[product.shop_id]}
+                isLoggedIn={isLoggedIn}
+                isPremiumMember={isPremiumMember}
+                currency={currency}
+                hasOptions={productsWithOptions.has(product.id)}
+              />
+            ))}
+          </div>
+        )
       ) : (
         <div className="text-center py-24">
           <p className="text-gray-400">商品がありません</p>
