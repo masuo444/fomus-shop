@@ -24,7 +24,7 @@ export default function StoryPage() {
         <p className="text-xs leading-[2.2] text-[var(--color-muted)] max-w-lg">
           FOMUSは、日本の伝統的な木製枡（ます）を現代のライフスタイルに合わせてリデザインし、
           新しい価値を提案するブランドです。岐阜県大垣市の職人技を活かしながら、
-          枡タワーや七宝焼コラボなど、誰も見たことのないプロダクトを生み出しています。
+          枡タワーなど、誰も見たことのないプロダクトを生み出しています。
         </p>
       </section>
 
