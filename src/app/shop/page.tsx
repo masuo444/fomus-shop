@@ -113,7 +113,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         query = query.order('created_at', { ascending: true })
         break
       default:
-        query = query.order('created_at', { ascending: false })
+        query = query.order('sort_order', { ascending: true }).order('created_at', { ascending: false })
     }
 
     const { data: productsData } = await query

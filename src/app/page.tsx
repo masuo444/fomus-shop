@@ -46,6 +46,7 @@ export default async function HomePage() {
       .in('shop_id', shopIds)
       .eq('is_published', true)
       .eq('item_type', 'physical')
+      .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
       .limit(8)
     newProducts = data || []
