@@ -297,7 +297,7 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
           <div className="mt-4">
             {isMadeToOrder ? (
               <div>
-                <span className="text-sm text-blue-600 font-medium">受注生産品</span>
+                <span className="text-sm text-[var(--foreground)] font-medium">完全受注生産 — 数量限定</span>
                 {product.production_time && (
                   <p className="text-xs text-gray-500 mt-1">{product.production_time}</p>
                 )}
@@ -311,19 +311,15 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
             )}
           </div>
 
-          {/* Sale period */}
-          {hasLimitedSale && (
+          {/* Sale period (only show when not active) */}
+          {hasLimitedSale && !isSalePeriodActive && (
             <div className="mt-3 rounded-lg px-3 py-2 bg-orange-50 border border-orange-200">
               {isBeforeSale ? (
                 <p className="text-sm text-orange-700 font-medium">
                   {saleStart!.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' })} 販売開始
                 </p>
-              ) : isAfterSale ? (
-                <p className="text-sm text-gray-500 font-medium">販売期間は終了しました</p>
               ) : (
-                <p className="text-sm text-orange-700 font-medium">
-                  {saleEnd!.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' })} まで期間限定販売
-                </p>
+                <p className="text-sm text-gray-500 font-medium">販売期間は終了しました</p>
               )}
             </div>
           )}
