@@ -92,40 +92,26 @@ export default async function ProductDetailPage({ params }: Props) {
     ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
     : 0
 
-  // Fetch related products (same category or same shop)
+  // Fetch related products: prioritize masu (枡) products, then sort by price ascending
   const currency = await getCurrency()
   let relatedProducts: Product[] = []
   const shopIds = await getPublishedShopIds()
   if (shopIds.length > 0) {
-    let query = supabase
+    const { data: allProducts } = await supabase
       .from('products')
       .select('*')
       .in('shop_id', shopIds)
       .eq('is_published', true)
       .eq('item_type', 'physical')
       .neq('id', id)
-      .limit(4)
+      .gt('price', 0)
+      .order('price', { ascending: true })
 
-    if (p.category_id) {
-      query = query.eq('category_id', p.category_id)
-    }
-
-    const { data: relatedData } = await query.order('created_at', { ascending: false })
-    relatedProducts = (relatedData || []) as Product[]
-
-    // If not enough from same category, fill with other products
-    if (relatedProducts.length < 4) {
-      const existingIds = [id, ...relatedProducts.map(r => r.id)]
-      const { data: moreData } = await supabase
-        .from('products')
-        .select('*')
-        .in('shop_id', shopIds)
-        .eq('is_published', true)
-        .eq('item_type', 'physical')
-        .not('id', 'in', `(${existingIds.join(',')})`)
-        .order('created_at', { ascending: false })
-        .limit(4 - relatedProducts.length)
-      if (moreData) relatedProducts = [...relatedProducts, ...(moreData as Product[])]
+    if (allProducts) {
+      // Prioritize masu-related products, then by price
+      const masuProducts = allProducts.filter((p: Product) => p.name.includes('枡'))
+      const otherProducts = allProducts.filter((p: Product) => !p.name.includes('枡'))
+      relatedProducts = [...masuProducts, ...otherProducts].slice(0, 4)
     }
   }
 
