@@ -58,14 +58,14 @@ function LoginContent() {
       {siteConfig.features.membershipSso && siteConfig.features.membershipUrl && (
         <div className="mb-8">
           <a
-            href="https://guild-app.fomusglobal.com/app/shop"
+            href="https://guild-app.fomusglobal.com/invite/FOMUS-SHOP"
             className="block w-full rounded-xl border-2 border-[var(--color-member)] px-5 py-4 text-center hover:bg-[var(--color-member-bg)] transition-colors"
           >
             <p className="text-sm font-bold" style={{ color: 'var(--color-member)' }}>
               {siteConfig.features.membershipName}メンバーの方
             </p>
             <p className="text-xs text-gray-500 mt-1">
-              会員限定価格 ・ 送料無料 ・ ポイント2倍
+              会員限定価格でお買い物できます
             </p>
           </a>
           <div className="flex items-center gap-3 my-6">

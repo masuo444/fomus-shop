@@ -466,13 +466,7 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">{isEur ? 'Shipping' : '送料'}</span>
-                {!isEur && isPremiumMember ? (
-                  <span className="font-medium" style={{ color: 'var(--color-member)' }}>
-                    送料無料（{siteConfig.features.membershipName}会員特典）
-                  </span>
-                ) : (
-                  <span>{formatPrice(shippingFee, currency)}</span>
-                )}
+                <span>{formatPrice(shippingFee, currency)}</span>
               </div>
               {couponDiscount > 0 && (
                 <div className="flex justify-between text-sm">

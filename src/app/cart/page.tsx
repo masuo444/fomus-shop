@@ -233,19 +233,8 @@ export default function CartPage() {
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-gray-500">{isEur ? 'Shipping' : '送料'}</span>
-          {!isEur && isPremiumMember ? (
-            <span className="font-medium" style={{ color: 'var(--color-member)' }}>
-              送料無料（{siteConfig.features.membershipName}会員特典）
-            </span>
-          ) : (
-            <span className="text-gray-900">{formatPrice(shippingFee, currency)}</span>
-          )}
+          <span className="text-gray-900">{formatPrice(shippingFee, currency)}</span>
         </div>
-        {!isEur && !isPremiumMember && items.length > 0 && (
-          <p className="text-xs" style={{ color: 'var(--color-member)' }}>
-            {siteConfig.features.membershipName}会員なら送料無料
-          </p>
-        )}
         {isEur ? (
           <p className="text-xs text-gray-400">International shipping included</p>
         ) : (

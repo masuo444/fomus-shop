@@ -6,11 +6,10 @@ interface MemberCTAProps {
 }
 
 const memberName = siteConfig.features.membershipName
-const memberUrl = siteConfig.features.membershipUrl
+const memberUrl = 'https://guild-app.fomusglobal.com/invite/FOMUS-SHOP'
 
 const benefits = [
   `${memberName}限定価格で購入`,
-  '送料無料',
   '限定商品へのアクセス',
 ]
 
@@ -28,7 +27,7 @@ export default function MemberCTA({ compact = false }: MemberCTAProps) {
             {memberName}会員になる
           </p>
           <p className="text-xs mt-0.5" style={{ color: 'var(--color-member)' }}>
-            {memberName}限定価格・送料無料・限定商品
+            {memberName}限定価格・限定商品
           </p>
         </div>
         <Link
