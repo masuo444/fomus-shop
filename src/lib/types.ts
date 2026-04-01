@@ -48,6 +48,10 @@ export interface Product {
   preorder_enabled: boolean
   preorder_start_date: string | null
   preorder_end_date: string | null
+  made_to_order: boolean
+  production_time: string | null
+  sale_start_date: string | null
+  sale_end_date: string | null
   weight_grams: number | null
   member_price: number | null
   price_eur: number | null

@@ -12,14 +12,18 @@ interface QuickAddToCartProps {
   hasOptions?: boolean
   price: number
   productName?: string
+  madeToOrder?: boolean
+  quantityLimit?: number | null
 }
 
-export default function QuickAddToCart({ productId, shopId, stock, hasOptions, price, productName }: QuickAddToCartProps) {
+export default function QuickAddToCart({ productId, shopId, stock, hasOptions, price, productName, madeToOrder, quantityLimit }: QuickAddToCartProps) {
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
   const [showQty, setShowQty] = useState(false)
 
-  if (stock === 0 || price === 0) return null
+  const maxQty = madeToOrder ? (quantityLimit || 99) : stock
+
+  if ((stock === 0 && !madeToOrder) || price === 0) return null
 
   // Products with options must go to detail page
   if (hasOptions) {
@@ -77,13 +81,13 @@ export default function QuickAddToCart({ productId, shopId, stock, hasOptions, p
             <input
               type="number"
               min={1}
-              max={stock}
+              max={maxQty}
               value={quantity}
-              onChange={(e) => setQuantity(Math.min(stock, Math.max(1, parseInt(e.target.value) || 1)))}
+              onChange={(e) => setQuantity(Math.min(maxQty, Math.max(1, parseInt(e.target.value) || 1)))}
               className="w-10 text-center text-xs border-x border-[var(--color-border)] py-1.5 bg-transparent focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
             <button
-              onClick={(e) => { e.preventDefault(); setQuantity(Math.min(stock, quantity + 1)) }}
+              onClick={(e) => { e.preventDefault(); setQuantity(Math.min(maxQty, quantity + 1)) }}
               className="p-1.5 text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors"
             >
               <Plus className="w-3 h-3" />

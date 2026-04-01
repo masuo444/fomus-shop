@@ -39,10 +39,20 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
   const comparePrice = isEur ? (product.compare_at_price_eur ?? null) : product.compare_at_price
 
   const optionsAdjustment = getOptionsAdjustment(selectedOptions)
-  const isSoldOut = product.stock === 0
+  const isMadeToOrder = product.made_to_order
+  const isSoldOut = product.stock === 0 && !isMadeToOrder
   const isInquiryOnly = mainPrice === 0
   const hasMemberPrice = memberPriceVal != null && memberPriceVal < mainPrice
   const hasOptions = product.product_options && product.product_options.length > 0
+
+  // Sale period
+  const now = new Date()
+  const saleStart = product.sale_start_date ? new Date(product.sale_start_date) : null
+  const saleEnd = product.sale_end_date ? new Date(product.sale_end_date) : null
+  const isBeforeSale = saleStart ? now < saleStart : false
+  const isAfterSale = saleEnd ? now > saleEnd : false
+  const isSalePeriodActive = !isBeforeSale && !isAfterSale
+  const hasLimitedSale = saleStart || saleEnd
 
   // Auto-add to cart when ?add=true
   useEffect(() => {
@@ -285,7 +295,14 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
 
           {/* Stock */}
           <div className="mt-4">
-            {isSoldOut ? (
+            {isMadeToOrder ? (
+              <div>
+                <span className="text-sm text-blue-600 font-medium">受注生産品</span>
+                {product.production_time && (
+                  <p className="text-xs text-gray-500 mt-1">{product.production_time}</p>
+                )}
+              </div>
+            ) : isSoldOut ? (
               <span className="text-sm text-red-500 font-medium">在庫切れ</span>
             ) : product.stock <= 5 ? (
               <span className="text-sm text-amber-600">残りわずか（{product.stock}点）</span>
@@ -293,6 +310,23 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
               <span className="text-sm text-green-600">在庫あり</span>
             )}
           </div>
+
+          {/* Sale period */}
+          {hasLimitedSale && (
+            <div className="mt-3 rounded-lg px-3 py-2 bg-orange-50 border border-orange-200">
+              {isBeforeSale ? (
+                <p className="text-sm text-orange-700 font-medium">
+                  {saleStart!.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' })} 販売開始
+                </p>
+              ) : isAfterSale ? (
+                <p className="text-sm text-gray-500 font-medium">販売期間は終了しました</p>
+              ) : (
+                <p className="text-sm text-orange-700 font-medium">
+                  {saleEnd!.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' })} まで期間限定販売
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Free shipping for GUILD members */}
           {isPremiumMember && (
@@ -311,7 +345,7 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
           )}
 
           {/* Product Options */}
-          {hasOptions && !isSoldOut && (
+          {hasOptions && !isSoldOut && isSalePeriodActive && (
             <div className="mt-6 pt-6 border-t border-gray-100">
               <ProductOptionSelector
                 options={product.product_options!}
@@ -350,7 +384,7 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
           )}
 
           {/* Quantity & Add to Cart */}
-          {!isSoldOut && !isInquiryOnly && (
+          {!isSoldOut && !isInquiryOnly && isSalePeriodActive && (
             <div className="mt-8 space-y-4">
               <div className="flex items-center gap-3">
                 <span className="text-sm text-gray-600">数量</span>
@@ -364,9 +398,9 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
                   </button>
                   <span className="w-12 text-center text-sm font-medium">{quantity}</span>
                   <button
-                    onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                    onClick={() => setQuantity(Math.min(isMadeToOrder ? (product.quantity_limit || 99) : product.stock, quantity + 1))}
                     className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                    disabled={quantity >= product.stock}
+                    disabled={quantity >= (isMadeToOrder ? (product.quantity_limit || 99) : product.stock)}
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -383,13 +417,24 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
             </div>
           )}
 
-          {isSoldOut && (
+          {isSoldOut && isSalePeriodActive && (
             <div className="mt-8">
               <button
                 disabled
                 className="w-full bg-gray-200 text-gray-400 py-3 rounded-full text-sm font-medium cursor-not-allowed"
               >
                 SOLD OUT
+              </button>
+            </div>
+          )}
+
+          {!isSalePeriodActive && !isInquiryOnly && (
+            <div className="mt-8">
+              <button
+                disabled
+                className="w-full bg-gray-200 text-gray-400 py-3 rounded-full text-sm font-medium cursor-not-allowed"
+              >
+                {isBeforeSale ? '販売開始前です' : '販売期間終了'}
               </button>
             </div>
           )}

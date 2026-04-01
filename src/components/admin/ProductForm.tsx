@@ -67,6 +67,14 @@ export default function ProductForm({
   const [preorderStartDate, setPreorderStartDate] = useState(product?.preorder_start_date ?? '')
   const [preorderEndDate, setPreorderEndDate] = useState(product?.preorder_end_date ?? '')
 
+  // Made to order
+  const [madeToOrder, setMadeToOrder] = useState(product?.made_to_order ?? false)
+  const [productionTime, setProductionTime] = useState(product?.production_time ?? '')
+
+  // Sale period
+  const [saleStartDate, setSaleStartDate] = useState(product?.sale_start_date ? product.sale_start_date.slice(0, 16) : '')
+  const [saleEndDate, setSaleEndDate] = useState(product?.sale_end_date ? product.sale_end_date.slice(0, 16) : '')
+
   // Shipping methods
   const [selectedShippingIds, setSelectedShippingIds] = useState<string[]>(
     product?.product_shipping_methods?.map((psm) => psm.shipping_method_id) ??
@@ -233,6 +241,10 @@ export default function ProductForm({
         preorder_enabled: preorderEnabled,
         preorder_start_date: preorderEnabled && preorderStartDate ? preorderStartDate : null,
         preorder_end_date: preorderEnabled && preorderEndDate ? preorderEndDate : null,
+        made_to_order: madeToOrder,
+        production_time: madeToOrder && productionTime ? productionTime : null,
+        sale_start_date: saleStartDate ? new Date(saleStartDate).toISOString() : null,
+        sale_end_date: saleEndDate ? new Date(saleEndDate).toISOString() : null,
       },
       options: options
         .filter((o) => o.name.trim())
@@ -743,6 +755,77 @@ export default function ProductForm({
                 />
               </div>
             </div>
+          )}
+        </div>
+      </Section>
+
+      {/* 受注生産 */}
+      <Section id="made-to-order" title="受注生産">
+        <div className="space-y-3">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <div
+              onClick={() => setMadeToOrder(!madeToOrder)}
+              className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer ${
+                madeToOrder ? 'bg-member' : 'bg-gray-300'
+              }`}
+            >
+              <div
+                className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                  madeToOrder ? 'translate-x-5' : 'translate-x-0.5'
+                }`}
+              />
+            </div>
+            <span className="text-sm text-gray-700">
+              {madeToOrder ? '受注生産を有効にする' : '受注生産を無効にする'}
+            </span>
+          </label>
+          {madeToOrder && (
+            <p className="text-xs text-amber-600 ml-12">在庫に関係なく購入可能になります</p>
+          )}
+
+          {madeToOrder && (
+            <div className="ml-12">
+              <label className="block text-xs text-gray-600 mb-1">製作期間・納期目安</label>
+              <input
+                type="text"
+                value={productionTime}
+                onChange={(e) => setProductionTime(e.target.value)}
+                placeholder="例: ご注文から約2〜3週間でお届け"
+                className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-member focus:border-member"
+              />
+            </div>
+          )}
+        </div>
+      </Section>
+
+      {/* 販売期間 */}
+      <Section id="sale-period" title="販売期間">
+        <div className="space-y-3">
+          <p className="text-xs text-gray-500">設定すると期間外は購入不可になります。空欄なら常時販売。</p>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">販売開始日時</label>
+              <input
+                type="datetime-local"
+                value={saleStartDate}
+                onChange={(e) => setSaleStartDate(e.target.value)}
+                className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-member focus:border-member"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">販売終了日時</label>
+              <input
+                type="datetime-local"
+                value={saleEndDate}
+                onChange={(e) => setSaleEndDate(e.target.value)}
+                className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-member focus:border-member"
+              />
+            </div>
+          </div>
+          {saleStartDate && saleEndDate && (
+            <p className="text-xs text-blue-600">
+              {new Date(saleStartDate).toLocaleDateString('ja-JP')} 〜 {new Date(saleEndDate).toLocaleDateString('ja-JP')} の期間限定販売
+            </p>
           )}
         </div>
       </Section>

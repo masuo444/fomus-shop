@@ -42,6 +42,10 @@ export async function PUT(
     preorder_start_date: 'preorder_start_date',
     preorder_end_date: 'preorder_end_date',
     weight_grams: 'weight_grams',
+    made_to_order: 'made_to_order',
+    production_time: 'production_time',
+    sale_start_date: 'sale_start_date',
+    sale_end_date: 'sale_end_date',
   }
 
   for (const [key, dbField] of Object.entries(fieldMap)) {

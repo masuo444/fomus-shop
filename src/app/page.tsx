@@ -36,6 +36,22 @@ export default async function HomePage() {
     if (profile?.is_premium_member) isPremiumMember = true
   }
 
+  // Fetch limited-sale product (枡バッジ)
+  let limitedProduct: Product | null = null
+  if (shopIds.length > 0) {
+    const now = new Date().toISOString()
+    const { data } = await supabase
+      .from('products')
+      .select('*')
+      .in('shop_id', shopIds)
+      .eq('is_published', true)
+      .not('sale_end_date', 'is', null)
+      .gte('sale_end_date', now)
+      .order('sale_end_date', { ascending: true })
+      .limit(1)
+    if (data?.[0]) limitedProduct = data[0] as Product
+  }
+
   let newProducts: Product[] = []
   let shopCoverImage: string | null = null
   let digitalCoverImage: string | null = null
@@ -116,6 +132,62 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ===== LIMITED SALE BANNER ===== */}
+      {limitedProduct && (
+        <section className="bg-[var(--foreground)] text-[var(--background)]">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
+            <ScrollReveal>
+              <Link href={`/shop/${limitedProduct.id}`} className="block group">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center py-16 md:py-24">
+                  {/* Image */}
+                  {limitedProduct.images?.[0] && (
+                    <div className="aspect-square max-w-sm mx-auto md:mx-0 overflow-hidden">
+                      <img
+                        src={limitedProduct.images[0]}
+                        alt={limitedProduct.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      />
+                    </div>
+                  )}
+                  {/* Text */}
+                  <div>
+                    <p className="text-[10px] tracking-[0.25em] uppercase text-orange-400 mb-4">Limited Edition</p>
+                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-light tracking-tight leading-tight mb-6">
+                      {limitedProduct.name}
+                    </h2>
+                    {limitedProduct.sale_end_date && (
+                      <p className="text-sm text-orange-400 font-medium mb-6">
+                        {new Date(limitedProduct.sale_end_date).toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' })} まで期間限定
+                      </p>
+                    )}
+                    <div className="flex items-baseline gap-4 mb-4">
+                      <span className="text-2xl font-light tracking-wide">
+                        {currency === 'eur' && limitedProduct.price_eur != null
+                          ? `€${(limitedProduct.price_eur / 100).toFixed(2)}`
+                          : `¥${limitedProduct.price.toLocaleString()}`}
+                      </span>
+                      <span className="text-xs text-[var(--background)]/50">税込</span>
+                    </div>
+                    {limitedProduct.member_price != null && limitedProduct.member_price < limitedProduct.price && (
+                      <p className="text-sm mb-8" style={{ color: 'var(--color-member)' }}>
+                        {siteConfig.features.membershipName}会員なら ¥{limitedProduct.member_price.toLocaleString()}
+                      </p>
+                    )}
+                    {limitedProduct.made_to_order && limitedProduct.production_time && (
+                      <p className="text-xs text-[var(--background)]/50 mb-8">{limitedProduct.production_time}</p>
+                    )}
+                    <span className="inline-flex items-center gap-3 text-[11px] tracking-[0.15em] uppercase text-[var(--background)]/70 group-hover:text-[var(--background)] transition-colors">
+                      詳細を見る
+                      <svg className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            </ScrollReveal>
+          </div>
+        </section>
+      )}
 
       {/* ===== 2. PRODUCTS (immediately after hero) ===== */}
       {newProducts.length > 0 && (

@@ -105,10 +105,17 @@ export async function POST(request: Request) {
       .eq('id', shopId)
       .single()
 
-    // Check stock (initial check before reservation)
+    // Check sale period and stock
+    const now = new Date()
     for (const item of items) {
       const product = products.find((p) => p.id === item.product_id) as Product
-      if (product.stock < item.quantity) {
+      if (product.sale_start_date && now < new Date(product.sale_start_date)) {
+        return NextResponse.json({ error: `${product.name} はまだ販売開始前です` }, { status: 400 })
+      }
+      if (product.sale_end_date && now > new Date(product.sale_end_date)) {
+        return NextResponse.json({ error: `${product.name} の販売期間は終了しました` }, { status: 400 })
+      }
+      if (!product.made_to_order && product.stock < item.quantity) {
         return NextResponse.json({ error: `${product.name} の在庫が不足しています` }, { status: 400 })
       }
     }
@@ -190,11 +197,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '合計金額が不正です' }, { status: 400 })
     }
 
-    // P0 Fix: Reserve stock atomically BEFORE creating order
-    const stockItems = items.map((item) => {
-      const product = products.find((p) => p.id === item.product_id)!
-      return { product_id: item.product_id, quantity: item.quantity, product_name: product.name }
-    })
+    // P0 Fix: Reserve stock atomically BEFORE creating order (skip made-to-order)
+    const stockItems = items
+      .filter((item) => {
+        const product = products.find((p) => p.id === item.product_id)!
+        return !product.made_to_order
+      })
+      .map((item) => {
+        const product = products.find((p) => p.id === item.product_id)!
+        return { product_id: item.product_id, quantity: item.quantity, product_name: product.name }
+      })
     const stockResult = await reserveStock(stockItems)
     if (!stockResult.success) {
       return NextResponse.json({ error: `${stockResult.failedProduct} の在庫が不足しています` }, { status: 400 })

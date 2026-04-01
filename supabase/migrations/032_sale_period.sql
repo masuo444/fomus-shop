@@ -1,0 +1,3 @@
+-- 期間限定販売機能
+ALTER TABLE products ADD COLUMN IF NOT EXISTS sale_start_date TIMESTAMPTZ;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS sale_end_date TIMESTAMPTZ;

@@ -200,7 +200,12 @@ export default function CartPage() {
                     onClick={() =>
                       updateQuantity(
                         item,
-                        Math.min(item.product?.stock || 99, item.quantity + 1)
+                        Math.min(
+                          item.product?.made_to_order
+                            ? (item.product.quantity_limit || 99)
+                            : (item.product?.stock || 99),
+                          item.quantity + 1
+                        )
                       )
                     }
                     className="p-2.5 text-gray-400 hover:text-gray-600"

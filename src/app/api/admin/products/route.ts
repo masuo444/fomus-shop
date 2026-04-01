@@ -68,6 +68,10 @@ export async function POST(request: NextRequest) {
       preorder_start_date: prodFields.preorder_start_date || null,
       preorder_end_date: prodFields.preorder_end_date || null,
       weight_grams: prodFields.weight_grams != null ? Number(prodFields.weight_grams) : null,
+      made_to_order: prodFields.made_to_order ?? false,
+      production_time: prodFields.production_time || null,
+      sale_start_date: prodFields.sale_start_date || null,
+      sale_end_date: prodFields.sale_end_date || null,
     })
     .select()
     .single()

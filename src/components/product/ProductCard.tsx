@@ -17,7 +17,16 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMember, isFavorited, currency = 'jpy', hasOptions }: ProductCardProps) {
-  const isSoldOut = product.stock === 0
+  const isMadeToOrder = product.made_to_order
+  const isSoldOut = product.stock === 0 && !isMadeToOrder
+
+  // Sale period
+  const now = new Date()
+  const saleStart = product.sale_start_date ? new Date(product.sale_start_date) : null
+  const saleEnd = product.sale_end_date ? new Date(product.sale_end_date) : null
+  const isBeforeSale = saleStart ? now < saleStart : false
+  const isAfterSale = saleEnd ? now > saleEnd : false
+  const isSalePeriodActive = !isBeforeSale && !isAfterSale
 
   // Determine prices based on currency
   const isEur = currency === 'eur'
@@ -69,21 +78,28 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
             </div>
           )}
           {/* Hover overlay */}
-          {!isSoldOut && (
+          {!isSoldOut && isSalePeriodActive && (
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500 flex items-center justify-center">
               <span className="opacity-0 group-hover:opacity-100 transition-all duration-300 bg-white text-[var(--foreground)] text-[10px] tracking-[0.15em] uppercase font-medium px-5 py-2 rounded-full translate-y-2 group-hover:translate-y-0">
                 View
               </span>
             </div>
           )}
-          {isSoldOut && (
+          {isSoldOut && isSalePeriodActive && (
             <div className="absolute inset-0 bg-[var(--foreground)]/40 flex items-center justify-center">
               <span className="text-[10px] tracking-[0.2em] uppercase text-white font-medium">
                 Sold Out
               </span>
             </div>
           )}
-          {!isSoldOut && product.stock > 0 && product.stock <= 5 && (
+          {!isSalePeriodActive && (
+            <div className="absolute inset-0 bg-[var(--foreground)]/40 flex items-center justify-center">
+              <span className="text-[10px] tracking-[0.2em] uppercase text-white font-medium">
+                {isAfterSale ? '販売終了' : '販売開始前'}
+              </span>
+            </div>
+          )}
+          {!isSoldOut && isSalePeriodActive && product.stock > 0 && product.stock <= 5 && !isMadeToOrder && (
             <div className="absolute bottom-3 left-3">
               <span className="bg-amber-500 text-white text-[9px] tracking-wider font-medium px-2.5 py-1 rounded-full">
                 残り{product.stock}点
@@ -104,6 +120,13 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
                 style={{ backgroundColor: 'var(--color-member)' }}
               >
                 {siteConfig.features.membershipName}
+              </span>
+            </div>
+          )}
+          {isMadeToOrder && (
+            <div className="absolute bottom-3 left-3">
+              <span className="bg-blue-600 text-white text-[9px] tracking-wider font-medium px-2.5 py-1 rounded-full">
+                受注生産
               </span>
             </div>
           )}
@@ -154,7 +177,7 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
         </div>
       </Link>
       {/* Quick Add to Cart */}
-      {!isSoldOut && mainPrice > 0 && (
+      {!isSoldOut && mainPrice > 0 && isSalePeriodActive && (
         <QuickAddToCart
           productId={product.id}
           shopId={product.shop_id}
@@ -162,6 +185,8 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
           hasOptions={hasOptions}
           price={mainPrice}
           productName={product.name}
+          madeToOrder={isMadeToOrder}
+          quantityLimit={product.quantity_limit}
         />
       )}
     </div>
