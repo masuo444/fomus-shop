@@ -24,10 +24,8 @@ export async function GET(request: Request) {
   const admin = createAdminClient()
 
   try {
-    // Find user by email (efficient single query)
-    const { data: { users } } = await admin.auth.admin.listUsers({
-      filter: payload.email,
-    })
+    // Find user by email
+    const { data: { users } } = await admin.auth.admin.listUsers()
     let user = users.find((u) => u.email === payload.email)
 
     if (!user) {
