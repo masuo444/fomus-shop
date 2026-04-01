@@ -4,7 +4,6 @@ import { verifySSOToken } from '@/features/membership-sso'
 import siteConfig from '@/site.config'
 
 export async function GET(request: Request) {
-  // Return 404 if membership SSO is disabled
   if (!siteConfig.features.membershipSso) {
     return new NextResponse('Not Found', { status: 404 })
   }
@@ -25,8 +24,10 @@ export async function GET(request: Request) {
   const admin = createAdminClient()
 
   try {
-    // Check if user exists by email
-    const { data: { users } } = await admin.auth.admin.listUsers()
+    // Find user by email (efficient single query)
+    const { data: { users } } = await admin.auth.admin.listUsers({
+      filter: payload.email,
+    })
     let user = users.find((u) => u.email === payload.email)
 
     if (!user) {
@@ -64,20 +65,29 @@ export async function GET(request: Request) {
         .eq('id', user.id)
     }
 
-    // Generate magic link for auto-login
+    // Generate magic link and extract token for direct verification
     const { data: linkData } = await admin.auth.admin.generateLink({
       type: 'magiclink',
       email: payload.email,
+      options: {
+        redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(redirect)}`,
+      },
     })
 
-    if (linkData?.properties?.action_link) {
-      // Append redirect destination
-      const magicLink = new URL(linkData.properties.action_link)
-      magicLink.searchParams.set('next', redirect)
-      return NextResponse.redirect(magicLink.toString())
+    if (linkData?.properties?.hashed_token) {
+      // Redirect to Supabase verify endpoint with the token
+      const verifyUrl = new URL(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/verify`)
+      verifyUrl.searchParams.set('token', linkData.properties.hashed_token)
+      verifyUrl.searchParams.set('type', 'magiclink')
+      verifyUrl.searchParams.set('redirect_to', `${origin}/auth/callback?next=${encodeURIComponent(redirect)}`)
+      return NextResponse.redirect(verifyUrl.toString())
     }
 
-    // Fallback: redirect to login
+    // Fallback: try action_link directly
+    if (linkData?.properties?.action_link) {
+      return NextResponse.redirect(linkData.properties.action_link)
+    }
+
     return NextResponse.redirect(new URL('/auth/login', request.url))
   } catch (error) {
     console.error('Guild SSO error:', error)
