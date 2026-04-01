@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Product, Category, ShippingMethod, ProductOption } from '@/lib/types'
 import { formatPrice } from '@/lib/utils'
@@ -322,8 +322,24 @@ export default function ProductForm({
     )
   }
 
+  const formRef = useRef<HTMLFormElement>(null)
+
+  // Prevent scroll-wheel from changing number input values
+  useEffect(() => {
+    const form = formRef.current
+    if (!form) return
+    const handler = (e: WheelEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === 'INPUT' && (target as HTMLInputElement).type === 'number') {
+        ;(target as HTMLInputElement).blur()
+      }
+    }
+    form.addEventListener('wheel', handler, { passive: true })
+    return () => form.removeEventListener('wheel', handler)
+  }, [])
+
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl space-y-4">
+    <form ref={formRef} onSubmit={handleSubmit} className="max-w-2xl space-y-4">
       {error && (
         <div className="p-3 rounded bg-red-50 text-red-700 text-sm border border-red-200">
           {error}
