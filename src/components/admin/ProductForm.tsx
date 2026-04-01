@@ -331,10 +331,11 @@ export default function ProductForm({
     const handler = (e: WheelEvent) => {
       const target = e.target as HTMLElement
       if (target.tagName === 'INPUT' && (target as HTMLInputElement).type === 'number') {
+        e.preventDefault()
         ;(target as HTMLInputElement).blur()
       }
     }
-    form.addEventListener('wheel', handler, { passive: true })
+    form.addEventListener('wheel', handler, { passive: false })
     return () => form.removeEventListener('wheel', handler)
   }, [])
 
