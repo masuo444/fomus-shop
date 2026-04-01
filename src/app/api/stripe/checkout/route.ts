@@ -179,10 +179,12 @@ export async function POST(request: Request) {
       return sum + (getUnitPrice(product) + getOptionsAdj(item, i)) * item.quantity
     }, 0)
 
-    // Premium members get free shipping (JPY only; EUR always charges shipping)
+    // Shipping fee: GUILD members via API get flat 800 yen, premium members get free, others pay standard
     const shippingFee = currency === 'eur'
       ? siteConfig.shippingFeeEur
-      : (isPremiumMember ? 0 : SHIPPING_FEE)
+      : isGuildMember ? 800
+      : isPremiumMember ? 0
+      : SHIPPING_FEE
 
     // P0 Fix: Verify coupon on server side
     let couponDiscount = 0
