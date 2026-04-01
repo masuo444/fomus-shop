@@ -287,7 +287,7 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
                   className="text-xs underline hover:no-underline"
                   style={{ color: 'var(--color-member)' }}
                 >
-                  {siteConfig.features.membershipName}に入会して会員価格で購入
+                  {siteConfig.features.membershipName}にログインして会員価格で購入
                 </Link>
               </div>
             )}
