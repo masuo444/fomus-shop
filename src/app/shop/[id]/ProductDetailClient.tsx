@@ -383,9 +383,12 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
                   </button>
                   <span className="w-12 text-center text-sm font-medium">{quantity}</span>
                   <button
-                    onClick={() => setQuantity(Math.min(isMadeToOrder ? (product.quantity_limit || 99) : product.stock, quantity + 1))}
+                    onClick={() => {
+                      const max = product.quantity_limit || (isMadeToOrder ? 99 : product.stock)
+                      setQuantity(Math.min(max, quantity + 1))
+                    }}
                     className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                    disabled={quantity >= (isMadeToOrder ? (product.quantity_limit || 99) : product.stock)}
+                    disabled={quantity >= (product.quantity_limit || (isMadeToOrder ? 99 : product.stock))}
                   >
                     <Plus className="w-4 h-4" />
                   </button>
