@@ -34,14 +34,19 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { items, shipping, currency: requestCurrency, coupon_code, gift_wrapping, gift_message } = (await request.json()) as {
+    const { items, shipping, currency: requestCurrency, coupon_code, gift_wrapping, gift_message, guild_secret } = (await request.json()) as {
       items: CheckoutItem[]
       shipping: ShippingInfo
       currency?: Currency
       coupon_code?: string
       gift_wrapping?: boolean
       gift_message?: string
+      guild_secret?: string
     }
+
+    // GUILD member verification via shared secret
+    const guildSsoSecret = process.env.GUILD_SSO_SECRET || process.env.MEMBERSHIP_SSO_SECRET || ''
+    const isGuildMember = guild_secret != null && guildSsoSecret !== '' && guild_secret === guildSsoSecret
 
     const currency: Currency = requestCurrency === 'eur' ? 'eur' : 'jpy'
 
@@ -143,7 +148,7 @@ export async function POST(request: Request) {
       profile = profileData
     }
 
-    const isPremiumMember = profile?.is_premium_member === true
+    const isPremiumMember = profile?.is_premium_member === true || isGuildMember
 
     // Helper: get unit price for a product based on currency and membership
     const getUnitPrice = (product: any): number => {
