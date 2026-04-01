@@ -69,7 +69,7 @@ const siteConfig = {
     membershipProgram: process.env.FEATURE_MEMBERSHIP === 'true',
     membershipSso: process.env.FEATURE_MEMBERSHIP_SSO === 'true',
     membershipUrl: process.env.MEMBERSHIP_URL || '',
-    membershipName: process.env.MEMBERSHIP_NAME || 'Premium',
+    membershipName: process.env.NEXT_PUBLIC_MEMBERSHIP_NAME || process.env.MEMBERSHIP_NAME || 'Premium',
     digitalItems: process.env.FEATURE_DIGITAL !== 'false',
     marketplace: process.env.FEATURE_MARKETPLACE !== 'false',
     marketplaceName: process.env.MARKETPLACE_NAME || '根の市',
