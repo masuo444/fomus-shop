@@ -4,7 +4,6 @@ import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { Shield } from 'lucide-react'
 import siteConfig from '@/site.config'
 
 export default function LoginPage() {
@@ -55,6 +54,28 @@ function LoginContent() {
     <div className="max-w-sm mx-auto px-4 py-16">
       <h1 className="text-2xl font-bold text-gray-900 text-center mb-8">ログイン</h1>
 
+      {/* GUILD Member CTA */}
+      {siteConfig.features.membershipSso && siteConfig.features.membershipUrl && (
+        <div className="mb-8">
+          <a
+            href="https://guild-app.fomusglobal.com/app/shop"
+            className="block w-full rounded-xl border-2 border-[var(--color-member)] px-5 py-4 text-center hover:bg-[var(--color-member-bg)] transition-colors"
+          >
+            <p className="text-sm font-bold" style={{ color: 'var(--color-member)' }}>
+              {siteConfig.features.membershipName}メンバーの方
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              会員限定価格 ・ 送料無料 ・ ポイント2倍
+            </p>
+          </a>
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="text-xs text-gray-400">または</span>
+            <div className="flex-1 h-px bg-gray-200" />
+          </div>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm text-gray-600 mb-1">メールアドレス</label>
@@ -90,21 +111,6 @@ function LoginContent() {
           {loading ? 'ログイン中...' : 'ログイン'}
         </button>
       </form>
-
-      {/* Membership SSO section */}
-      {siteConfig.features.membershipSso && (
-        <div className="mt-8 border-t border-gray-100 pt-6">
-          <div className="bg-gray-50 rounded-xl p-4 text-center">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <Shield className="w-4 h-4 text-gray-600" />
-              <p className="text-sm font-medium text-gray-700">{siteConfig.features.membershipName}会員の方</p>
-            </div>
-            <p className="text-xs text-gray-400">
-              {siteConfig.features.membershipName}アプリの「ショップ」ボタンから自動ログインできます
-            </p>
-          </div>
-        </div>
-      )}
 
       <div className="mt-6 space-y-3 text-center text-sm">
         <p className="text-gray-500">
