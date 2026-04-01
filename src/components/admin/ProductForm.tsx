@@ -23,6 +23,41 @@ interface ChoiceFormData {
   sort_order: number
 }
 
+function Section({
+  id,
+  title,
+  children,
+  defaultOpen = true,
+  isOpen,
+  onToggle,
+}: {
+  id: string
+  title: string
+  children: React.ReactNode
+  defaultOpen?: boolean
+  isOpen?: boolean
+  onToggle: (id: string) => void
+}) {
+  const open = isOpen ?? defaultOpen
+  return (
+    <div className="bg-white rounded border border-gray-200">
+      <button
+        type="button"
+        onClick={() => onToggle(id)}
+        className="w-full flex items-center justify-between px-5 py-4 text-left"
+      >
+        <h3 className="text-sm font-bold text-gray-900">{title}</h3>
+        {open ? (
+          <ChevronUp size={16} className="text-gray-400" />
+        ) : (
+          <ChevronDown size={16} className="text-gray-400" />
+        )}
+      </button>
+      {open && <div className="px-5 pb-5 border-t border-gray-100 pt-4">{children}</div>}
+    </div>
+  )
+}
+
 interface ProductFormProps {
   product?: Product
   categories: Category[]
@@ -290,38 +325,6 @@ export default function ProductForm({
     }
   }
 
-  // Section wrapper
-  const Section = ({
-    id,
-    title,
-    children,
-    defaultOpen = true,
-  }: {
-    id: string
-    title: string
-    children: React.ReactNode
-    defaultOpen?: boolean
-  }) => {
-    const isOpen = expandedSections[id] ?? defaultOpen
-    return (
-      <div className="bg-white rounded border border-gray-200">
-        <button
-          type="button"
-          onClick={() => toggleSection(id)}
-          className="w-full flex items-center justify-between px-5 py-4 text-left"
-        >
-          <h3 className="text-sm font-bold text-gray-900">{title}</h3>
-          {isOpen ? (
-            <ChevronUp size={16} className="text-gray-400" />
-          ) : (
-            <ChevronDown size={16} className="text-gray-400" />
-          )}
-        </button>
-        {isOpen && <div className="px-5 pb-5 border-t border-gray-100 pt-4">{children}</div>}
-      </div>
-    )
-  }
-
   const formRef = useRef<HTMLFormElement>(null)
 
   // Prevent scroll-wheel from changing number input values
@@ -363,7 +366,7 @@ export default function ProductForm({
       </div>
 
       {/* 商品画像 */}
-      <Section id="images" title="商品画像">
+      <Section id="images" title="商品画像" isOpen={expandedSections["images"]} onToggle={toggleSection}>
         <ImageUploader
           images={images.filter(Boolean)}
           onImagesChange={(urls) => setImages(urls)}
@@ -371,7 +374,7 @@ export default function ProductForm({
       </Section>
 
       {/* 商品説明 */}
-      <Section id="description" title="商品説明">
+      <Section id="description" title="商品説明" isOpen={expandedSections["description"]} onToggle={toggleSection}>
         <textarea
           rows={6}
           value={description}
@@ -406,7 +409,7 @@ export default function ProductForm({
       </Section>
 
       {/* 価格(税込) */}
-      <Section id="price" title="価格（税込）">
+      <Section id="price" title="価格（税込）" isOpen={expandedSections["price"]} onToggle={toggleSection}>
         <div className="space-y-3">
           <div>
             <label className="block text-xs text-gray-600 mb-1">
@@ -532,7 +535,7 @@ export default function ProductForm({
       </Section>
 
       {/* 在庫と種類 */}
-      <Section id="stock" title="在庫と種類">
+      <Section id="stock" title="在庫と種類" isOpen={expandedSections["stock"]} onToggle={toggleSection}>
         <div className="space-y-3">
           <div>
             <label className="block text-xs text-gray-600 mb-1">
@@ -575,7 +578,7 @@ export default function ProductForm({
       </Section>
 
       {/* 表示と公開 */}
-      <Section id="display" title="表示と公開">
+      <Section id="display" title="表示と公開" isOpen={expandedSections["display"]} onToggle={toggleSection}>
         <div className="space-y-4">
           <div>
             <label className="flex items-center gap-2 cursor-pointer">
@@ -629,7 +632,7 @@ export default function ProductForm({
       </Section>
 
       {/* カテゴリ */}
-      <Section id="category" title="カテゴリ">
+      <Section id="category" title="カテゴリ" isOpen={expandedSections["category"]} onToggle={toggleSection}>
         <div className="space-y-2">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -696,7 +699,7 @@ export default function ProductForm({
       </Section>
 
       {/* 送料詳細 */}
-      <Section id="shipping" title="送料詳細">
+      <Section id="shipping" title="送料詳細" isOpen={expandedSections["shipping"]} onToggle={toggleSection}>
         {shippingMethods.length > 0 ? (
           <div className="space-y-2">
             {shippingMethods.map((method) => (
@@ -731,7 +734,7 @@ export default function ProductForm({
       </Section>
 
       {/* 予約販売 */}
-      <Section id="preorder" title="予約販売">
+      <Section id="preorder" title="予約販売" isOpen={expandedSections["preorder"]} onToggle={toggleSection}>
         <div className="space-y-3">
           <label className="flex items-center gap-2 cursor-pointer">
             <div
@@ -777,7 +780,7 @@ export default function ProductForm({
       </Section>
 
       {/* 受注生産 */}
-      <Section id="made-to-order" title="受注生産">
+      <Section id="made-to-order" title="受注生産" isOpen={expandedSections["made-to-order"]} onToggle={toggleSection}>
         <div className="space-y-3">
           <label className="flex items-center gap-2 cursor-pointer">
             <div
@@ -816,7 +819,7 @@ export default function ProductForm({
       </Section>
 
       {/* 販売期間 */}
-      <Section id="sale-period" title="販売期間">
+      <Section id="sale-period" title="販売期間" isOpen={expandedSections["sale-period"]} onToggle={toggleSection}>
         <div className="space-y-3">
           <p className="text-xs text-gray-500">設定すると期間外は購入不可になります。空欄なら常時販売。</p>
           <div className="grid grid-cols-2 gap-4">
@@ -848,7 +851,7 @@ export default function ProductForm({
       </Section>
 
       {/* 商品オプション */}
-      <Section id="options" title="商品オプション">
+      <Section id="options" title="商品オプション" isOpen={expandedSections["options"]} onToggle={toggleSection}>
         <div className="space-y-4">
           {options.map((option, oi) => (
             <div key={oi} className="border border-gray-200 rounded p-4">
@@ -940,7 +943,7 @@ export default function ProductForm({
       </Section>
 
       {/* 数量制限 */}
-      <Section id="quantity" title="数量制限">
+      <Section id="quantity" title="数量制限" isOpen={expandedSections["quantity"]} onToggle={toggleSection}>
         <div className="flex items-center gap-2">
           <input
             type="number"
