@@ -172,17 +172,6 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
                 </svg>
               </div>
             )}
-            {/* {siteConfig.features.membershipName}限定価格 badge */}
-            {hasMemberPrice && (
-              <div className="absolute top-3 left-3">
-                <span
-                  className="text-white text-xs font-bold px-3 py-1 rounded-full"
-                  style={{ backgroundColor: 'var(--color-member)' }}
-                >
-                  {siteConfig.features.membershipName}限定価格
-                </span>
-              </div>
-            )}
           </div>
           {product.images && product.images.length > 1 && (
             <div className="flex gap-2 overflow-x-auto">
