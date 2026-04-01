@@ -152,33 +152,48 @@ export default async function HomePage() {
                   )}
                   {/* Text */}
                   <div>
-                    <p className="text-[10px] tracking-[0.25em] uppercase text-orange-400 mb-4">Limited Edition</p>
-                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-light tracking-tight leading-tight mb-6">
+                    <div className="flex items-center gap-3 mb-6">
+                      <span className="text-[10px] tracking-[0.2em] uppercase text-orange-400 border border-orange-400/40 px-3 py-1">Limited</span>
+                      {limitedProduct.made_to_order && (
+                        <span className="text-[10px] tracking-[0.2em] uppercase text-[var(--background)]/60 border border-[var(--background)]/20 px-3 py-1">Made to Order</span>
+                      )}
+                    </div>
+                    <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-light tracking-tight leading-none mb-3 italic">
                       {limitedProduct.name}
                     </h2>
+                    <p className="text-[11px] tracking-[0.1em] text-[var(--background)]/40 mb-8">
+                      完全受注生産 — 数量限定
+                    </p>
+
                     {limitedProduct.sale_end_date && (
-                      <p className="text-sm text-orange-400 font-medium mb-6">
-                        {new Date(limitedProduct.sale_end_date).toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' })} まで期間限定
-                      </p>
+                      <div className="flex items-center gap-2 mb-8">
+                        <div className="w-1 h-1 rounded-full bg-orange-400" />
+                        <p className="text-xs tracking-wide text-orange-400">
+                          {new Date(limitedProduct.sale_end_date).toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' })} まで
+                        </p>
+                      </div>
                     )}
-                    <div className="flex items-baseline gap-4 mb-4">
-                      <span className="text-2xl font-light tracking-wide">
+
+                    <div className="flex items-baseline gap-3 mb-2">
+                      <span className="text-3xl md:text-4xl font-light tracking-wide">
                         {currency === 'eur' && limitedProduct.price_eur != null
                           ? `€${(limitedProduct.price_eur / 100).toFixed(2)}`
                           : `¥${limitedProduct.price.toLocaleString()}`}
                       </span>
-                      <span className="text-xs text-[var(--background)]/50">税込</span>
+                      <span className="text-[10px] tracking-wider text-[var(--background)]/30 uppercase">tax incl.</span>
                     </div>
                     {limitedProduct.member_price != null && limitedProduct.member_price < limitedProduct.price && (
-                      <p className="text-sm mb-8" style={{ color: 'var(--color-member)' }}>
-                        {siteConfig.features.membershipName}会員なら ¥{limitedProduct.member_price.toLocaleString()}
+                      <p className="text-xs tracking-wide mb-8" style={{ color: 'var(--color-member)' }}>
+                        {siteConfig.features.membershipName} ¥{limitedProduct.member_price.toLocaleString()}
                       </p>
                     )}
+
                     {limitedProduct.made_to_order && limitedProduct.production_time && (
-                      <p className="text-xs text-[var(--background)]/50 mb-8">{limitedProduct.production_time}</p>
+                      <p className="text-[11px] text-[var(--background)]/30 mb-10">{limitedProduct.production_time}</p>
                     )}
-                    <span className="inline-flex items-center gap-3 text-[11px] tracking-[0.15em] uppercase text-[var(--background)]/70 group-hover:text-[var(--background)] transition-colors">
-                      詳細を見る
+
+                    <span className="inline-flex items-center gap-4 text-[10px] tracking-[0.2em] uppercase text-[var(--background)]/50 group-hover:text-[var(--background)] transition-colors border-b border-[var(--background)]/20 group-hover:border-[var(--background)]/50 pb-2">
+                      View Details
                       <svg className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                     </span>
                   </div>
