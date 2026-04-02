@@ -252,7 +252,7 @@ export async function POST(request: Request) {
       // Restore stock on failure
       await restoreStock(stockItems)
       console.error('Order creation error:', orderError)
-      return NextResponse.json({ error: '注文の作成に失敗しました' }, { status: 500 })
+      return NextResponse.json({ error: `注文の作成に失敗しました: ${orderError?.message || 'unknown'}` }, { status: 500 })
     }
 
     // Increment coupon usage
