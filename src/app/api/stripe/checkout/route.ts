@@ -246,13 +246,14 @@ export async function POST(request: Request) {
       coupon_discount: couponDiscount,
       gift_wrapping: gift_wrapping || false,
       gift_message: gift_message || null,
+      payment_method: 'stripe',
     }).select().single()
 
     if (orderError || !order) {
       // Restore stock on failure
       await restoreStock(stockItems)
       console.error('Order creation error:', orderError)
-      return NextResponse.json({ error: `注文の作成に失敗しました: ${orderError?.message || 'unknown'}` }, { status: 500 })
+      return NextResponse.json({ error: '注文の作成に失敗しました' }, { status: 500 })
     }
 
     // Increment coupon usage
