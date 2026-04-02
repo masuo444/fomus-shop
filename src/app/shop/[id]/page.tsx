@@ -29,6 +29,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = product?.description || siteConfig.description
   const imageUrl = product?.images?.[0] || undefined
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://shop.fomus.jp'
+
   return {
     title,
     description,
@@ -36,14 +38,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       canonical: `/shop/${id}`,
     },
     openGraph: {
-      title,
+      title: `${title} — ${siteConfig.name}`,
       description,
-      images: imageUrl ? [{ url: imageUrl }] : undefined,
+      url: `${baseUrl}/shop/${id}`,
+      siteName: siteConfig.name,
+      images: imageUrl ? [{ url: imageUrl, width: 1200, height: 630 }] : undefined,
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
-      title,
+      title: `${title} — ${siteConfig.name}`,
       description,
       images: imageUrl ? [imageUrl] : undefined,
     },
