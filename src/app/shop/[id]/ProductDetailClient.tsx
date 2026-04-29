@@ -118,13 +118,23 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
     }
     setOptionError('')
 
+    const opts = Object.keys(selectedOptions).length > 0 ? selectedOptions : undefined
+
+    if (isDigital) {
+      // クラファン商品はカートをリセットして即チェックアウトへ
+      clearLocalCart()
+      addToLocalCart(product.id, quantity, product.shop_id, opts)
+      window.dispatchEvent(new Event('cart-updated'))
+      router.push('/checkout')
+      return
+    }
+
     if (wouldMixShops(product.shop_id)) {
       if (!confirm('カートには別のショップの商品が入っています。カートを空にしてこの商品を追加しますか？')) {
         return
       }
       clearLocalCart()
     }
-    const opts = Object.keys(selectedOptions).length > 0 ? selectedOptions : undefined
     addToLocalCart(product.id, quantity, product.shop_id, opts)
     window.dispatchEvent(new Event('cart-updated'))
     window.dispatchEvent(new CustomEvent('cart-toast', { detail: { name: product.name } }))
@@ -421,7 +431,7 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
                   className="w-full relative overflow-hidden bg-gradient-to-r from-amber-800 via-amber-700 to-amber-600 text-amber-50 py-4 rounded-2xl text-sm font-semibold tracking-[0.15em] hover:opacity-90 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2.5 shadow-lg shadow-amber-900/30"
                 >
                   <Heart className="w-4 h-4 fill-amber-200 text-amber-200" />
-                  {addedToCart ? 'カートに追加しました' : '支援する'}
+                  支援する
                 </button>
               ) : (
                 <button
