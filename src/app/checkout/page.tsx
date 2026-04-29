@@ -47,8 +47,9 @@ export default function CheckoutPage() {
   const currency = useCurrency()
   const isEur = currency === 'eur'
   const isPremiumMember = profile?.is_premium_member === true
-  const jpycEnabled = siteConfig.jpyc.enabled && !isEur
-  const bankTransferEnabled = siteConfig.bankTransfer.enabled && !isEur
+  const allDigital = items.length > 0 && items.every(i => i.product?.item_type === 'digital')
+  const jpycEnabled = siteConfig.jpyc.enabled && !isEur && !allDigital
+  const bankTransferEnabled = siteConfig.bankTransfer.enabled && !isEur && !allDigital
 
   useEffect(() => {
     loadData()
@@ -116,7 +117,6 @@ export default function CheckoutPage() {
     (sum, item) => sum + getItemPrice(item) * item.quantity,
     0
   )
-  const allDigital = items.length > 0 && items.every(i => i.product?.item_type === 'digital')
   const shippingFee = allDigital ? 0 : (isEur ? SHIPPING_FEE_EUR : SHIPPING_FEE)
   const total = subtotal + shippingFee - couponDiscount
 
@@ -258,13 +258,13 @@ export default function CheckoutPage() {
 
             {/* Shipping info review */}
             <div className="mb-6">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">配送先情報</h3>
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">{allDigital ? '支援者情報' : '配送先情報'}</h3>
               <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-1">
                 <p className="font-medium">{form.name}</p>
                 <p className="text-gray-500">{form.email}</p>
                 <p className="text-gray-500">{form.phone}</p>
-                <p className="text-gray-500">〒{form.postal_code}</p>
-                <p className="text-gray-500">{form.address}</p>
+                {!allDigital && <p className="text-gray-500">〒{form.postal_code}</p>}
+                {!allDigital && <p className="text-gray-500">{form.address}</p>}
               </div>
             </div>
 
@@ -300,10 +300,12 @@ export default function CheckoutPage() {
                 <span className="text-gray-500">小計</span>
                 <span>{formatPrice(subtotal, currency)}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">送料</span>
-                <span>{allDigital ? '無料' : formatPrice(shippingFee, currency)}</span>
-              </div>
+              {!allDigital && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">送料</span>
+                  <span>{formatPrice(shippingFee, currency)}</span>
+                </div>
+              )}
               {couponDiscount > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-green-600">クーポン割引</span>
@@ -341,13 +343,13 @@ export default function CheckoutPage() {
           {/* Shipping Form */}
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-gray-900">
-              {isEur ? 'Shipping Information' : '配送先情報'}
+              {isEur ? 'Shipping Information' : allDigital ? '支援者情報' : '配送先情報'}
             </h2>
-            {isEur ? (
+            {!allDigital && (isEur ? (
               <p className="text-xs text-gray-400">International shipping available</p>
             ) : (
               <p className="text-xs text-gray-400">※ 国内送料1,000円〜 / 銀行振込OK</p>
-            )}
+            ))}
 
             <div>
               <label className="block text-sm text-gray-600 mb-1">
@@ -388,6 +390,7 @@ export default function CheckoutPage() {
               />
             </div>
 
+            {!allDigital && (<>
             <div>
               <label className="block text-sm text-gray-600 mb-1">
                 {isEur ? 'Postal Code' : '郵便番号'} *
@@ -417,6 +420,7 @@ export default function CheckoutPage() {
                 className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black resize-none"
               />
             </div>
+            </>)}
           </div>
 
           {/* Order Summary */}
@@ -465,10 +469,12 @@ export default function CheckoutPage() {
                 <span className="text-gray-500">{isEur ? 'Subtotal' : '小計'}</span>
                 <span>{formatPrice(subtotal, currency)}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">{isEur ? 'Shipping' : '送料'}</span>
-                <span>{allDigital ? '無料' : formatPrice(shippingFee, currency)}</span>
-              </div>
+              {!allDigital && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">{isEur ? 'Shipping' : '送料'}</span>
+                  <span>{formatPrice(shippingFee, currency)}</span>
+                </div>
+              )}
               {couponDiscount > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-green-600">{isEur ? 'Coupon Discount' : 'クーポン割引'}</span>
@@ -523,7 +529,7 @@ export default function CheckoutPage() {
         </div>
 
         {/* Gift Wrapping */}
-        <div className="border border-[var(--color-border)] p-4 mt-4">
+        {!allDigital && <div className="border border-[var(--color-border)] p-4 mt-4">
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
@@ -550,7 +556,7 @@ export default function CheckoutPage() {
               <p className="text-[10px] text-[var(--color-border)] mt-1">{giftMessage.length}/200</p>
             </div>
           )}
-        </div>
+        </div>}
 
         {/* Payment Method Selection */}
         {(jpycEnabled || bankTransferEnabled) && (
