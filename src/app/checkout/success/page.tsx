@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle, UserPlus, Gift } from 'lucide-react'
+import { CheckCircle, UserPlus } from 'lucide-react'
 import Image from 'next/image'
 import { clearLocalCart } from '@/lib/cart'
 import { createClient } from '@/lib/supabase/client'
@@ -18,7 +18,6 @@ export default function CheckoutSuccessPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [bonusMessage, setBonusMessage] = useState('')
   const [recommended, setRecommended] = useState<Product[]>([])
   const router = useRouter()
 
@@ -83,24 +82,6 @@ export default function CheckoutSuccessPage() {
       return
     }
 
-    // Call register-bonus API
-    const userId = signUpData.user?.id
-    if (userId) {
-      try {
-        const res = await fetch('/api/auth/register-bonus', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId }),
-        })
-        if (res.ok) {
-          const data = await res.json()
-          setBonusMessage(`500円OFFクーポンをプレゼント！（コード: ${data.coupon_code}）`)
-        }
-      } catch (err) {
-        console.error('Register bonus error:', err)
-      }
-    }
-
     setSuccess(true)
     setLoading(false)
   }
@@ -129,9 +110,6 @@ export default function CheckoutSuccessPage() {
               </p>
               <p className="text-xs text-gray-500 mb-2">
                 次回のお買い物で配送先の入力が不要になります。注文履歴の確認やデジタルアイテムの購入もできるようになります。
-              </p>
-              <p className="text-xs text-blue-600 mb-4 font-medium">
-                今なら500円OFFクーポンプレゼント！
               </p>
               <button
                 onClick={() => setShowRegister(true)}
@@ -205,15 +183,6 @@ export default function CheckoutSuccessPage() {
               確認メールをお送りしました。メール内のリンクをクリックしてアカウントを有効化してください。
             </p>
           </div>
-          {bonusMessage && (
-            <div className="bg-yellow-50 border border-yellow-100 rounded-xl p-4 text-left flex items-start gap-3">
-              <Gift className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-medium text-yellow-700">{bonusMessage}</p>
-                <p className="text-xs text-yellow-600 mt-1">次回のお買い物でご利用いただけます。</p>
-              </div>
-            </div>
-          )}
         </div>
       )}
 

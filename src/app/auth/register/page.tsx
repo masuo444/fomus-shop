@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { Gift } from 'lucide-react'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -14,7 +13,6 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [bonusMessage, setBonusMessage] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,7 +26,7 @@ export default function RegisterPage() {
     }
 
     const supabase = createClient()
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+    const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -43,45 +41,12 @@ export default function RegisterPage() {
       return
     }
 
-    const userId = signUpData.user?.id
-
-    // Call register-bonus API
-    if (userId) {
-      try {
-        const res = await fetch('/api/auth/register-bonus', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId }),
-        })
-        if (res.ok) {
-          const data = await res.json()
-          setBonusMessage(`500円OFFクーポンをプレゼント！（コード: ${data.coupon_code}）`)
-        }
-      } catch (err) {
-        console.error('Register bonus error:', err)
-      }
-    }
-
-    if (bonusMessage) {
-      // Wait a bit to show message before redirect
-      setTimeout(() => router.push('/auth/login?registered=true'), 3000)
-    } else {
-      router.push('/auth/login?registered=true')
-    }
+    router.push('/auth/login?registered=true')
   }
 
   return (
     <div className="max-w-sm mx-auto px-4 py-16">
       <h1 className="text-2xl font-bold text-gray-900 text-center mb-8">アカウント作成</h1>
-
-      {/* Bonus message */}
-      {bonusMessage && (
-        <div className="mb-6 bg-yellow-50 border border-yellow-100 rounded-xl p-4 text-center">
-          <Gift className="w-6 h-6 text-yellow-500 mx-auto mb-2" />
-          <p className="text-sm font-medium text-yellow-700">{bonusMessage}</p>
-          <p className="text-xs text-yellow-600 mt-1">次回のお買い物でご利用いただけます。</p>
-        </div>
-      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -132,11 +97,9 @@ export default function RegisterPage() {
         </button>
       </form>
 
-      {/* Registration benefits */}
       <div className="mt-6 bg-gray-50 rounded-xl p-4">
         <p className="text-xs font-medium text-gray-700 mb-2">登録特典</p>
         <ul className="text-xs text-gray-500 space-y-1">
-          <li>- 初回500円OFFウェルカムクーポン</li>
           <li>- お気に入り機能</li>
           <li>- 注文履歴の確認</li>
         </ul>

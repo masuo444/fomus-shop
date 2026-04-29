@@ -25,7 +25,7 @@ export default function AnnouncementBar() {
   return (
     <div className="bg-[var(--foreground)] text-white text-center py-2.5 px-4 relative">
       <p className="text-xs tracking-wide">
-        会員登録で<span className="font-bold mx-1">500円OFFクーポン</span>プレゼント中
+        会員登録で注文履歴・お気に入り機能が使えます
         <Link href="/auth/register" className="ml-2 underline underline-offset-2 hover:opacity-80">
           無料登録
         </Link>
