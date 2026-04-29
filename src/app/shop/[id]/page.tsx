@@ -1,4 +1,3 @@
-import { createClient } from '@/lib/supabase/server'
 import { createClient as createAnonClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
 import type { Product } from '@/lib/types'
@@ -9,9 +8,16 @@ import type { ProductReview } from '@/components/product/ProductReviews'
 import ProductCard from '@/components/product/ProductCard'
 import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import { getPublishedShopIds } from '@/lib/shop'
-import { getCurrency } from '@/lib/currency'
 import RecentlyViewed from '@/components/product/RecentlyViewed'
 import siteConfig from '@/site.config'
+
+// cookies()を使わないanon clientで全クエリを実行 → ISRキャッシュが有効になる
+function getSupabase() {
+  return createAnonClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
 
 export const revalidate = 3600
 
@@ -20,11 +26,7 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  const supabase = createAnonClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-  const { data } = await supabase
+  const { data } = await getSupabase()
     .from('products')
     .select('id')
     .eq('is_published', true)
@@ -33,8 +35,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
-  const supabase = await createClient()
-  const { data: product } = await supabase
+  const { data: product } = await getSupabase()
     .from('products')
     .select('name, description, images')
     .eq('id', id)
@@ -72,18 +73,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductDetailPage({ params }: Props) {
   const { id } = await params
-  const supabase = await createClient()
+  const supabase = getSupabase()
 
-  // Phase 1: product + currency in parallel
-  const [{ data: product }, currency] = await Promise.all([
-    supabase
-      .from('products')
-      .select('*, category:categories(*), product_options(*, choices:product_option_choices(*))')
-      .eq('id', id)
-      .eq('is_published', true)
-      .single(),
-    getCurrency(),
-  ])
+  // Phase 1: product fetch（anon client = ISRキャッシュ有効）
+  const { data: product } = await supabase
+    .from('products')
+    .select('*, category:categories(*), product_options(*, choices:product_option_choices(*))')
+    .eq('id', id)
+    .eq('is_published', true)
+    .single()
 
   if (!product) {
     notFound()
@@ -174,7 +172,7 @@ export default async function ProductDetailPage({ params }: Props) {
             <h2 className="text-lg font-medium text-[var(--foreground)] mb-8">関連商品</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
               {relatedProducts.map((rp) => (
-                <ProductCard key={rp.id} product={rp} currency={currency} />
+                <ProductCard key={rp.id} product={rp} currency="jpy" />
               ))}
             </div>
           </div>
