@@ -102,7 +102,6 @@ export default async function ProductDetailPage({ params }: Props) {
         .eq('hidden_from_listing', true)
         .neq('id', id)
         .order('price', { ascending: true })
-        .limit(4)
       return (data || []) as Product[]
     }
     const shopIds = await getPublishedShopIds()
