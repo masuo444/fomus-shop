@@ -268,14 +268,14 @@ export default function CartPage() {
       <div className="mt-8 space-y-3">
         {hasMixedShops ? (
           <span className="block w-full bg-gray-300 text-gray-500 py-3 rounded-full text-sm font-medium text-center cursor-not-allowed">
-            レジに進む
+            {allDigital ? '支援の手続きへ' : 'レジに進む'}
           </span>
         ) : (
           <Link
             href="/checkout"
             className="block w-full bg-black text-white py-3 rounded-full text-sm font-medium text-center hover:bg-gray-800 transition-colors"
           >
-            レジに進む
+            {allDigital ? '支援の手続きへ' : 'レジに進む'}
           </Link>
         )}
         <Link
