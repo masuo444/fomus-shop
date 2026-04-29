@@ -74,79 +74,72 @@ export default async function ProductDetailPage({ params }: Props) {
   const { id } = await params
   const supabase = await createClient()
 
-  const { data: product } = await supabase
-    .from('products')
-    .select('*, category:categories(*), product_options(*, choices:product_option_choices(*))')
-    .eq('id', id)
-    .eq('is_published', true)
-    .single()
+  // Phase 1: product + currency in parallel
+  const [{ data: product }, currency] = await Promise.all([
+    supabase
+      .from('products')
+      .select('*, category:categories(*), product_options(*, choices:product_option_choices(*))')
+      .eq('id', id)
+      .eq('is_published', true)
+      .single(),
+    getCurrency(),
+  ])
 
   if (!product) {
     notFound()
   }
 
-  // Get shop name for partner products
-  let shopName: string | undefined
-  const { data: shop } = await supabase
-    .from('shops')
-    .select('name, slug')
-    .eq('id', product.shop_id)
-    .single()
-  if (shop && shop.slug !== 'fomus') {
-    shopName = shop.name
-  }
-
   const p = product as Product
 
-  // Fetch published reviews
-  const { data: reviewsData } = await supabase
-    .from('product_reviews')
-    .select('id, reviewer_name, rating, title, body, verified_purchase, created_at')
-    .eq('product_id', id)
-    .eq('is_published', true)
-    .order('created_at', { ascending: false })
+  // Phase 2: shop / reviews / related products in parallel
+  const fetchRelated = async (): Promise<Product[]> => {
+    if (p.hidden_from_listing) {
+      const { data } = await supabase
+        .from('products')
+        .select('*')
+        .eq('shop_id', p.shop_id)
+        .eq('is_published', true)
+        .eq('hidden_from_listing', true)
+        .neq('id', id)
+        .order('price', { ascending: true })
+        .limit(4)
+      return (data || []) as Product[]
+    }
+    const shopIds = await getPublishedShopIds()
+    if (shopIds.length === 0) return []
+    const { data } = await supabase
+      .from('products')
+      .select('*')
+      .in('shop_id', shopIds)
+      .eq('is_published', true)
+      .eq('item_type', 'physical')
+      .neq('id', id)
+      .gt('price', 0)
+      .order('price', { ascending: true })
+    const all = (data || []) as Product[]
+    const masu = all.filter((p) => p.name.includes('枡'))
+    const others = all.filter((p) => !p.name.includes('枡'))
+    return [...masu, ...others].slice(0, 4)
+  }
+
+  const [{ data: shop }, { data: reviewsData }, relatedProducts] = await Promise.all([
+    supabase.from('shops').select('name, slug').eq('id', p.shop_id).single(),
+    supabase
+      .from('product_reviews')
+      .select('id, reviewer_name, rating, title, body, verified_purchase, created_at')
+      .eq('product_id', id)
+      .eq('is_published', true)
+      .order('created_at', { ascending: false }),
+    fetchRelated(),
+  ])
+
+  const shopName = shop && shop.slug !== 'fomus' ? shop.name : undefined
 
   const reviews: ProductReview[] = (reviewsData || []) as ProductReview[]
   const reviewCount = reviews.length
   const averageRating = reviewCount > 0
     ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
     : 0
-
-  const currency = await getCurrency()
-  let relatedProducts: Product[] = []
-
-  if (p.hidden_from_listing) {
-    // クラファン商品ページ → 同ショップの他のクラファン商品を表示
-    const { data: cfProducts } = await supabase
-      .from('products')
-      .select('*')
-      .eq('shop_id', p.shop_id)
-      .eq('is_published', true)
-      .eq('hidden_from_listing', true)
-      .neq('id', id)
-      .order('price', { ascending: true })
-    relatedProducts = (cfProducts || []).slice(0, 4) as Product[]
-  } else {
-    // 通常商品ページ → 物販商品を優先表示
-    const shopIds = await getPublishedShopIds()
-    if (shopIds.length > 0) {
-      const { data: allProducts } = await supabase
-        .from('products')
-        .select('*')
-        .in('shop_id', shopIds)
-        .eq('is_published', true)
-        .eq('item_type', 'physical')
-        .neq('id', id)
-        .gt('price', 0)
-        .order('price', { ascending: true })
-
-      if (allProducts) {
-        const masuProducts = allProducts.filter((p: Product) => p.name.includes('枡'))
-        const otherProducts = allProducts.filter((p: Product) => !p.name.includes('枡'))
-        relatedProducts = [...masuProducts, ...otherProducts].slice(0, 4)
-      }
-    }
-  }
 
   return (
     <>
