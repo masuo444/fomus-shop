@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Minus, Plus, ShoppingCart, ChevronLeft, Mail } from 'lucide-react'
+import { Minus, Plus, ShoppingCart, ChevronLeft, Mail, Heart } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import { addToLocalCart, wouldMixShops, clearLocalCart, getOptionsAdjustment, type SelectedOptions } from '@/lib/cart'
 import type { Product } from '@/lib/types'
@@ -140,8 +140,8 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
       {/* Auto-add toast */}
       {autoAddToast && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-member text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
-          <ShoppingCart className="w-5 h-5" />
-          <span className="font-medium">カートに追加しました</span>
+          {isDigital ? <Heart className="w-5 h-5" /> : <ShoppingCart className="w-5 h-5" />}
+          <span className="font-medium">{isDigital ? '支援しました' : 'カートに追加しました'}</span>
         </div>
       )}
 
@@ -415,13 +415,23 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
                 </div>
               </div>
 
-              <button
-                onClick={handleAddToCart}
-                className="w-full bg-black text-white py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
-              >
-                <ShoppingCart className="w-4 h-4" />
-                {addedToCart ? 'カートに追加しました' : 'カートに追加'}
-              </button>
+              {isDigital ? (
+                <button
+                  onClick={handleAddToCart}
+                  className="w-full relative overflow-hidden bg-gradient-to-r from-amber-800 via-amber-700 to-amber-600 text-amber-50 py-4 rounded-2xl text-sm font-semibold tracking-[0.15em] hover:opacity-90 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2.5 shadow-lg shadow-amber-900/30"
+                >
+                  <Heart className="w-4 h-4 fill-amber-200 text-amber-200" />
+                  {addedToCart ? '支援しました' : '支援する'}
+                </button>
+              ) : (
+                <button
+                  onClick={handleAddToCart}
+                  className="w-full bg-black text-white py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  {addedToCart ? 'カートに追加しました' : 'カートに追加'}
+                </button>
+              )}
             </div>
           )}
 
