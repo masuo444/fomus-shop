@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import ProductForm from '@/components/admin/ProductForm'
 import Link from 'next/link'
@@ -9,7 +10,8 @@ export default async function PartnerNewProductPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login?redirect=/partner')
 
-  const { data: profile } = await supabase
+  const adminClient = createAdminClient()
+  const { data: profile } = await adminClient
     .from('profiles')
     .select('role, shop_id')
     .eq('id', user.id)

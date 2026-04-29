@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import PartnerSidebar from '@/components/partner/PartnerSidebar'
 
 export const metadata = {
@@ -19,7 +20,8 @@ export default async function PartnerLayout({
     redirect('/auth/login?redirect=/partner')
   }
 
-  const { data: profile } = await supabase
+  const adminClient = createAdminClient()
+  const { data: profile } = await adminClient
     .from('profiles')
     .select('role, shop_id')
     .eq('id', user.id)

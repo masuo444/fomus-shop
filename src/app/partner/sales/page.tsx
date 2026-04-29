@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { formatPrice, formatDate } from '@/lib/utils'
 import type { Commission } from '@/lib/types'
@@ -9,7 +10,8 @@ export default async function PartnerSalesPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login?redirect=/partner')
 
-  const { data: profile } = await supabase
+  const adminClient = createAdminClient()
+  const { data: profile } = await adminClient
     .from('profiles')
     .select('shop_id')
     .eq('id', user.id)
