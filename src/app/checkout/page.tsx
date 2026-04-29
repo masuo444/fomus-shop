@@ -116,7 +116,8 @@ export default function CheckoutPage() {
     (sum, item) => sum + getItemPrice(item) * item.quantity,
     0
   )
-  const shippingFee = isEur ? SHIPPING_FEE_EUR : SHIPPING_FEE
+  const allDigital = items.length > 0 && items.every(i => i.product?.item_type === 'digital')
+  const shippingFee = allDigital ? 0 : (isEur ? SHIPPING_FEE_EUR : SHIPPING_FEE)
   const total = subtotal + shippingFee - couponDiscount
 
   const handleApplyCoupon = async () => {
@@ -301,7 +302,7 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">送料</span>
-                <span>{formatPrice(shippingFee, currency)}</span>
+                <span>{allDigital ? '無料' : formatPrice(shippingFee, currency)}</span>
               </div>
               {couponDiscount > 0 && (
                 <div className="flex justify-between text-sm">
@@ -466,7 +467,7 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">{isEur ? 'Shipping' : '送料'}</span>
-                <span>{formatPrice(shippingFee, currency)}</span>
+                <span>{allDigital ? '無料' : formatPrice(shippingFee, currency)}</span>
               </div>
               {couponDiscount > 0 && (
                 <div className="flex justify-between text-sm">

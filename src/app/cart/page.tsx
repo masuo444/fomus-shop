@@ -116,7 +116,8 @@ export default function CartPage() {
     (sum, item) => sum + getItemPrice(item.product, item.selected_options) * item.quantity,
     0
   )
-  const shippingFee = items.length > 0
+  const allDigital = items.length > 0 && items.every(i => i.product?.item_type === 'digital')
+  const shippingFee = items.length > 0 && !allDigital
     ? (isEur ? SHIPPING_FEE_EUR : SHIPPING_FEE)
     : 0
   const total = subtotal + shippingFee
@@ -233,13 +234,13 @@ export default function CartPage() {
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-gray-500">{isEur ? 'Shipping' : '送料'}</span>
-          <span className="text-gray-900">{formatPrice(shippingFee, currency)}</span>
+          <span className="text-gray-900">{allDigital ? '無料' : formatPrice(shippingFee, currency)}</span>
         </div>
-        {isEur ? (
+        {!allDigital && (isEur ? (
           <p className="text-xs text-gray-400">International shipping included</p>
         ) : (
           <p className="text-xs text-gray-400">※ 国内送料1,000円〜 / 銀行振込OK</p>
-        )}
+        ))}
         <div className="flex justify-between text-base font-bold pt-3 border-t border-gray-100">
           <span>{isEur ? 'Total' : '合計'}</span>
           <span>{formatPrice(total, currency)}</span>
