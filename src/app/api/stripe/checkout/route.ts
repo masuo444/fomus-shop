@@ -62,21 +62,9 @@ export async function POST(request: Request) {
       throw err
     }
 
-    // Validate shipping fields
-    try {
-      shipping.name = requireString(shipping.name, 'お名前').slice(0, 100)
-      shipping.email = validateEmail(shipping.email)
-      shipping.phone = requireString(shipping.phone, '電話番号').slice(0, 20)
-      shipping.postal_code = requireString(shipping.postal_code, '郵便番号').slice(0, 10)
-      shipping.address = requireString(shipping.address, '住所').slice(0, 500)
-    } catch (err) {
-      if (err instanceof ValidationError) return NextResponse.json({ error: err.message }, { status: 400 })
-      throw err
-    }
-
     const admin = createAdminClient()
 
-    // Load products
+    // Load products first (needed to determine if order is digital-only)
     const productIds = items.map((i) => i.product_id)
     const { data: products } = await admin
       .from('products')
@@ -86,6 +74,22 @@ export async function POST(request: Request) {
 
     if (!products || products.length !== items.length) {
       return NextResponse.json({ error: '一部の商品が見つかりません' }, { status: 400 })
+    }
+
+    const allDigital = products.every((p: any) => p.item_type === 'digital')
+
+    // Validate shipping fields (address/phone not required for digital-only orders)
+    try {
+      shipping.name = requireString(shipping.name, 'お名前').slice(0, 100)
+      shipping.email = validateEmail(shipping.email)
+      if (!allDigital) {
+        shipping.phone = requireString(shipping.phone, '電話番号').slice(0, 20)
+        shipping.postal_code = requireString(shipping.postal_code, '郵便番号').slice(0, 10)
+        shipping.address = requireString(shipping.address, '住所').slice(0, 500)
+      }
+    } catch (err) {
+      if (err instanceof ValidationError) return NextResponse.json({ error: err.message }, { status: 400 })
+      throw err
     }
 
     // For EUR orders, verify all products have EUR prices
@@ -180,7 +184,6 @@ export async function POST(request: Request) {
     }, 0)
 
     // Shipping fee: digital products are free, GUILD members get flat 800 yen
-    const allDigital = products.every((p: any) => p.item_type === 'digital')
     const shippingFee = allDigital ? 0
       : currency === 'eur' ? siteConfig.shippingFeeEur
       : isGuildMember ? 800
