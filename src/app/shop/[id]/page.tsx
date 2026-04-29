@@ -112,26 +112,39 @@ export default async function ProductDetailPage({ params }: Props) {
     ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
     : 0
 
-  // Fetch related products: prioritize masu (枡) products, then sort by price ascending
   const currency = await getCurrency()
   let relatedProducts: Product[] = []
-  const shopIds = await getPublishedShopIds()
-  if (shopIds.length > 0) {
-    const { data: allProducts } = await supabase
+
+  if (p.hidden_from_listing) {
+    // クラファン商品ページ → 同ショップの他のクラファン商品を表示
+    const { data: cfProducts } = await supabase
       .from('products')
       .select('*')
-      .in('shop_id', shopIds)
+      .eq('shop_id', p.shop_id)
       .eq('is_published', true)
-      .eq('item_type', 'physical')
+      .eq('hidden_from_listing', true)
       .neq('id', id)
-      .gt('price', 0)
       .order('price', { ascending: true })
+    relatedProducts = (cfProducts || []).slice(0, 4) as Product[]
+  } else {
+    // 通常商品ページ → 物販商品を優先表示
+    const shopIds = await getPublishedShopIds()
+    if (shopIds.length > 0) {
+      const { data: allProducts } = await supabase
+        .from('products')
+        .select('*')
+        .in('shop_id', shopIds)
+        .eq('is_published', true)
+        .eq('item_type', 'physical')
+        .neq('id', id)
+        .gt('price', 0)
+        .order('price', { ascending: true })
 
-    if (allProducts) {
-      // Prioritize masu-related products, then by price
-      const masuProducts = allProducts.filter((p: Product) => p.name.includes('枡'))
-      const otherProducts = allProducts.filter((p: Product) => !p.name.includes('枡'))
-      relatedProducts = [...masuProducts, ...otherProducts].slice(0, 4)
+      if (allProducts) {
+        const masuProducts = allProducts.filter((p: Product) => p.name.includes('枡'))
+        const otherProducts = allProducts.filter((p: Product) => !p.name.includes('枡'))
+        relatedProducts = [...masuProducts, ...otherProducts].slice(0, 4)
+      }
     }
   }
 
