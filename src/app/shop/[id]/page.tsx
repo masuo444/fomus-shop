@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createAnonClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
 import type { Product } from '@/lib/types'
 import type { Metadata } from 'next'
@@ -12,8 +13,22 @@ import { getCurrency } from '@/lib/currency'
 import RecentlyViewed from '@/components/product/RecentlyViewed'
 import siteConfig from '@/site.config'
 
+export const revalidate = 3600
+
 interface Props {
   params: Promise<{ id: string }>
+}
+
+export async function generateStaticParams() {
+  const supabase = createAnonClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+  const { data } = await supabase
+    .from('products')
+    .select('id')
+    .eq('is_published', true)
+  return (data || []).map((p) => ({ id: p.id }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
