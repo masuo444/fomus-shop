@@ -150,7 +150,7 @@ export async function POST(request: Request) {
       return sum + (getUnitPrice(product) + getOptionsAdj(item, i)) * item.quantity
     }, 0)
 
-    const shippingFee = isPremiumMember ? 0 : SHIPPING_FEE
+    const shippingFee = SHIPPING_FEE
 
     // P0 Fix: Verify coupon on server side
     let couponDiscount = 0

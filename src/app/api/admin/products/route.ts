@@ -72,6 +72,7 @@ export async function POST(request: NextRequest) {
       production_time: prodFields.production_time || null,
       sale_start_date: prodFields.sale_start_date || null,
       sale_end_date: prodFields.sale_end_date || null,
+      hidden_from_listing: prodFields.hidden_from_listing ?? false,
     })
     .select()
     .single()

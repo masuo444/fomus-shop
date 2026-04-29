@@ -117,7 +117,7 @@ export default function CartPage() {
     0
   )
   const shippingFee = items.length > 0
-    ? (isEur ? SHIPPING_FEE_EUR : (isPremiumMember ? 0 : SHIPPING_FEE))
+    ? (isEur ? SHIPPING_FEE_EUR : SHIPPING_FEE)
     : 0
   const total = subtotal + shippingFee
 

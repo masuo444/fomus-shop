@@ -46,6 +46,7 @@ export async function PUT(
     production_time: 'production_time',
     sale_start_date: 'sale_start_date',
     sale_end_date: 'sale_end_date',
+    hidden_from_listing: 'hidden_from_listing',
   }
 
   for (const [key, dbField] of Object.entries(fieldMap)) {

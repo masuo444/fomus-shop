@@ -89,11 +89,6 @@ export default function Header() {
             <Link href="/digital" className="text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
               Digital
             </Link>
-            {siteConfig.features.marketplace && (
-              <Link href="/market" className="text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
-                {siteConfig.features.marketplaceName}
-              </Link>
-            )}
             <Link href="/contact" className="text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
               Contact
             </Link>
@@ -222,11 +217,6 @@ export default function Header() {
             <Link href="/digital" className="block text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
               Digital
             </Link>
-            {siteConfig.features.marketplace && (
-              <Link href="/market" className="block text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
-                {siteConfig.features.marketplaceName}
-              </Link>
-            )}
             <Link href="/contact" className="block text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
               Contact
             </Link>

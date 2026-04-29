@@ -116,7 +116,7 @@ export default function CheckoutPage() {
     (sum, item) => sum + getItemPrice(item) * item.quantity,
     0
   )
-  const shippingFee = isEur ? SHIPPING_FEE_EUR : (isPremiumMember ? 0 : SHIPPING_FEE)
+  const shippingFee = isEur ? SHIPPING_FEE_EUR : SHIPPING_FEE
   const total = subtotal + shippingFee - couponDiscount
 
   const handleApplyCoupon = async () => {

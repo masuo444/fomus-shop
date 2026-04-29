@@ -21,8 +21,6 @@ export default async function HomePage() {
   const supabase = await createClient()
   const currency = await getCurrency()
   const shopIds = await getPublishedShopIds()
-  const mpName = siteConfig.features.marketplaceName
-
   let isLoggedIn = false
   let isPremiumMember = false
   const { data: { user } } = await supabase.auth.getUser()
@@ -348,55 +346,42 @@ export default async function HomePage() {
                 </div>
               </Link>
 
-              {siteConfig.features.marketplace && (
-                <Link href="/market" className="group bg-[var(--background)] transition-colors hover:bg-[var(--color-subtle)]">
-                  <div className="aspect-[4/3] overflow-hidden bg-[var(--color-subtle)]">
-                    <img src="/fomus-guild.png" alt={mpName} className="w-full h-full object-cover img-hover" />
-                  </div>
-                  <div className="p-10 md:p-14">
-                  <p className="text-[10px] tracking-[0.25em] uppercase text-[var(--color-muted)] mb-6">03</p>
-                  <h3 className="font-display text-3xl md:text-4xl font-light text-[var(--foreground)] mb-4 italic">{mpName}</h3>
-                  <p className="text-xs leading-[2] text-[var(--color-muted)]">
-                    メンバーが出品する
-                    <br />マーケットプレイス。
-                  </p>
-                  <div className="mt-8 flex items-center gap-2 text-[10px] tracking-[0.15em] uppercase text-[var(--color-muted)] group-hover:text-[var(--foreground)] transition-colors">
-                    <span>View</span>
-                    <svg className="w-3 h-3 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                  </div>
-                  </div>
-                </Link>
-              )}
             </div>
           </ScrollReveal>
         </div>
       </section>
 
       {/* ===== MASU SPECIALIST ===== */}
-      <section className="py-20 md:py-32">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
-          <ScrollReveal>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
+      <section className="relative overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-2 min-h-[50vh]">
+          {/* Photo side */}
+          <div className="relative min-h-[40vh] md:min-h-[50vh]">
+            <img src="/masu-sakura.jpg" alt="国産ヒノキ枡" className="w-full h-full object-cover absolute inset-0" />
+          </div>
+          {/* Text side */}
+          <div className="bg-[var(--foreground)] flex items-center px-8 md:px-16 lg:px-24 py-16 md:py-0">
+            <ScrollReveal>
               <div>
-                <p className="text-[10px] tracking-[0.25em] uppercase text-[var(--color-muted)] mb-4">Masu Specialist</p>
-                <h2 className="text-2xl md:text-3xl lg:text-4xl font-light text-[var(--foreground)] leading-snug mb-6">
+                <p className="text-[10px] tracking-[0.3em] uppercase text-white/40 mb-6">Masu Specialist</p>
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-light text-white leading-snug mb-6">
                   通常枡・法人注文は
                   <br />枡の専門サイトへ
                 </h2>
-                <p className="text-xs leading-[2.2] text-[var(--color-muted)] mb-10 max-w-sm">
-                  全8サイズの国産ヒノキ枡、名入れ・焼印・レーザー刻印、
-                  企業ノベルティ。法人様は20個から承ります。
+                <p className="text-sm leading-[2] text-white/50 mb-10 max-w-sm">
+                  全8サイズの国産ヒノキ枡、名入れ・焼印・レーザー刻印、企業ノベルティ。法人様は20個から承ります。
                 </p>
-                <a href="https://masu.fomus.jp" target="_blank" rel="noopener noreferrer" className="btn-outline inline-flex items-center gap-3">
+                <a
+                  href="https://masu.fomus.jp"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-3 border border-white/30 text-white text-sm tracking-[0.12em] uppercase px-8 py-4 hover:bg-white hover:text-[var(--foreground)] transition-all duration-300"
+                >
                   masu.fomus.jp
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                 </a>
               </div>
-              <div className="aspect-[4/5] rounded-2xl overflow-hidden">
-                <img src="/masu-sakura.jpg" alt="国産ヒノキ枡" className="w-full h-full object-cover" />
-              </div>
-            </div>
-          </ScrollReveal>
+            </ScrollReveal>
+          </div>
         </div>
       </section>
 

@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono, Noto_Sans_JP } from 'next/font/google'
 import { Cormorant_Garamond } from 'next/font/google'
 import Header from '@/components/layout/Header'
-import AnnouncementBar from '@/components/layout/AnnouncementBar'
 import Footer from '@/components/layout/Footer'
 import CartToast from '@/components/ui/CartToast'
 import MobileCartBar from '@/components/layout/MobileCartBar'
@@ -103,14 +102,13 @@ export default function RootLayout({
         <WebSiteJsonLd />
         <LocalBusinessJsonLd />
         <div className="flex flex-col min-h-screen">
-          <AnnouncementBar />
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
         </div>
         <CartToast />
         <MobileCartBar />
-        <Concierge />
+        {/* <Concierge /> */}
       </body>
     </html>
   )

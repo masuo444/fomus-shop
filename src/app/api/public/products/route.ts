@@ -70,6 +70,7 @@ export async function GET(request: NextRequest) {
       .in('shop_id', shopIds)
       .eq('is_published', true)
       .eq('item_type', 'physical')
+      .eq('hidden_from_listing', false)
 
     if (tag) {
       countQuery = countQuery.ilike('name', `%${tag}%`)
@@ -89,6 +90,7 @@ export async function GET(request: NextRequest) {
       .in('shop_id', shopIds)
       .eq('is_published', true)
       .eq('item_type', 'physical')
+      .eq('hidden_from_listing', false)
 
     if (tag) {
       query = query.ilike('name', `%${tag}%`)

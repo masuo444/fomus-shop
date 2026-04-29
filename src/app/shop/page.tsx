@@ -81,6 +81,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       .in('shop_id', shopIds)
       .eq('is_published', true)
       .eq('item_type', 'physical')
+      .eq('hidden_from_listing', false)
 
     if (allProducts) {
       totalCount = allProducts.length
@@ -97,6 +98,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       .in('shop_id', shopIds)
       .eq('is_published', true)
       .eq('item_type', 'physical')
+      .eq('hidden_from_listing', false)
 
     if (params.category) {
       query = query.eq('category_id', params.category)

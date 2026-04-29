@@ -97,6 +97,8 @@ export default function ProductForm({
   const [itemType, setItemType] = useState<'physical' | 'digital'>(product?.item_type ?? 'physical')
   const [quantityLimit, setQuantityLimit] = useState<number | ''>(product?.quantity_limit ?? '')
 
+  const [hiddenFromListing, setHiddenFromListing] = useState(product?.hidden_from_listing ?? false)
+
   // Preorder
   const [preorderEnabled, setPreorderEnabled] = useState(product?.preorder_enabled ?? false)
   const [preorderStartDate, setPreorderStartDate] = useState(product?.preorder_start_date ?? '')
@@ -280,6 +282,7 @@ export default function ProductForm({
         production_time: madeToOrder && productionTime ? productionTime : null,
         sale_start_date: saleStartDate ? new Date(saleStartDate).toISOString() : null,
         sale_end_date: saleEndDate ? new Date(saleEndDate).toISOString() : null,
+        hidden_from_listing: hiddenFromListing,
       },
       options: options
         .filter((o) => o.name.trim())
@@ -627,6 +630,22 @@ export default function ProductForm({
                 <span className="text-sm text-gray-700">非公開</span>
               </label>
             </div>
+          </div>
+          <div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={hiddenFromListing}
+                onChange={(e) => setHiddenFromListing(e.target.checked)}
+                className="rounded accent-member"
+              />
+              <span className="text-sm text-gray-700">一覧ページに表示しない（直リンクのみアクセス可）</span>
+            </label>
+            {hiddenFromListing && (
+              <p className="mt-1 ml-6 text-xs text-amber-600">
+                ショップ一覧には表示されません。URLを知っている人だけが購入できます。
+              </p>
+            )}
           </div>
         </div>
       </Section>

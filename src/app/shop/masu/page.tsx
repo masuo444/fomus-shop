@@ -217,6 +217,7 @@ export default async function MasuPage() {
       .in('shop_id', shopIds)
       .eq('is_published', true)
       .eq('item_type', 'physical')
+      .eq('hidden_from_listing', false)
       .or('name.ilike.%枡%,name.ilike.%masu%,name.ilike.%ます%')
       .order('created_at', { ascending: false })
 
@@ -229,6 +230,7 @@ export default async function MasuPage() {
         .in('shop_id', shopIds)
         .eq('is_published', true)
         .eq('item_type', 'physical')
+        .eq('hidden_from_listing', false)
         .order('created_at', { ascending: false })
         .limit(8)
 
