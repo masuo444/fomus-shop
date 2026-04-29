@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { ADMIN_EMAILS } from '@/lib/constants'
 import siteConfig from '@/site.config'
 import AdminSidebar from '@/components/admin/AdminSidebar'
@@ -22,8 +23,9 @@ export default async function AdminLayout({
     redirect('/auth/login?redirect=/admin')
   }
 
-  // Check admin role
-  const { data: profile } = await supabase
+  // Check admin role (use admin client to bypass RLS)
+  const adminClient = createAdminClient()
+  const { data: profile } = await adminClient
     .from('profiles')
     .select('role')
     .eq('id', user.id)
