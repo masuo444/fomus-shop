@@ -26,6 +26,10 @@ export default function CheckoutSuccessPage() {
     clearLocalCart()
     window.dispatchEvent(new Event('cart-updated'))
 
+    const params = new URLSearchParams(window.location.search)
+    const nameParam = params.get('name')
+    if (nameParam) setName(nameParam)
+
     const init = async () => {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()

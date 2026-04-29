@@ -333,7 +333,7 @@ export async function POST(request: Request) {
         shop_id: shopId,
         currency,
       },
-      success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}&email=${encodeURIComponent(shipping.email)}`,
+      success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}&email=${encodeURIComponent(shipping.email)}&name=${encodeURIComponent(shipping.name)}`,
       cancel_url: `${origin}/cart`,
     }
 
