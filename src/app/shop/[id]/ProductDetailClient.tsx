@@ -169,11 +169,15 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
           {isDigital ? (
             <div className="bg-gray-100 rounded-lg overflow-hidden">
               {product.images && product.images.length > 0 ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={product.images[selectedImage]}
                   alt={product.name}
+                  width={0}
+                  height={0}
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   className="w-full h-auto"
+                  priority
+                  style={{ width: '100%', height: 'auto' }}
                 />
               ) : (
                 <div className="aspect-square flex items-center justify-center text-gray-300">
