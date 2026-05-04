@@ -334,7 +334,14 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
             )}
           </div>
 
-          {/* Sale period (only show when not active) */}
+          {/* Sale period */}
+          {hasLimitedSale && isSalePeriodActive && saleEnd && (
+            <div className="mt-3 rounded-lg px-3 py-2 bg-red-50 border border-red-200">
+              <p className="text-sm text-red-600 font-medium">
+                {saleEnd.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' })} まで販売
+              </p>
+            </div>
+          )}
           {hasLimitedSale && !isSalePeriodActive && (
             <div className="mt-3 rounded-lg px-3 py-2 bg-orange-50 border border-orange-200">
               {isBeforeSale ? (
