@@ -7,6 +7,7 @@ import CartToast from '@/components/ui/CartToast'
 import MobileCartBar from '@/components/layout/MobileCartBar'
 import Concierge from '@/components/ui/Concierge'
 import GoogleAnalytics from '@/components/layout/GoogleAnalytics'
+import ProgressBar from '@/components/layout/ProgressBar'
 import { OrganizationJsonLd, WebSiteJsonLd, LocalBusinessJsonLd } from '@/components/seo/JsonLd'
 import { SITE_NAME, SITE_DESCRIPTION } from '@/lib/constants'
 import siteConfig from '@/site.config'
@@ -105,6 +106,7 @@ export default function RootLayout({
           <main className="flex-1">{children}</main>
           <Footer />
         </div>
+        <ProgressBar />
         <CartToast />
         <MobileCartBar />
         {/* <Concierge /> */}
