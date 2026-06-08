@@ -240,7 +240,7 @@ export default function CartPage() {
         {!allDigital && !allShippingIncluded && (isEur ? (
           <p className="text-xs text-gray-400">International shipping included</p>
         ) : (
-          <p className="text-xs text-gray-400">※ 国内送料1,000円〜 / 銀行振込OK</p>
+          <p className="text-xs text-gray-400">※ 国内送料1,000円〜</p>
         ))}
         <div className="flex justify-between text-base font-bold pt-3 border-t border-gray-100">
           <span>{isEur ? 'Total' : '合計'}</span>
@@ -262,7 +262,6 @@ export default function CartPage() {
         <span>Mastercard</span><span>/</span>
         <span>Amex</span><span>/</span>
         <span>JCB</span><span>/</span>
-        <span>銀行振込</span><span>/</span>
         <span>JPYC</span>
       </div>
 
