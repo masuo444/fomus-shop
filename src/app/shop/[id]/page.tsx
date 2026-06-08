@@ -75,12 +75,12 @@ export default async function ProductDetailPage({ params }: Props) {
   const { id } = await params
   const supabase = getSupabase()
 
-  // Phase 1: product fetch（slug OR uuid で検索）
+  // Phase 1: product fetch（UUID or slug で分岐）
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
   const { data: product } = await supabase
     .from('products')
     .select('*, category:categories(*), product_options(*, choices:product_option_choices(*))')
-    .or(`id.eq.${id},slug.eq.${id}`)
+    .eq(isUuid ? 'id' : 'slug', id)
     .eq('is_published', true)
     .single()
 
