@@ -91,7 +91,20 @@ export default async function ProductDetailPage({ params }: Props) {
 
   // Phase 2: shop / reviews / related products in parallel
   const fetchRelated = async (): Promise<Product[]> => {
-    if (p.hidden_from_listing) return []
+    if (p.hidden_from_listing) {
+      const shopIds = await getPublishedShopIds()
+      if (shopIds.length === 0) return []
+      const { data } = await supabase
+        .from('products')
+        .select('*')
+        .in('shop_id', shopIds)
+        .eq('is_published', true)
+        .eq('hidden_from_listing', false)
+        .neq('id', id)
+        .gt('price', 0)
+        .order('sort_order', { ascending: true })
+      return ((data || []) as Product[]).slice(0, 4)
+    }
     const shopIds = await getPublishedShopIds()
     if (shopIds.length === 0) return []
     const { data } = await supabase
