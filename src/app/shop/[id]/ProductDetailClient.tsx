@@ -354,8 +354,12 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
             </div>
           )}
 
-          {/* Free shipping for GUILD members */}
-          {isPremiumMember && (
+          {/* Shipping info */}
+          {product.shipping_included ? (
+            <div className="mt-2">
+              <span className="text-sm font-medium text-green-600">送料込み</span>
+            </div>
+          ) : isPremiumMember && (
             <div className="mt-2">
               <span className="text-sm font-medium" style={{ color: 'var(--color-member)' }}>
                 {siteConfig.features.membershipName}会員特典あり

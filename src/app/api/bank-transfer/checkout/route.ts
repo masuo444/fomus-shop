@@ -3,10 +3,11 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { SHIPPING_FEE } from '@/lib/constants'
 import siteConfig from '@/site.config'
-import type { Product } from '@/lib/types'
+import type { Order, OrderItem, Product } from '@/lib/types'
 import { requireString, validateEmail, ValidationError } from '@/lib/validation'
 import { rateLimit } from '@/lib/rate-limit'
 import { validateItemQuantities, verifyOptionPrices, verifyCouponDiscount, reserveStock, restoreStock } from '@/lib/checkout-validation'
+import { sendOrderNotificationToAdmin } from '@/lib/email'
 
 interface CheckoutItem {
   product_id: string
@@ -153,7 +154,9 @@ export async function POST(request: Request) {
       return sum + (getUnitPrice(product) + getOptionsAdj(item, i)) * item.quantity
     }, 0)
 
-    const shippingFee = SHIPPING_FEE
+    const allDigital = products.every((p: any) => p.item_type === 'digital')
+    const allShippingIncluded = products.every((p: any) => p.shipping_included)
+    const shippingFee = (allDigital || allShippingIncluded) ? 0 : SHIPPING_FEE
 
     // P0 Fix: Verify coupon on server side
     let couponDiscount = 0
@@ -240,7 +243,17 @@ export async function POST(request: Request) {
       }
     })
 
-    await admin.from('order_items').insert(orderItems)
+    const { data: insertedItems } = await admin.from('order_items').insert(orderItems).select()
+
+    // Send admin notification email
+    try {
+      await sendOrderNotificationToAdmin(
+        order as unknown as Order,
+        (insertedItems ?? []) as OrderItem[]
+      )
+    } catch (emailError) {
+      console.error('Admin notification email failed for bank transfer order:', order.id, emailError)
+    }
 
     return NextResponse.json({
       order_id: order.id,

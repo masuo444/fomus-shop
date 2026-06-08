@@ -183,8 +183,9 @@ export async function POST(request: Request) {
       return sum + (getUnitPrice(product) + getOptionsAdj(item, i)) * item.quantity
     }, 0)
 
-    // Shipping fee: digital products are free, GUILD members get flat 800 yen
-    const shippingFee = allDigital ? 0
+    // Shipping fee: digital or shipping_included products are free, GUILD members get flat 800 yen
+    const allShippingIncluded = products.every((p: any) => p.shipping_included)
+    const shippingFee = (allDigital || allShippingIncluded) ? 0
       : currency === 'eur' ? siteConfig.shippingFeeEur
       : isGuildMember ? 800
       : SHIPPING_FEE

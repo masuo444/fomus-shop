@@ -54,6 +54,7 @@ export interface Product {
   sale_end_date: string | null
   weight_grams: number | null
   hidden_from_listing: boolean
+  shipping_included: boolean
   member_price: number | null
   price_eur: number | null
   member_price_eur: number | null

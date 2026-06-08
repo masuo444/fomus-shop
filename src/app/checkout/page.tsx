@@ -117,7 +117,8 @@ export default function CheckoutPage() {
     (sum, item) => sum + getItemPrice(item) * item.quantity,
     0
   )
-  const shippingFee = allDigital ? 0 : (isEur ? SHIPPING_FEE_EUR : SHIPPING_FEE)
+  const allShippingIncluded = items.length > 0 && items.every(i => i.product?.shipping_included)
+  const shippingFee = (allDigital || allShippingIncluded) ? 0 : (isEur ? SHIPPING_FEE_EUR : SHIPPING_FEE)
   const total = subtotal + shippingFee - couponDiscount
 
   const handleApplyCoupon = async () => {
