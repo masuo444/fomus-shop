@@ -7,7 +7,6 @@ import ProductReviews from '@/components/product/ProductReviews'
 import type { ProductReview } from '@/components/product/ProductReviews'
 import ProductCard from '@/components/product/ProductCard'
 import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd'
-import { getPublishedShopIds } from '@/lib/shop'
 import RecentlyViewed from '@/components/product/RecentlyViewed'
 import siteConfig from '@/site.config'
 
@@ -97,12 +96,9 @@ export default async function ProductDetailPage({ params }: Props) {
 
   // Phase 2: shop / reviews / related products in parallel
   const fetchRelated = async (): Promise<Product[]> => {
-    const shopIds = await getPublishedShopIds()
-    if (shopIds.length === 0) return []
     const { data } = await supabase
       .from('products')
       .select('*')
-      .in('shop_id', shopIds)
       .eq('is_published', true)
       .eq('hidden_from_listing', false)
       .neq('id', p.id)
