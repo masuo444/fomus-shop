@@ -40,8 +40,7 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
 
   const optionsAdjustment = getOptionsAdjustment(selectedOptions)
   const isDigital = product.item_type === 'digital'
-  // hidden_from_listing: カートをスキップして即チェックアウトへ（ボタンスタイルはisDigitalとは別）
-  const isDirectCheckout = isDigital || product.hidden_from_listing
+  const isDirectCheckout = isDigital
   const isMadeToOrder = product.made_to_order
   const isSoldOut = product.stock === 0 && !isMadeToOrder
   const isInquiryOnly = mainPrice === 0
