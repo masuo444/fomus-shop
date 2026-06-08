@@ -304,7 +304,7 @@ export default function CheckoutPage() {
               {!allDigital && (
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">送料</span>
-                  <span>{formatPrice(shippingFee, currency)}</span>
+                  <span>{allShippingIncluded ? '送料込み' : formatPrice(shippingFee, currency)}</span>
                 </div>
               )}
               {couponDiscount > 0 && (

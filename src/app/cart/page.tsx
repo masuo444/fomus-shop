@@ -117,7 +117,8 @@ export default function CartPage() {
     0
   )
   const allDigital = items.length > 0 && items.every(i => i.product?.item_type === 'digital')
-  const shippingFee = items.length > 0 && !allDigital
+  const allShippingIncluded = items.length > 0 && items.every(i => i.product?.shipping_included)
+  const shippingFee = items.length > 0 && !allDigital && !allShippingIncluded
     ? (isEur ? SHIPPING_FEE_EUR : SHIPPING_FEE)
     : 0
   const total = subtotal + shippingFee
@@ -234,9 +235,9 @@ export default function CartPage() {
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-gray-500">{isEur ? 'Shipping' : '送料'}</span>
-          <span className="text-gray-900">{allDigital ? '無料' : formatPrice(shippingFee, currency)}</span>
+          <span className="text-gray-900">{(allDigital || allShippingIncluded) ? '無料（送料込み）' : formatPrice(shippingFee, currency)}</span>
         </div>
-        {!allDigital && (isEur ? (
+        {!allDigital && !allShippingIncluded && (isEur ? (
           <p className="text-xs text-gray-400">International shipping included</p>
         ) : (
           <p className="text-xs text-gray-400">※ 国内送料1,000円〜 / 銀行振込OK</p>
