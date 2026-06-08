@@ -117,10 +117,10 @@ export default function CartPage() {
     0
   )
   const allDigital = items.length > 0 && items.every(i => i.product?.item_type === 'digital')
-  const allShippingIncluded = items.length > 0 && items.every(i => i.product?.shipping_included)
-  const shippingFee = items.length > 0 && !allDigital && !allShippingIncluded
-    ? (isEur ? SHIPPING_FEE_EUR : SHIPPING_FEE)
-    : 0
+  const allShippingIncluded = items.length > 0 && items.every(i => i.product?.shipping_included === true)
+  const shippingFee = (allDigital || allShippingIncluded || items.length === 0)
+    ? 0
+    : (isEur ? SHIPPING_FEE_EUR : SHIPPING_FEE)
   const total = subtotal + shippingFee
 
   if (loading) {
