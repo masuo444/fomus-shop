@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, productPath } from '@/lib/utils'
 import type { Product } from '@/lib/types'
 import FavoriteButton from '@/components/product/FavoriteButton'
 import QuickAddToCart from '@/components/product/QuickAddToCart'
@@ -49,7 +49,7 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
         />
       </div>
 
-      <Link href={`/shop/${product.id}`} className="block">
+      <Link href={productPath(product)} className="block">
         <div className="relative aspect-square bg-[var(--color-subtle)] overflow-hidden rounded-xl">
           {product.images && product.images.length > 0 ? (
             <>
@@ -180,6 +180,7 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
       {!isSoldOut && mainPrice > 0 && isSalePeriodActive && (
         <QuickAddToCart
           productId={product.id}
+          productSlug={product.slug}
           shopId={product.shop_id}
           stock={product.stock}
           hasOptions={hasOptions}

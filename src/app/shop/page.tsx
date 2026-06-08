@@ -146,7 +146,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         name="FOMUS 商品一覧"
         items={products.slice(0, 20).map((p, i) => ({
           name: p.name,
-          url: `${process.env.NEXT_PUBLIC_BASE_URL || ''}/shop/${p.id}`,
+          url: `${process.env.NEXT_PUBLIC_BASE_URL || ''}/shop/${p.slug || p.id}`,
           image: p.images?.[0],
           position: i + 1,
         }))}

@@ -32,6 +32,7 @@ export interface Commission {
 export interface Product {
   id: string
   shop_id: string
+  slug: string | null
   name: string
   description: string | null
   price: number

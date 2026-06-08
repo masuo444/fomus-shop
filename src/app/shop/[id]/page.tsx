@@ -1,5 +1,5 @@
 import { createClient as createAnonClient } from '@supabase/supabase-js'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import type { Product } from '@/lib/types'
 import type { Metadata } from 'next'
 import ProductDetailClient from './ProductDetailClient'
@@ -28,9 +28,9 @@ interface Props {
 export async function generateStaticParams() {
   const { data } = await getSupabase()
     .from('products')
-    .select('id')
+    .select('id, slug')
     .eq('is_published', true)
-  return (data || []).map((p) => ({ id: p.id }))
+  return (data || []).map((p) => ({ id: p.slug || p.id }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -75,11 +75,12 @@ export default async function ProductDetailPage({ params }: Props) {
   const { id } = await params
   const supabase = getSupabase()
 
-  // Phase 1: product fetch（anon client = ISRキャッシュ有効）
+  // Phase 1: product fetch（slug OR uuid で検索）
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
   const { data: product } = await supabase
     .from('products')
     .select('*, category:categories(*), product_options(*, choices:product_option_choices(*))')
-    .eq('id', id)
+    .or(`id.eq.${id},slug.eq.${id}`)
     .eq('is_published', true)
     .single()
 
@@ -88,6 +89,11 @@ export default async function ProductDetailPage({ params }: Props) {
   }
 
   const p = product as Product
+
+  // UUIDでアクセスされてslugがある場合はslugにリダイレクト
+  if (isUuid && p.slug) {
+    redirect(`/shop/${p.slug}`)
+  }
 
   // Phase 2: shop / reviews / related products in parallel
   const fetchRelated = async (): Promise<Product[]> => {
@@ -149,7 +155,7 @@ export default async function ProductDetailPage({ params }: Props) {
         price={p.price}
         currency="JPY"
         image={p.images?.[0]}
-        url={`/shop/${p.id}`}
+        url={`/shop/${p.slug || p.id}`}
         inStock={p.stock !== 0}
         sku={p.id}
         brand="FOMUS"

@@ -30,3 +30,8 @@ export function cn(...classes: (string | undefined | false | null)[]): string {
 export function truncate(str: string, length: number): string {
   return str.length > length ? str.slice(0, length) + '...' : str
 }
+
+export function productPath(product: { id: string; slug?: string | null }): string {
+  return `/shop/${product.slug || product.id}`
+}
+

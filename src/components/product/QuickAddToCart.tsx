@@ -7,6 +7,7 @@ import Link from 'next/link'
 
 interface QuickAddToCartProps {
   productId: string
+  productSlug?: string | null
   shopId: string
   stock: number
   hasOptions?: boolean
@@ -16,7 +17,7 @@ interface QuickAddToCartProps {
   quantityLimit?: number | null
 }
 
-export default function QuickAddToCart({ productId, shopId, stock, hasOptions, price, productName, madeToOrder, quantityLimit }: QuickAddToCartProps) {
+export default function QuickAddToCart({ productId, productSlug, shopId, stock, hasOptions, price, productName, madeToOrder, quantityLimit }: QuickAddToCartProps) {
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
   const [showQty, setShowQty] = useState(false)
@@ -29,7 +30,7 @@ export default function QuickAddToCart({ productId, shopId, stock, hasOptions, p
   if (hasOptions) {
     return (
       <Link
-        href={`/shop/${productId}`}
+        href={`/shop/${productSlug || productId}`}
         className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 text-[10px] tracking-[0.12em] uppercase border border-[var(--color-border)] text-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-[var(--background)] transition-colors"
         onClick={(e) => e.stopPropagation()}
       >

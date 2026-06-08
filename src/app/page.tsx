@@ -92,7 +92,7 @@ export default async function HomePage() {
           name="FOMUS 新着商品"
           items={newProducts.map((p, i) => ({
             name: p.name,
-            url: `${process.env.NEXT_PUBLIC_BASE_URL || ''}/shop/${p.id}`,
+            url: `${process.env.NEXT_PUBLIC_BASE_URL || ''}/shop/${p.slug || p.id}`,
             image: p.images?.[0],
             position: i + 1,
           }))}

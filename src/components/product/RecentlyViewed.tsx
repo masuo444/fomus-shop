@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, productPath } from '@/lib/utils'
 import type { Product } from '@/lib/types'
 import { useCurrency } from '@/hooks/useCurrency'
 
@@ -58,7 +58,7 @@ export default function RecentlyViewed({ excludeId }: { excludeId?: string }) {
         {products.map((product) => {
           const price = isEur ? (product.price_eur ?? product.price) : product.price
           return (
-            <Link key={product.id} href={`/shop/${product.id}`} className="shrink-0 w-36 group">
+            <Link key={product.id} href={productPath(product)} className="shrink-0 w-36 group">
               <div className="aspect-square bg-[var(--color-subtle)] rounded-lg overflow-hidden relative">
                 {product.images?.[0] && (
                   <Image
