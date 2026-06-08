@@ -26,9 +26,13 @@ interface ShopPageProps {
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const params = await searchParams
   const supabase = await createClient()
-  const currency = await getCurrency()
 
-  const shopIds = await getPublishedShopIds()
+  // 独立したクエリを並列実行
+  const [{ data: { user } }, currency, shopIds] = await Promise.all([
+    supabase.auth.getUser(),
+    getCurrency(),
+    getPublishedShopIds(),
+  ])
 
   let products: Product[] = []
   let categories: Category[] = []
@@ -36,104 +40,78 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   let productsWithOptions: Set<string> = new Set()
   let categoryCounts: Record<string, number> = {}
   let totalCount = 0
-
-  // Check current user's GUILD status
   let isLoggedIn = false
   let isPremiumMember = false
-  const { data: { user } } = await supabase.auth.getUser()
-  if (user) {
-    isLoggedIn = true
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_premium_member')
-      .eq('id', user.id)
-      .single()
-    if (profile?.is_premium_member) {
-      isPremiumMember = true
-    }
+
+  // 認証チェックとショップデータを並列実行
+  const authPromise = user
+    ? supabase.from('profiles').select('is_premium_member').eq('id', user.id).single()
+    : Promise.resolve({ data: null })
+
+  let productQuery = supabase
+    .from('products')
+    .select('*')
+    .in('shop_id', shopIds)
+    .eq('is_published', true)
+    .eq('item_type', 'physical')
+    .eq('hidden_from_listing', false)
+
+  if (params.category) productQuery = productQuery.eq('category_id', params.category)
+  switch (params.sort) {
+    case 'price_asc': productQuery = productQuery.order('price', { ascending: true }); break
+    case 'price_desc': productQuery = productQuery.order('price', { ascending: false }); break
+    case 'oldest': productQuery = productQuery.order('created_at', { ascending: true }); break
+    default: productQuery = productQuery.order('sort_order', { ascending: true }).order('created_at', { ascending: false })
   }
 
   if (shopIds.length > 0) {
-    // Load shop names for display (only if multiple shops)
-    if (shopIds.length > 1) {
-      const { data: shopsData } = await supabase
-        .from('shops')
-        .select('id, name')
-        .in('id', shopIds)
-      if (shopsData) {
-        shopNames = Object.fromEntries(shopsData.map((s) => [s.id, s.name]))
-      }
+    const [
+      { data: profile },
+      { data: categoriesData },
+      { data: allProductCounts },
+      { data: productsData },
+      { data: shopsData },
+    ] = await Promise.all([
+      authPromise,
+      supabase.from('categories').select('*').in('shop_id', shopIds).order('sort_order'),
+      supabase.from('products').select('id, category_id').in('shop_id', shopIds).eq('is_published', true).eq('item_type', 'physical').eq('hidden_from_listing', false),
+      productQuery,
+      shopIds.length > 1
+        ? supabase.from('shops').select('id, name').in('id', shopIds)
+        : Promise.resolve({ data: null }),
+    ])
+
+    if (user) {
+      isLoggedIn = true
+      if (profile?.is_premium_member) isPremiumMember = true
     }
 
-    const { data: categoriesData } = await supabase
-      .from('categories')
-      .select('*')
-      .in('shop_id', shopIds)
-      .order('sort_order')
+    if (shopsData) shopNames = Object.fromEntries(shopsData.map((s: any) => [s.id, s.name]))
 
     const excludeCategories = ['撮影', 'イベント']
-    categories = (categoriesData || []).filter((c) => !excludeCategories.includes(c.name))
+    categories = (categoriesData || []).filter((c: any) => !excludeCategories.includes(c.name))
 
-    // Get counts per category
-    const { data: allProducts } = await supabase
-      .from('products')
-      .select('id, category_id')
-      .in('shop_id', shopIds)
-      .eq('is_published', true)
-      .eq('item_type', 'physical')
-      .eq('hidden_from_listing', false)
-
-    if (allProducts) {
-      totalCount = allProducts.length
-      for (const p of allProducts) {
-        if (p.category_id) {
-          categoryCounts[p.category_id] = (categoryCounts[p.category_id] || 0) + 1
-        }
+    if (allProductCounts) {
+      totalCount = allProductCounts.length
+      for (const p of allProductCounts) {
+        if (p.category_id) categoryCounts[p.category_id] = (categoryCounts[p.category_id] || 0) + 1
       }
     }
 
-    let query = supabase
-      .from('products')
-      .select('*')
-      .in('shop_id', shopIds)
-      .eq('is_published', true)
-      .eq('item_type', 'physical')
-      .eq('hidden_from_listing', false)
-
-    if (params.category) {
-      query = query.eq('category_id', params.category)
-    }
-
-    switch (params.sort) {
-      case 'price_asc':
-        query = query.order('price', { ascending: true })
-        break
-      case 'price_desc':
-        query = query.order('price', { ascending: false })
-        break
-      case 'oldest':
-        query = query.order('created_at', { ascending: true })
-        break
-      default:
-        query = query.order('sort_order', { ascending: true }).order('created_at', { ascending: false })
-    }
-
-    const { data: productsData } = await query
     products = productsData || []
 
-    // Check which products have required options (for quick-add vs detail-page)
+    // オプション確認（商品取得後）
     if (products.length > 0) {
-      const productIds = products.map(p => p.id)
       const { data: optionsData } = await supabase
         .from('product_options')
         .select('product_id')
-        .in('product_id', productIds)
+        .in('product_id', products.map(p => p.id))
         .eq('required', true)
-      if (optionsData) {
-        const idsWithOptions = new Set(optionsData.map(o => o.product_id))
-        productsWithOptions = idsWithOptions
-      }
+      if (optionsData) productsWithOptions = new Set(optionsData.map((o: any) => o.product_id))
     }
+  } else {
+    const { data: profile } = await authPromise
+    if (user) { isLoggedIn = true; if (profile?.is_premium_member) isPremiumMember = true }
   }
 
   return (
