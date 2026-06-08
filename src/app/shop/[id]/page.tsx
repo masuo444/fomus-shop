@@ -19,7 +19,6 @@ function getSupabase() {
   )
 }
 
-export const runtime = 'edge'
 export const revalidate = 86400
 
 interface Props {
@@ -92,17 +91,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
   // Phase 2: shop / reviews / related products in parallel
   const fetchRelated = async (): Promise<Product[]> => {
-    if (p.hidden_from_listing) {
-      const { data } = await supabase
-        .from('products')
-        .select('*')
-        .eq('shop_id', p.shop_id)
-        .eq('is_published', true)
-        .eq('hidden_from_listing', true)
-        .neq('id', id)
-        .order('price', { ascending: true })
-      return (data || []) as Product[]
-    }
+    if (p.hidden_from_listing) return []
     const shopIds = await getPublishedShopIds()
     if (shopIds.length === 0) return []
     const { data } = await supabase
