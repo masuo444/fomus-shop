@@ -55,7 +55,7 @@ const siteConfig = {
 
   // Bank Transfer
   bankTransfer: {
-    enabled: true,
+    enabled: false,
     bankName: process.env.BANK_TRANSFER_BANK_NAME || '三菱UFJ銀行',
     branchName: process.env.BANK_TRANSFER_BRANCH_NAME || '渋谷支店',
     accountType: process.env.BANK_TRANSFER_ACCOUNT_TYPE || '普通',
