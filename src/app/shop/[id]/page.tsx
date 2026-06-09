@@ -34,29 +34,30 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
   const { data: product } = await getSupabase()
     .from('products')
-    .select('name, description, images')
-    .eq('id', id)
+    .select('name, description, images, slug')
+    .eq(isUuid ? 'id' : 'slug', id)
     .single()
 
   const title = product?.name || '商品詳細'
   const description = product?.description || siteConfig.description
-  const imageUrl = product?.images?.[0] || undefined
+  const slug = product?.slug || id
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://shop.fomus.jp'
-  const ogImage = `${baseUrl}/api/og?id=${id}`
+  const ogImage = `${baseUrl}/api/og?id=${slug}`
 
   return {
     title,
     description,
     alternates: {
-      canonical: `/shop/${id}`,
+      canonical: `/shop/${slug}`,
     },
     openGraph: {
       title: `${title} — ${siteConfig.name}`,
       description,
-      url: `${baseUrl}/shop/${id}`,
+      url: `${baseUrl}/shop/${slug}`,
       siteName: siteConfig.name,
       images: [{ url: ogImage, width: 1200, height: 630 }],
       type: 'website',

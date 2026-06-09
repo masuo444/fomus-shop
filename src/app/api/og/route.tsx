@@ -25,8 +25,10 @@ export async function GET(request: Request) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     if (supabaseUrl && supabaseKey) {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(productId)
+      const filter = isUuid ? `id=eq.${productId}` : `slug=eq.${productId}`
       const res = await fetch(
-        `${supabaseUrl}/rest/v1/products?id=eq.${productId}&select=name,price,images&limit=1`,
+        `${supabaseUrl}/rest/v1/products?${filter}&select=name,price,images&limit=1`,
         { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
       )
       const data = await res.json()
