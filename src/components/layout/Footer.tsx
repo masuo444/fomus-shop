@@ -49,6 +49,7 @@ export default function Footer() {
                 <li><Link href="/digital" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">デジタルアイテム</Link></li>
                 <li><Link href="/gallery" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">ギャラリー</Link></li>
                 <li><Link href="/story" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">FOMUSについて</Link></li>
+                <li><Link href="/column" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">枡コラム</Link></li>
               </ul>
             </div>
             <div>
