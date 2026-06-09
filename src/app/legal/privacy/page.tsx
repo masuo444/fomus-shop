@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'プライバシーポリシー',
   description: 'FOMUSのプライバシーポリシー。個人情報の収集・利用目的・第三者提供・管理について。',
+  alternates: { canonical: '/legal/privacy' },
 }
 
 export default function PrivacyPolicyPage() {

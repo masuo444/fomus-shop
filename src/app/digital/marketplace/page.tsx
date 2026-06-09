@@ -6,6 +6,7 @@ import MarketplaceClient from './MarketplaceClient'
 export const metadata: Metadata = {
   title: 'マーケットプレイス - デジタルアイテム',
   description: 'メンバーが出品したデジタルアイテムのマーケットプレイス',
+  alternates: { canonical: '/digital/marketplace' },
 }
 
 export default async function MarketplacePage() {
