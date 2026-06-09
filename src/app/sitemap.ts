@@ -31,6 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .select('id, slug, updated_at')
       .in('shop_id', shopIds)
       .eq('is_published', true)
+      .eq('hidden_from_listing', false)
       .order('updated_at', { ascending: false })
 
     productPages = (products || []).map((p) => ({
