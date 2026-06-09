@@ -349,7 +349,7 @@ export default function CheckoutPage() {
             {!allDigital && (isEur ? (
               <p className="text-xs text-gray-400">International shipping available</p>
             ) : (
-              <p className="text-xs text-gray-400">※ 国内送料1,000円〜 / 銀行振込OK</p>
+              <p className="text-xs text-gray-400">※ 国内送料1,000円〜</p>
             ))}
 
             <div>
