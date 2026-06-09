@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title: {
     absolute: `${siteConfig.name} — Official Online Shop`,
   },
-  description: 'FOMUS公式ショップ。国産ヒノキの枡（FOMUS枡・首掛け枡・アラビア語枡）、SILVA、デジタルアイテムなど。Stripe・銀行振込・JPYC決済対応。',
+  description: 'FOMUS公式ショップ。国産ヒノキの枡（FOMUS枡・首掛け枡・アラビア語枡）、SILVA、デジタルアイテムなど。クレジットカード・JPYC決済対応。',
   keywords: ['FOMUS', '枡', 'ます', 'masu', 'SILVA', 'ヒノキ枡', 'オリジナルグッズ', 'FOMUS GUILD', 'デジタルアイテム'],
 }
 
@@ -83,7 +83,7 @@ export default async function HomePage() {
       <FAQPageJsonLd items={[
         { question: 'FOMUSではどんな商品が買えますか？', answer: '国産ヒノキの枡（一合枡・ミニ枡・名入れ枡）、カードゲーム「SILVA」、FOMUSランニングウェア、デジタルアイテムなどを販売しています。' },
         { question: '送料はいくらですか？', answer: '国内一律1,000円（税込）です。' },
-        { question: 'どんな決済方法が使えますか？', answer: 'クレジットカード（Visa・Mastercard・Amex・JCB）、銀行振込、JPYC（日本円ステーブルコイン）に対応しています。' },
+        { question: 'どんな決済方法が使えますか？', answer: 'クレジットカード（Visa・Mastercard・Amex・JCB）、JPYC（日本円ステーブルコイン）に対応しています。' },
         { question: '枡の名入れやオーダーメイドはできますか？', answer: 'はい、法人向け・個人向けともに名入れ・オリジナルデザインの枡を承っています。' },
         { question: 'JPYC決済とは何ですか？', answer: 'JPYCは1JPYC=1円の日本円ステーブルコインで、Polygonネットワークで決済します。' },
       ]} />
@@ -272,7 +272,7 @@ export default async function HomePage() {
                 まずは、1個から。
               </p>
               <p className="text-[11px] tracking-[0.15em] text-[var(--color-muted)] mb-12">
-                ¥2,200〜 / 送料¥1,000 / Visa・Mastercard・銀行振込対応
+                ¥2,200〜 / 送料¥1,000 / Visa・Mastercard対応
               </p>
               <div className="flex items-center justify-center gap-6 flex-wrap">
                 <Link href="/shop" className="btn-primary inline-flex items-center gap-3">
@@ -482,7 +482,7 @@ export default async function HomePage() {
           {[
             { q: 'FOMUSではどんな商品が買えますか？', a: '国産ヒノキの枡（一合枡・ミニ枡・名入れ枡）、カードゲーム「SILVA」、FOMUSランニングウェア、デジタルアイテムなどを販売しています。' },
             { q: '送料はいくらですか？', a: '国内一律1,000円（税込）です。商品はヤマト運輸または日本郵便でお届けします。' },
-            { q: 'どんな決済方法が使えますか？', a: 'クレジットカード（Visa・Mastercard・Amex・JCB）、銀行振込、JPYC（日本円ステーブルコイン）に対応しています。' },
+            { q: 'どんな決済方法が使えますか？', a: 'クレジットカード（Visa・Mastercard・Amex・JCB）、JPYC（日本円ステーブルコイン）に対応しています。' },
             { q: '枡の名入れやオーダーメイドはできますか？', a: 'はい、法人向け・個人向けともに名入れ・オリジナルデザインの枡を承っています。お問い合わせページからご相談ください。' },
             { q: 'JPYC決済とは何ですか？', a: 'JPYC（Japanese Yen Coin）は1JPYC=1円の日本円ステーブルコインです。Polygonネットワークで送金し、ブロックチェーン上で決済が完了します。' },
           ].map((item, i) => (

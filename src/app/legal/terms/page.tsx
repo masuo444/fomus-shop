@@ -40,10 +40,8 @@ export default function TermsPage() {
 
       <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-4">第4条（支払い）</h2>
       <p className="text-sm text-gray-600 leading-relaxed">
-        支払方法は、クレジットカード（Visa、Mastercard、American Express）および銀行振込とします。
+        支払方法は、クレジットカード（Visa、Mastercard、American Express、JCB）およびJPYCとします。
         クレジットカード決済はStripe社のシステムを利用します。
-        銀行振込の場合、注文後3営業日以内にお振り込みください。期限内に入金が確認できない場合、注文はキャンセルとなります。
-        振込手数料はお客様のご負担となります。
       </p>
 
       <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-4">第5条（配送）</h2>
