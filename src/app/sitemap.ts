@@ -28,13 +28,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (shopIds.length > 0) {
     const { data: products } = await admin
       .from('products')
-      .select('id, updated_at')
+      .select('id, slug, updated_at')
       .in('shop_id', shopIds)
       .eq('is_published', true)
       .order('updated_at', { ascending: false })
 
     productPages = (products || []).map((p) => ({
-      url: `${baseUrl}/shop/${p.id}`,
+      url: `${baseUrl}/shop/${p.slug || p.id}`,
       lastModified: new Date(p.updated_at),
       changeFrequency: 'weekly' as const,
       priority: 0.8,

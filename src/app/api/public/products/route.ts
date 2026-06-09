@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
     let query = admin
       .from('products')
       .select(
-        'id, name, description, price, compare_at_price, images, stock, category_id, member_price, is_published, sort_order, created_at'
+        'id, slug, name, description, price, compare_at_price, images, stock, category_id, member_price, is_published, sort_order, created_at'
       )
       .in('shop_id', shopIds)
       .eq('is_published', true)
@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
       category_id: p.category_id,
       member_price: showMemberPrice ? p.member_price : null,
       is_available: p.stock > 0 && p.is_published,
-      url: `${BASE_URL}/shop/${p.id}`,
+      url: `${BASE_URL}/shop/${p.slug || p.id}`,
     }))
 
     return NextResponse.json(result, {

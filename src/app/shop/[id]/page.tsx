@@ -150,7 +150,7 @@ export default async function ProductDetailPage({ params }: Props) {
       <BreadcrumbJsonLd items={[
         { name: 'ホーム', href: '/' },
         { name: '商品一覧', href: '/shop' },
-        { name: p.name, href: `/shop/${p.id}` },
+        { name: p.name, href: `/shop/${p.slug || p.id}` },
       ]} />
       <ProductDetailClient product={p} shopName={shopName} reviewCount={reviewCount} averageRating={averageRating} />
       <div className="max-w-6xl mx-auto px-4 sm:px-6">

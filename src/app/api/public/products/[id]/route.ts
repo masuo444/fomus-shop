@@ -29,7 +29,7 @@ export async function GET(
     const { data: product, error } = await admin
       .from('products')
       .select(
-        `id, name, description, price, compare_at_price, images, stock, category_id, member_price, is_published, item_type, shop_id,
+        `id, slug, name, description, price, compare_at_price, images, stock, category_id, member_price, is_published, item_type, shop_id,
         product_options (
           id, name, required, sort_order,
           choices:product_option_choices ( id, label, price_adjustment, stock, sort_order )
@@ -95,7 +95,7 @@ export async function GET(
       category_id: product.category_id,
       member_price: showMemberPrice ? product.member_price : null,
       is_available: product.stock > 0 && product.is_published,
-      url: `${BASE_URL}/shop/${product.id}`,
+      url: `${BASE_URL}/shop/${product.slug || product.id}`,
       product_options: productOptions,
     }
 
