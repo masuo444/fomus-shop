@@ -1,7 +1,15 @@
+'use client'
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import siteConfig from '@/site.config'
+import { commonDict, localeFromPathname, localePath } from '@/lib/i18n/common'
 
 export default function Footer() {
+  const locale = localeFromPathname(usePathname())
+  const t = commonDict[locale]
+  const p = (path: string) => localePath(locale, path)
+
   return (
     <footer className="border-t border-[var(--color-border)]">
       {/* Top */}
@@ -12,8 +20,8 @@ export default function Footer() {
               {siteConfig.name.toUpperCase()}
             </h3>
             <p className="mt-4 text-xs leading-[2] text-[var(--color-muted)] max-w-xs">
-              面白いモノを世の中に。
-              <br />枡・カードゲーム・デジタルアイテム。
+              {t.footerTagline1}
+              <br />{t.footerTagline2}
             </p>
             <div className="flex items-center gap-4 mt-6">
               <a
@@ -44,37 +52,37 @@ export default function Footer() {
             <div>
               <h4 className="text-[10px] tracking-[0.2em] uppercase text-[var(--color-muted)] mb-5">Shop</h4>
               <ul className="space-y-3">
-                <li><Link href="/shop" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">商品一覧</Link></li>
-                <li><Link href="/shop/masu" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">枡について</Link></li>
-                <li><Link href="/digital" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">デジタルアイテム</Link></li>
-                <li><Link href="/gallery" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">ギャラリー</Link></li>
-                <li><Link href="/story" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">FOMUSについて</Link></li>
-                <li><Link href="/column" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">枡コラム</Link></li>
+                <li><Link href={p('/shop')} className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerShopList}</Link></li>
+                <li><Link href="/shop/masu" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerAboutMasu}</Link></li>
+                <li><Link href="/digital" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerDigital}</Link></li>
+                <li><Link href="/gallery" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerGallery}</Link></li>
+                <li><Link href={p('/story')} className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerStory}</Link></li>
+                <li><Link href="/column" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerColumn}</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="text-[10px] tracking-[0.2em] uppercase text-[var(--color-muted)] mb-5">Account</h4>
               <ul className="space-y-3">
-                <li><Link href="/account" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">マイページ</Link></li>
-                <li><Link href="/account/orders" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">注文履歴</Link></li>
-                <li><Link href="/cart" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">カート</Link></li>
+                <li><Link href="/account" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerMyPage}</Link></li>
+                <li><Link href="/account/orders" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerOrders}</Link></li>
+                <li><Link href={p('/cart')} className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerCart}</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="text-[10px] tracking-[0.2em] uppercase text-[var(--color-muted)] mb-5">Support</h4>
               <ul className="space-y-3">
-                <li><Link href="/contact" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">お問い合わせ</Link></li>
-                <li><Link href="/shop/masu/custom" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">オーダーメイド</Link></li>
-                <li><Link href="/legal/commercial-transactions" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">配送について</Link></li>
-                <li><Link href="/jpyc" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">JPYC決済</Link></li>
+                <li><Link href={p('/contact')} className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerContact}</Link></li>
+                <li><Link href="/shop/masu/custom" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerCustomOrder}</Link></li>
+                <li><Link href="/legal/commercial-transactions" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerShipping}</Link></li>
+                <li><Link href="/jpyc" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerJpyc}</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="text-[10px] tracking-[0.2em] uppercase text-[var(--color-muted)] mb-5">Legal</h4>
               <ul className="space-y-3">
-                <li><Link href="/legal/commercial-transactions" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">特定商取引法</Link></li>
-                <li><Link href="/legal/privacy" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">プライバシー</Link></li>
-                <li><Link href="/legal/terms" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">利用規約</Link></li>
+                <li><Link href="/legal/commercial-transactions" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerCommercial}</Link></li>
+                <li><Link href="/legal/privacy" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerPrivacy}</Link></li>
+                <li><Link href="/legal/terms" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerTerms}</Link></li>
               </ul>
             </div>
           </div>

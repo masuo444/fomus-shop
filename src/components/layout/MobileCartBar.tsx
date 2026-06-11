@@ -5,10 +5,13 @@ import Link from 'next/link'
 import { ShoppingCart } from 'lucide-react'
 import { getLocalCart } from '@/lib/cart'
 import { usePathname } from 'next/navigation'
+import { commonDict, localeFromPathname, localePath } from '@/lib/i18n/common'
 
 export default function MobileCartBar() {
   const [cartCount, setCartCount] = useState(0)
   const pathname = usePathname()
+  const locale = localeFromPathname(pathname)
+  const t = commonDict[locale]
 
   useEffect(() => {
     const update = () => {
@@ -25,18 +28,18 @@ export default function MobileCartBar() {
   }, [])
 
   // Hide on cart/checkout/admin pages
-  const hiddenPaths = ['/cart', '/checkout', '/admin', '/partner', '/auth']
+  const hiddenPaths = ['/cart', '/checkout', '/admin', '/partner', '/auth', '/en/cart', '/en/checkout']
   if (hiddenPaths.some(p => pathname.startsWith(p))) return null
   if (cartCount === 0) return null
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-[var(--color-border)] px-4 py-3 safe-area-bottom">
       <Link
-        href="/cart"
+        href={localePath(locale, '/cart')}
         className="flex items-center justify-center gap-2 w-full bg-[var(--foreground)] text-white py-3 rounded-full text-sm font-medium"
       >
         <ShoppingCart className="w-4 h-4" />
-        カートを見る ({cartCount})
+        {t.viewCart} ({cartCount})
       </Link>
     </div>
   )

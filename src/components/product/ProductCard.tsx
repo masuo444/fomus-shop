@@ -5,6 +5,7 @@ import type { Product } from '@/lib/types'
 import FavoriteButton from '@/components/product/FavoriteButton'
 import QuickAddToCart from '@/components/product/QuickAddToCart'
 import siteConfig from '@/site.config'
+import { commonDict, localePath, productName } from '@/lib/i18n/common'
 
 interface ProductCardProps {
   product: Product
@@ -14,9 +15,12 @@ interface ProductCardProps {
   isFavorited?: boolean
   currency?: 'jpy' | 'eur'
   hasOptions?: boolean
+  locale?: 'ja' | 'en'
 }
 
-export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMember, isFavorited, currency = 'jpy', hasOptions }: ProductCardProps) {
+export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMember, isFavorited, currency = 'jpy', hasOptions, locale = 'ja' }: ProductCardProps) {
+  const t = commonDict[locale]
+  const displayName = productName(product, locale)
   const isMadeToOrder = product.made_to_order
   const isSoldOut = product.stock === 0 && !isMadeToOrder
 
@@ -49,7 +53,7 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
         />
       </div>
 
-      <Link href={productPath(product)} className="block">
+      <Link href={localePath(locale, productPath(product))} className="block">
         <div className="relative aspect-square bg-[var(--color-subtle)] overflow-hidden rounded-xl">
           {product.images && product.images.length > 0 ? (
             <>
@@ -95,14 +99,14 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
           {!isSalePeriodActive && (
             <div className="absolute inset-0 bg-[var(--foreground)]/40 flex items-center justify-center">
               <span className="text-[10px] tracking-[0.2em] uppercase text-white font-medium">
-                {isAfterSale ? '販売終了' : '販売開始前'}
+                {isAfterSale ? t.saleEnded : t.beforeSale}
               </span>
             </div>
           )}
           {!isSoldOut && isSalePeriodActive && product.stock > 0 && product.stock <= 5 && !isMadeToOrder && (
             <div className="absolute bottom-3 left-3">
               <span className="bg-amber-500 text-white text-[9px] tracking-wider font-medium px-2.5 py-1 rounded-full">
-                残り{product.stock}点
+                {t.onlyLeftPrefix}{product.stock}{t.onlyLeftSuffix}
               </span>
             </div>
           )}
@@ -126,7 +130,7 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
           {isMadeToOrder && (
             <div className="absolute bottom-3 left-3">
               <span className="bg-blue-600 text-white text-[9px] tracking-wider font-medium px-2.5 py-1 rounded-full">
-                受注生産
+                {t.madeToOrder}
               </span>
             </div>
           )}
@@ -136,12 +140,12 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
             <p className="text-[9px] tracking-[0.15em] uppercase text-[var(--color-muted)] mb-1">{shopName}</p>
           )}
           <h3 className="text-xs leading-relaxed text-[var(--foreground)] group-hover:text-[var(--color-muted)] transition-colors duration-300 line-clamp-2">
-            {product.name}
+            {displayName}
           </h3>
           <div className="mt-2">
             {mainPrice === 0 ? (
               <span className="text-xs tracking-wide text-[var(--color-muted)]">
-                価格はお問い合わせ
+                {t.contactForPrice}
               </span>
             ) : isPremiumMember && hasMemberPrice ? (
               <div className="flex items-center gap-2.5">
@@ -185,7 +189,7 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
           stock={product.stock}
           hasOptions={hasOptions}
           price={mainPrice}
-          productName={product.name}
+          productName={displayName}
           madeToOrder={isMadeToOrder}
           quantityLimit={product.quantity_limit}
         />

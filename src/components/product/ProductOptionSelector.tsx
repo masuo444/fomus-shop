@@ -1,9 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { formatPrice } from '@/lib/utils'
 import type { ProductOption } from '@/lib/types'
 import type { SelectedOptions } from '@/lib/cart'
+import { localeFromPathname } from '@/lib/i18n/common'
+import { productDict } from '@/lib/i18n/product'
 
 interface Props {
   options: ProductOption[]
@@ -14,6 +17,8 @@ interface Props {
 
 export default function ProductOptionSelector({ options, selectedOptions, onOptionsChange, currency = 'jpy' }: Props) {
   const [openInfo, setOpenInfo] = useState<string | null>(null)
+  const pathname = usePathname()
+  const t = productDict[localeFromPathname(pathname)]
 
   const sortedOptions = [...options].sort((a, b) => a.sort_order - b.sort_order)
 
@@ -49,7 +54,7 @@ export default function ProductOptionSelector({ options, selectedOptions, onOpti
               </label>
               {isRequired && (
                 <span className="text-[10px] bg-red-50 text-red-600 px-1.5 py-0.5 rounded font-medium">
-                  必須
+                  {t.required}
                 </span>
               )}
             </div>
@@ -66,7 +71,7 @@ export default function ProductOptionSelector({ options, selectedOptions, onOpti
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <span className="text-gray-500">なし</span>
+                    <span className="text-gray-500">{t.none}</span>
                   </button>
                 )}
                 {sortedChoices.map((choice) => {
@@ -97,7 +102,7 @@ export default function ProductOptionSelector({ options, selectedOptions, onOpti
                             {choice.label}
                           </span>
                           {isOutOfStock && (
-                            <span className="text-[10px] text-red-400 font-medium">品切れ</span>
+                            <span className="text-[10px] text-red-400 font-medium">{t.choiceOutOfStock}</span>
                           )}
                         </div>
                         {choice.price_adjustment !== 0 && (
@@ -117,8 +122,8 @@ export default function ProductOptionSelector({ options, selectedOptions, onOpti
                 onChange={(e) => handleSelect(option, e.target.value)}
                 className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black"
               >
-                {!isRequired && <option value="">選択しない</option>}
-                {isRequired && !selected && <option value="">選択してください</option>}
+                {!isRequired && <option value="">{t.noSelection}</option>}
+                {isRequired && !selected && <option value="">{t.pleaseSelect}</option>}
                 {sortedChoices.map((choice) => {
                   const isOutOfStock = choice.stock !== null && choice.stock <= 0
                   return (
@@ -127,7 +132,7 @@ export default function ProductOptionSelector({ options, selectedOptions, onOpti
                       {choice.price_adjustment !== 0
                         ? ` (${choice.price_adjustment > 0 ? '+' : ''}${formatPrice(choice.price_adjustment, currency)})`
                         : ''}
-                      {isOutOfStock ? ' - 品切れ' : ''}
+                      {isOutOfStock ? ` - ${t.choiceOutOfStock}` : ''}
                     </option>
                   )
                 })}

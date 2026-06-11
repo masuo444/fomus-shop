@@ -1,3 +1,5 @@
+import { productDict, dateLocale } from '@/lib/i18n/product'
+
 export interface ProductReview {
   id: string
   reviewer_name: string
@@ -10,6 +12,7 @@ export interface ProductReview {
 
 interface ProductReviewsProps {
   reviews: ProductReview[]
+  locale?: 'ja' | 'en'
 }
 
 function StarIcon({ filled, size = 14 }: { filled: boolean; size?: number }) {
@@ -39,20 +42,21 @@ function StarRating({ rating, size = 14 }: { rating: number; size?: number }) {
   )
 }
 
-export default function ProductReviews({ reviews }: ProductReviewsProps) {
+export default function ProductReviews({ reviews, locale = 'ja' }: ProductReviewsProps) {
   if (reviews.length === 0) return null
 
+  const t = productDict[locale]
   const totalCount = reviews.length
   const averageRating = reviews.reduce((sum, r) => sum + r.rating, 0) / totalCount
 
   return (
     <section className="border-t border-[var(--color-border)] pt-12 mt-12">
       <div className="flex items-baseline gap-4 mb-8">
-        <h2 className="text-lg font-medium text-[var(--foreground)]">カスタマーレビュー</h2>
+        <h2 className="text-lg font-medium text-[var(--foreground)]">{t.customerReviews}</h2>
         <div className="flex items-center gap-2">
           <StarRating rating={Math.round(averageRating)} />
           <span className="text-xs text-[var(--color-muted)]">
-            {averageRating.toFixed(1)} ({totalCount}件)
+            {averageRating.toFixed(1)} ({totalCount}{t.reviewsCountSuffix})
           </span>
         </div>
       </div>
@@ -64,7 +68,7 @@ export default function ProductReviews({ reviews }: ProductReviewsProps) {
               <StarRating rating={review.rating} size={12} />
               <span className="text-[11px] text-[var(--foreground)] font-medium">{review.reviewer_name}</span>
               {review.verified_purchase && (
-                <span className="text-[9px] tracking-[0.1em] text-emerald-600 bg-emerald-50 px-2 py-0.5">認証済み購入</span>
+                <span className="text-[9px] tracking-[0.1em] text-emerald-600 bg-emerald-50 px-2 py-0.5">{t.verifiedPurchase}</span>
               )}
             </div>
             {review.title && (
@@ -72,7 +76,7 @@ export default function ProductReviews({ reviews }: ProductReviewsProps) {
             )}
             <p className="text-xs leading-[2] text-[var(--color-muted)]">{review.body}</p>
             <p className="text-[10px] text-[var(--color-border)] mt-2">
-              {new Date(review.created_at).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}
+              {new Date(review.created_at).toLocaleDateString(dateLocale(locale), { year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
           </div>
         ))}

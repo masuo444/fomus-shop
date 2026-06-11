@@ -1,20 +1,23 @@
 import Link from 'next/link'
 import siteConfig from '@/site.config'
+import { productDict, fmt } from '@/lib/i18n/product'
 
 interface MemberCTAProps {
   compact?: boolean
+  locale?: 'ja' | 'en'
 }
 
 const memberName = siteConfig.features.membershipName
 const memberUrl = 'https://guild-app.fomusglobal.com/invite/FOMUS-SHOP'
 
-const benefits = [
-  `${memberName}限定価格で購入`,
-  '限定商品へのアクセス',
-]
-
-export default function MemberCTA({ compact = false }: MemberCTAProps) {
+export default function MemberCTA({ compact = false, locale = 'ja' }: MemberCTAProps) {
   if (!siteConfig.features.membershipProgram || !memberUrl) return null
+
+  const t = productDict[locale]
+  const benefits = [
+    fmt(t.ctaBenefitPrice, { name: memberName }),
+    t.ctaBenefitAccess,
+  ]
 
   if (compact) {
     return (
@@ -24,10 +27,10 @@ export default function MemberCTA({ compact = false }: MemberCTAProps) {
       >
         <div className="min-w-0">
           <p className="text-sm font-bold" style={{ color: 'var(--color-member-dark)' }}>
-            {memberName}会員になる
+            {fmt(t.ctaBecomeMember, { name: memberName })}
           </p>
           <p className="text-xs mt-0.5" style={{ color: 'var(--color-member)' }}>
-            {memberName}限定価格・限定商品
+            {fmt(t.ctaCompactDesc, { name: memberName })}
           </p>
         </div>
         <Link
@@ -37,7 +40,7 @@ export default function MemberCTA({ compact = false }: MemberCTAProps) {
           className="shrink-0 text-xs font-bold text-white px-3 py-1.5 rounded-full hover:opacity-90 transition-opacity"
           style={{ backgroundColor: 'var(--color-member)' }}
         >
-          詳しく見る
+          {t.ctaLearnMore}
         </Link>
       </div>
     )
@@ -49,10 +52,10 @@ export default function MemberCTA({ compact = false }: MemberCTAProps) {
       style={{ backgroundColor: 'var(--color-member-bg)', border: '1px solid var(--color-member-border)' }}
     >
       <h3 className="text-lg font-bold mb-1" style={{ color: 'var(--color-member-dark)' }}>
-        {memberName}会員になる
+        {fmt(t.ctaBecomeMember, { name: memberName })}
       </h3>
       <p className="text-sm mb-4" style={{ color: 'var(--color-member)' }}>
-        {memberName}会員だけの特別な特典をご利用いただけます
+        {fmt(t.ctaFullDesc, { name: memberName })}
       </p>
       <ul className="space-y-2 mb-5">
         {benefits.map((benefit) => (
@@ -71,7 +74,7 @@ export default function MemberCTA({ compact = false }: MemberCTAProps) {
         className="inline-block text-sm font-bold text-white px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity"
         style={{ backgroundColor: 'var(--color-member)' }}
       >
-        {memberName}に入会する
+        {fmt(t.ctaJoin, { name: memberName })}
       </Link>
     </div>
   )

@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   description: 'FOMUSへのお問い合わせ。商品・配送・オーダーメイドに関するご質問はこちらから。',
   alternates: {
     canonical: '/contact',
+    languages: { ja: '/contact', en: '/en/contact' },
   },
 }
 

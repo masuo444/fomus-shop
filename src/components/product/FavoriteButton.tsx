@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { Heart } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { localeFromPathname } from '@/lib/i18n/common'
+import { productDict } from '@/lib/i18n/product'
 
 interface FavoriteButtonProps {
   productId: string
@@ -17,6 +19,8 @@ export default function FavoriteButton({
   size = 'md',
 }: FavoriteButtonProps) {
   const router = useRouter()
+  const pathname = usePathname()
+  const t = productDict[localeFromPathname(pathname)]
   const [favorited, setFavorited] = useState(initialFavorited)
   const [loading, setLoading] = useState(false)
 
@@ -66,7 +70,7 @@ export default function FavoriteButton({
       onClick={handleToggle}
       disabled={loading}
       className="p-1.5 rounded-full hover:bg-white/80 transition-colors disabled:opacity-50"
-      aria-label={favorited ? 'お気に入りから削除' : 'お気に入りに追加'}
+      aria-label={favorited ? t.removeFavorite : t.addFavorite}
     >
       <Heart
         size={iconSize}

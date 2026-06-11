@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { ShoppingCart, Plus, Minus, Check } from 'lucide-react'
 import { addToLocalCart, wouldMixShops } from '@/lib/cart'
 import Link from 'next/link'
+import { commonDict, localeFromPathname, localePath } from '@/lib/i18n/common'
 
 interface QuickAddToCartProps {
   productId: string
@@ -21,6 +23,8 @@ export default function QuickAddToCart({ productId, productSlug, shopId, stock, 
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
   const [showQty, setShowQty] = useState(false)
+  const locale = localeFromPathname(usePathname())
+  const t = commonDict[locale]
 
   const maxQty = madeToOrder ? (quantityLimit || 99) : stock
 
@@ -30,12 +34,12 @@ export default function QuickAddToCart({ productId, productSlug, shopId, stock, 
   if (hasOptions) {
     return (
       <Link
-        href={`/shop/${productSlug || productId}`}
+        href={localePath(locale, `/shop/${productSlug || productId}`)}
         className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 text-[10px] tracking-[0.12em] uppercase border border-[var(--color-border)] text-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-[var(--background)] transition-colors"
         onClick={(e) => e.stopPropagation()}
       >
         <ShoppingCart className="w-3 h-3" />
-        オプションを選択
+        {t.selectOptions}
       </Link>
     )
   }
@@ -45,7 +49,7 @@ export default function QuickAddToCart({ productId, productSlug, shopId, stock, 
     e.stopPropagation()
 
     if (wouldMixShops(shopId)) {
-      if (!confirm('別のショップの商品がカートにあります。カートを空にしてこの商品を追加しますか？')) return
+      if (!confirm(t.mixedShopsConfirm)) return
       const { clearLocalCart } = require('@/lib/cart')
       clearLocalCart()
     }
@@ -63,7 +67,7 @@ export default function QuickAddToCart({ productId, productSlug, shopId, stock, 
     return (
       <div className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 text-[10px] tracking-[0.12em] bg-[var(--foreground)] text-[var(--background)]">
         <Check className="w-3 h-3" />
-        カートに追加しました
+        {t.addedToCart}
       </div>
     )
   }
@@ -99,7 +103,7 @@ export default function QuickAddToCart({ productId, productSlug, shopId, stock, 
             className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[10px] tracking-[0.12em] uppercase bg-[var(--foreground)] text-[var(--background)] hover:opacity-90 transition-opacity"
           >
             <ShoppingCart className="w-3 h-3" />
-            追加
+            {t.add}
           </button>
         </div>
       ) : (
@@ -108,7 +112,7 @@ export default function QuickAddToCart({ productId, productSlug, shopId, stock, 
           className="w-full flex items-center justify-center gap-1.5 py-2 text-[10px] tracking-[0.12em] uppercase border border-[var(--color-border)] text-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-[var(--background)] transition-colors"
         >
           <ShoppingCart className="w-3 h-3" />
-          カートに入れる
+          {t.addToCart}
         </button>
       )}
     </div>

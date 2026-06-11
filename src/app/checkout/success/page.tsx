@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle, UserPlus } from 'lucide-react'
 import Image from 'next/image'
@@ -9,6 +9,7 @@ import { clearLocalCart } from '@/lib/cart'
 import { createClient } from '@/lib/supabase/client'
 import { formatPrice } from '@/lib/utils'
 import type { Product } from '@/lib/types'
+import { checkoutDict, localeFromPathname, localePath } from '@/lib/i18n/checkout'
 
 export default function CheckoutSuccessPage() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
@@ -20,6 +21,10 @@ export default function CheckoutSuccessPage() {
   const [loading, setLoading] = useState(false)
   const [recommended, setRecommended] = useState<Product[]>([])
   const router = useRouter()
+  const pathname = usePathname()
+  const locale = localeFromPathname(pathname)
+  const t = checkoutDict[locale]
+  const p = (path: string) => localePath(locale, path)
 
   useEffect(() => {
     clearLocalCart()
@@ -59,7 +64,7 @@ export default function CheckoutSuccessPage() {
     const email = params.get('email')
 
     if (!email) {
-      setError('メールアドレスが見つかりません')
+      setError(t.emailNotFound)
       setLoading(false)
       return
     }
@@ -74,7 +79,7 @@ export default function CheckoutSuccessPage() {
 
     if (signUpError) {
       if (signUpError.message.includes('already registered')) {
-        setError('このメールアドレスは既に登録されています。ログインしてください。')
+        setError(t.alreadyRegistered)
       } else {
         setError(signUpError.message)
       }
@@ -90,13 +95,13 @@ export default function CheckoutSuccessPage() {
     <div className="max-w-lg mx-auto px-4 py-24 text-center">
       <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-6" />
       <h1 className="text-2xl font-bold text-gray-900 mb-2">
-        ご注文ありがとうございます
+        {t.thankYou}
       </h1>
       <p className="text-sm text-gray-500 mb-2">
-        ご注文の確認メールをお送りしました。
+        {t.confirmationEmailSent}
       </p>
       <p className="text-sm text-gray-500 mb-8">
-        商品の発送準備が整い次第、発送通知をお送りいたします。
+        {t.shippingNotice}
       </p>
 
       {/* Guest user: prompt to register */}
@@ -106,16 +111,16 @@ export default function CheckoutSuccessPage() {
             <UserPlus className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" />
             <div>
               <p className="text-sm font-medium text-gray-900 mb-1">
-                アカウントを作成しませんか？
+                {t.createAccountPrompt}
               </p>
               <p className="text-xs text-gray-500 mb-2">
-                次回のお買い物で配送先の入力が不要になります。注文履歴の確認やデジタルアイテムの購入もできるようになります。
+                {t.createAccountDesc}
               </p>
               <button
                 onClick={() => setShowRegister(true)}
                 className="bg-blue-500 text-white text-sm px-5 py-2 rounded-full hover:bg-blue-600 transition-colors"
               >
-                無料でアカウント作成
+                {t.createAccountFree}
               </button>
             </div>
           </div>
@@ -125,10 +130,10 @@ export default function CheckoutSuccessPage() {
       {/* Registration form */}
       {showRegister && !success && (
         <div className="mb-8 bg-white border border-gray-200 rounded-xl p-6 text-left">
-          <h3 className="font-medium text-gray-900 mb-4">アカウント作成</h3>
+          <h3 className="font-medium text-gray-900 mb-4">{t.createAccountTitle}</h3>
           <form onSubmit={handleRegister} className="space-y-4">
             <div>
-              <label className="block text-xs text-gray-500 mb-1">お名前</label>
+              <label className="block text-xs text-gray-500 mb-1">{t.nameLabel}</label>
               <input
                 type="text"
                 value={name}
@@ -138,13 +143,13 @@ export default function CheckoutSuccessPage() {
               />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">パスワード</label>
+              <label className="block text-xs text-gray-500 mb-1">{t.passwordLabel}</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                placeholder="6文字以上"
+                placeholder={t.passwordPlaceholder}
                 minLength={6}
                 required
               />
@@ -158,14 +163,14 @@ export default function CheckoutSuccessPage() {
                 disabled={loading}
                 className="flex-1 bg-blue-500 text-white text-sm py-2.5 rounded-full hover:bg-blue-600 transition-colors disabled:opacity-50"
               >
-                {loading ? '作成中...' : 'アカウント作成'}
+                {loading ? t.creating : t.createAccountButton}
               </button>
               <button
                 type="button"
                 onClick={() => setShowRegister(false)}
                 className="text-sm text-gray-400 hover:text-gray-600 px-3"
               >
-                キャンセル
+                {t.cancel}
               </button>
             </div>
           </form>
@@ -177,10 +182,10 @@ export default function CheckoutSuccessPage() {
         <div className="mb-8 space-y-4">
           <div className="bg-green-50 border border-green-100 rounded-xl p-6 text-left">
             <p className="text-sm font-medium text-green-700 mb-1">
-              アカウントを作成しました！
+              {t.accountCreated}
             </p>
             <p className="text-xs text-green-600">
-              確認メールをお送りしました。メール内のリンクをクリックしてアカウントを有効化してください。
+              {t.accountCreatedDesc}
             </p>
           </div>
         </div>
@@ -192,31 +197,31 @@ export default function CheckoutSuccessPage() {
             href="/account/orders"
             className="block w-full bg-black text-white py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
           >
-            注文履歴を確認
+            {t.viewOrders}
           </Link>
         ) : success ? (
           <Link
             href="/auth/login"
             className="block w-full bg-black text-white py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
           >
-            ログインする
+            {t.logIn}
           </Link>
         ) : null}
         <Link
-          href="/shop"
+          href={p('/shop')}
           className="block w-full text-sm text-gray-500 hover:text-gray-900 py-2 transition-colors"
         >
-          ショッピングを続ける
+          {t.continueShopping}
         </Link>
       </div>
 
       {/* Recommended Products */}
       {recommended.length > 0 && (
         <div className="mt-16 border-t border-gray-100 pt-10">
-          <h2 className="text-sm font-medium text-gray-500 mb-6 text-center">こちらもおすすめ</h2>
+          <h2 className="text-sm font-medium text-gray-500 mb-6 text-center">{t.recommended}</h2>
           <div className="grid grid-cols-2 gap-4">
             {recommended.map((product) => (
-              <Link key={product.id} href={`/shop/${product.id}`} className="group">
+              <Link key={product.id} href={p(`/shop/${product.id}`)} className="group">
                 <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden relative">
                   {product.images?.[0] && (
                     <Image

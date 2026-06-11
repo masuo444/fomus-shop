@@ -4,20 +4,62 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Mail } from 'lucide-react'
 
-const subjects = [
-  '商品について',
-  '注文について',
-  '返品・交換',
-  '配送について',
-  'オーダーメイド・コラボ相談',
-  'その他',
-]
+type Locale = 'ja' | 'en'
 
-function ContactContent() {
+const dictionaries = {
+  ja: {
+    subjects: [
+      '商品について',
+      '注文について',
+      '返品・交換',
+      '配送について',
+      'オーダーメイド・コラボ相談',
+      'その他',
+    ],
+    sendFailed: '送信に失敗しました',
+    sentTitle: '送信完了',
+    sentBody: 'お問い合わせを受け付けました。2営業日以内にご返信いたします。',
+    title: 'お問い合わせ',
+    lead: 'ご質問・ご要望がございましたら、お気軽にお問い合わせください。',
+    nameLabel: 'お名前 *',
+    emailLabel: 'メールアドレス *',
+    subjectLabel: 'お問い合わせ種別',
+    messageLabel: 'お問い合わせ内容 *',
+    sending: '送信中...',
+    submit: '送信する',
+    loading: '読み込み中...',
+  },
+  en: {
+    subjects: [
+      'About a product',
+      'About my order',
+      'Returns & exchanges',
+      'Shipping & delivery',
+      'Custom orders & collaborations',
+      'Other',
+    ],
+    sendFailed: 'Failed to send your message',
+    sentTitle: 'Message Sent',
+    sentBody: 'We have received your inquiry and will reply within 2 business days.',
+    title: 'Contact Us',
+    lead: 'Have a question or a request? We would love to hear from you.',
+    nameLabel: 'Name *',
+    emailLabel: 'Email *',
+    subjectLabel: 'Subject',
+    messageLabel: 'Message *',
+    sending: 'Sending...',
+    submit: 'Send Message',
+    loading: 'Loading...',
+  },
+} as const
+
+function ContactContent({ locale = 'ja' }: { locale?: Locale }) {
+  const t = dictionaries[locale]
+  const subjects = t.subjects
   const searchParams = useSearchParams()
   const prefillSubject = searchParams.get('subject')
 
-  const [form, setForm] = useState({ name: '', email: '', subject: subjects[0], message: '' })
+  const [form, setForm] = useState({ name: '', email: '', subject: subjects[0] as string, message: '' })
 
   useEffect(() => {
     if (prefillSubject) {
@@ -26,9 +68,10 @@ function ContactContent() {
       if (matched) {
         setForm(f => ({ ...f, subject: matched }))
       } else {
-        setForm(f => ({ ...f, subject: '商品について', message: `${prefillSubject}\n\n` }))
+        setForm(f => ({ ...f, subject: subjects[0], message: `${prefillSubject}\n\n` }))
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prefillSubject])
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
@@ -47,11 +90,11 @@ function ContactContent() {
       })
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || '送信に失敗しました')
+        throw new Error(data.error || t.sendFailed)
       }
       setSent(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : '送信に失敗しました')
+      setError(err instanceof Error ? err.message : t.sendFailed)
     } finally {
       setLoading(false)
     }
@@ -61,49 +104,49 @@ function ContactContent() {
     return (
       <div className="max-w-lg mx-auto px-4 py-24 text-center">
         <Mail className="w-12 h-12 text-green-500 mx-auto mb-4" />
-        <h1 className="text-xl font-bold text-gray-900 mb-2">送信完了</h1>
-        <p className="text-sm text-gray-500">お問い合わせを受け付けました。2営業日以内にご返信いたします。</p>
+        <h1 className="text-xl font-bold text-gray-900 mb-2">{t.sentTitle}</h1>
+        <p className="text-sm text-gray-500">{t.sentBody}</p>
       </div>
     )
   }
 
   return (
     <div className="max-w-lg mx-auto px-4 sm:px-6 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">お問い合わせ</h1>
-      <p className="text-sm text-gray-500 mb-8">ご質問・ご要望がございましたら、お気軽にお問い合わせください。</p>
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">{t.title}</h1>
+      <p className="text-sm text-gray-500 mb-8">{t.lead}</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm text-gray-600 mb-1">お名前 *</label>
+          <label className="block text-sm text-gray-600 mb-1">{t.nameLabel}</label>
           <input type="text" required value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black" />
         </div>
         <div>
-          <label className="block text-sm text-gray-600 mb-1">メールアドレス *</label>
+          <label className="block text-sm text-gray-600 mb-1">{t.emailLabel}</label>
           <input type="email" required value={form.email} onChange={(e) => setForm({...form, email: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black" />
         </div>
         <div>
-          <label className="block text-sm text-gray-600 mb-1">お問い合わせ種別</label>
+          <label className="block text-sm text-gray-600 mb-1">{t.subjectLabel}</label>
           <select value={form.subject} onChange={(e) => setForm({...form, subject: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black bg-white">
             {subjects.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
         <div>
-          <label className="block text-sm text-gray-600 mb-1">お問い合わせ内容 *</label>
+          <label className="block text-sm text-gray-600 mb-1">{t.messageLabel}</label>
           <textarea required value={form.message} onChange={(e) => setForm({...form, message: e.target.value})} rows={5} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black resize-none" />
         </div>
         {error && <p className="text-sm text-red-500">{error}</p>}
         <button type="submit" disabled={loading} className="w-full bg-black text-white py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50">
-          {loading ? '送信中...' : '送信する'}
+          {loading ? t.sending : t.submit}
         </button>
       </form>
     </div>
   )
 }
 
-export default function ContactClient() {
+export default function ContactClient({ locale = 'ja' }: { locale?: Locale }) {
   return (
-    <Suspense fallback={<div className="max-w-lg mx-auto px-4 py-16 text-center"><div className="animate-pulse text-gray-400">読み込み中...</div></div>}>
-      <ContactContent />
+    <Suspense fallback={<div className="max-w-lg mx-auto px-4 py-16 text-center"><div className="animate-pulse text-gray-400">{dictionaries[locale].loading}</div></div>}>
+      <ContactContent locale={locale} />
     </Suspense>
   )
 }

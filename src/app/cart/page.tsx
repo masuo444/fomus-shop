@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
@@ -20,6 +21,8 @@ import type { Product } from '@/lib/types'
 import MemberCTA from '@/components/ui/MemberCTA'
 import siteConfig from '@/site.config'
 import { useCurrency } from '@/hooks/useCurrency'
+import { checkoutDict, localeFromPathname, localePath } from '@/lib/i18n/checkout'
+import { productName as pnameForLocale } from '@/lib/i18n/common'
 
 interface CartItemWithProduct extends LocalCartItem {
   product?: Product
@@ -32,6 +35,13 @@ export default function CartPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const currency = useCurrency()
   const isEur = currency === 'eur'
+  const pathname = usePathname()
+  const locale = localeFromPathname(pathname)
+  const t = checkoutDict[locale]
+  const pname = (product: { name: string; name_en?: string | null }) => pnameForLocale(product, locale)
+  // Some labels already switch to English when currency is EUR on the JA site
+  const te = checkoutDict[isEur || locale === 'en' ? 'en' : 'ja']
+  const p = (path: string) => localePath(locale, path)
 
   useEffect(() => {
     loadCartProducts()
@@ -126,7 +136,7 @@ export default function CartPage() {
   if (loading) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
-        <div className="animate-pulse text-gray-400">読み込み中...</div>
+        <div className="animate-pulse text-gray-400">{t.loading}</div>
       </div>
     )
   }
@@ -135,13 +145,13 @@ export default function CartPage() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-24 text-center">
         <ShoppingBag className="w-16 h-16 text-gray-200 mx-auto mb-4" />
-        <h1 className="text-xl font-bold text-gray-900 mb-2">カートは空です</h1>
-        <p className="text-sm text-gray-400 mb-8">商品をカートに追加してください</p>
+        <h1 className="text-xl font-bold text-gray-900 mb-2">{t.cartEmptyTitle}</h1>
+        <p className="text-sm text-gray-400 mb-8">{t.cartEmptyDesc}</p>
         <Link
-          href="/shop"
+          href={p('/shop')}
           className="inline-block bg-black text-white px-8 py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
         >
-          ショッピングを続ける
+          {t.continueShopping}
         </Link>
       </div>
     )
@@ -149,7 +159,7 @@ export default function CartPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">カート</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-8">{t.cartTitle}</h1>
 
       <div className="space-y-4">
         {items.map((item) => (
@@ -161,7 +171,7 @@ export default function CartPage() {
               {item.product?.images?.[0] ? (
                 <Image
                   src={item.product.images[0]}
-                  alt={item.product?.name || ''}
+                  alt={item.product ? pname(item.product) : ''}
                   fill
                   className="object-cover"
                   sizes="80px"
@@ -175,10 +185,10 @@ export default function CartPage() {
 
             <div className="flex-1 min-w-0">
               <Link
-                href={`/shop/${item.product_id}`}
+                href={p(`/shop/${item.product_id}`)}
                 className="text-sm font-medium text-gray-900 hover:text-gray-600 line-clamp-1"
               >
-                {item.product?.name || '商品が見つかりません'}
+                {item.product ? pname(item.product) : t.productNotFound}
               </Link>
               <p className="text-sm font-medium text-gray-900 mt-1">
                 {item.product ? formatPrice(getItemPrice(item.product, item.selected_options), currency) : '-'}
@@ -230,28 +240,28 @@ export default function CartPage() {
       {/* Summary */}
       <div className="mt-8 border-t border-gray-100 pt-6 space-y-3">
         <div className="flex justify-between text-sm">
-          <span className="text-gray-500">小計</span>
+          <span className="text-gray-500">{t.subtotal}</span>
           <span className="text-gray-900">{formatPrice(subtotal, currency)}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-gray-500">{isEur ? 'Shipping' : '送料'}</span>
-          <span className="text-gray-900">{(allDigital || allShippingIncluded) ? '無料（送料込み）' : formatPrice(shippingFee, currency)}</span>
+          <span className="text-gray-500">{te.shipping}</span>
+          <span className="text-gray-900">{(allDigital || allShippingIncluded) ? t.freeShippingIncluded : formatPrice(shippingFee, currency)}</span>
         </div>
         {!allDigital && !allShippingIncluded && (isEur ? (
-          <p className="text-xs text-gray-400">International shipping included</p>
+          <p className="text-xs text-gray-400">{t.intlShippingIncludedNote}</p>
         ) : (
-          <p className="text-xs text-gray-400">※ 国内送料1,000円〜</p>
+          <p className="text-xs text-gray-400">{t.domesticShippingNote}</p>
         ))}
         <div className="flex justify-between text-base font-bold pt-3 border-t border-gray-100">
-          <span>{isEur ? 'Total' : '合計'}</span>
+          <span>{te.total}</span>
           <span>{formatPrice(total, currency)}</span>
         </div>
       </div>
 
       {hasMixedShops && (
         <div className="mt-6 bg-orange-50 border border-orange-200 rounded-xl px-5 py-3">
-          <p className="text-sm text-orange-800 font-medium">異なるショップの商品が含まれています</p>
-          <p className="text-xs text-orange-600 mt-1">同一ショップの商品のみ同時に購入できます。いずれかのショップの商品を削除してください。</p>
+          <p className="text-sm text-orange-800 font-medium">{t.mixedShopsTitle}</p>
+          <p className="text-xs text-orange-600 mt-1">{t.mixedShopsDesc}</p>
         </div>
       )}
 
@@ -261,28 +271,28 @@ export default function CartPage() {
         <span>Visa</span><span>/</span>
         <span>Mastercard</span><span>/</span>
         <span>Amex</span><span>/</span>
-        <span>JCB</span><span>/</span>
-        <span>JPYC</span>
+        <span>JCB</span>
+        {locale !== 'en' && (<><span>/</span><span>JPYC</span></>)}
       </div>
 
       <div className="mt-8 space-y-3">
         {hasMixedShops ? (
           <span className="block w-full bg-gray-300 text-gray-500 py-3 rounded-full text-sm font-medium text-center cursor-not-allowed">
-            {allDigital ? '支援の手続きへ' : 'レジに進む'}
+            {allDigital ? t.proceedToSupport : t.proceedToCheckout}
           </span>
         ) : (
           <Link
-            href="/checkout"
+            href={p('/checkout')}
             className="block w-full bg-black text-white py-3 rounded-full text-sm font-medium text-center hover:bg-gray-800 transition-colors"
           >
-            {allDigital ? '支援の手続きへ' : 'レジに進む'}
+            {allDigital ? t.proceedToSupport : t.proceedToCheckout}
           </Link>
         )}
         <Link
-          href="/shop"
+          href={p('/shop')}
           className="block w-full text-center text-sm text-gray-500 hover:text-gray-900 transition-colors py-2"
         >
-          ショッピングを続ける
+          {t.continueShopping}
         </Link>
       </div>
 

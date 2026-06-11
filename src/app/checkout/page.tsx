@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getLocalCart, getOptionsAdjustment, formatOptionsText, type LocalCartItem } from '@/lib/cart'
@@ -12,6 +12,8 @@ import { SHIPPING_FEE, SHIPPING_FEE_EUR } from '@/lib/constants'
 import type { Product, Profile } from '@/lib/types'
 import siteConfig from '@/site.config'
 import { useCurrency } from '@/hooks/useCurrency'
+import { checkoutDict, localeFromPathname, localePath } from '@/lib/i18n/checkout'
+import { productName as pnameForLocale } from '@/lib/i18n/common'
 
 type PaymentMethod = 'stripe' | 'jpyc' | 'bank_transfer'
 
@@ -46,10 +48,18 @@ export default function CheckoutPage() {
 
   const currency = useCurrency()
   const isEur = currency === 'eur'
+  const pathname = usePathname()
+  const locale = localeFromPathname(pathname)
+  const t = checkoutDict[locale]
+  const pname = (product: { name: string; name_en?: string | null }) => pnameForLocale(product, locale)
+  // Some labels already switch to English when currency is EUR on the JA site
+  const te = checkoutDict[isEur || locale === 'en' ? 'en' : 'ja']
+  const p = (path: string) => localePath(locale, path)
   const isPremiumMember = profile?.is_premium_member === true
   const allDigital = items.length > 0 && items.every(i => i.product?.item_type === 'digital')
-  const jpycEnabled = siteConfig.jpyc.enabled && !isEur && !allDigital
-  const bankTransferEnabled = siteConfig.bankTransfer.enabled && !isEur && !allDigital
+  // EN pages are card-only: bank transfer / JPYC are domestic (Japan) options
+  const jpycEnabled = siteConfig.jpyc.enabled && !isEur && !allDigital && locale !== 'en'
+  const bankTransferEnabled = siteConfig.bankTransfer.enabled && !isEur && !allDigital && locale !== 'en'
 
   useEffect(() => {
     loadData()
@@ -58,7 +68,7 @@ export default function CheckoutPage() {
   const loadData = async () => {
     const cart = getLocalCart()
     if (cart.length === 0) {
-      router.push('/cart')
+      router.push(p('/cart'))
       return
     }
 
@@ -134,7 +144,7 @@ export default function CheckoutPage() {
       })
       const data = await res.json()
       if (!res.ok) {
-        setCouponError(data.error || 'クーポンが無効です')
+        setCouponError(data.error || t.couponInvalid)
         setCouponDiscount(0)
         setCouponApplied(false)
       } else {
@@ -142,7 +152,7 @@ export default function CheckoutPage() {
         setCouponApplied(true)
       }
     } catch {
-      setCouponError('クーポンの確認に失敗しました')
+      setCouponError(t.couponCheckFailed)
     } finally {
       setCouponLoading(false)
     }
@@ -196,7 +206,7 @@ export default function CheckoutPage() {
         })
 
         const data = await res.json()
-        if (!res.ok) throw new Error(data.error || '注文の作成に失敗しました')
+        if (!res.ok) throw new Error(data.error || t.orderCreateFailed)
 
         const params = new URLSearchParams({
           order_number: data.order_number,
@@ -212,7 +222,7 @@ export default function CheckoutPage() {
         })
 
         const data = await res.json()
-        if (!res.ok) throw new Error(data.error || '注文の作成に失敗しました')
+        if (!res.ok) throw new Error(data.error || t.orderCreateFailed)
 
         const params = new URLSearchParams({
           order_id: data.order_id,
@@ -226,16 +236,16 @@ export default function CheckoutPage() {
         const res = await fetch('/api/stripe/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ items: cartItems, shipping: form, currency, coupon_code: couponApplied ? couponCode : undefined, gift_wrapping: giftWrapping, gift_message: giftWrapping ? giftMessage : undefined }),
+          body: JSON.stringify({ items: cartItems, shipping: form, currency, locale, coupon_code: couponApplied ? couponCode : undefined, gift_wrapping: giftWrapping, gift_message: giftWrapping ? giftMessage : undefined }),
         })
 
         const data = await res.json()
-        if (!res.ok) throw new Error(data.error || '決済の作成に失敗しました')
+        if (!res.ok) throw new Error(data.error || t.paymentCreateFailed)
 
         window.location.href = data.url
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラーが発生しました')
+      setError(err instanceof Error ? err.message : t.genericError)
       setSubmitting(false)
     }
   }
@@ -243,40 +253,40 @@ export default function CheckoutPage() {
   if (loading) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
-        <div className="animate-pulse text-gray-400">読み込み中...</div>
+        <div className="animate-pulse text-gray-400">{t.loading}</div>
       </div>
     )
   }
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">{isEur ? 'Checkout' : 'お会計'}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-8">{te.checkoutTitle}</h1>
 
       <form onSubmit={handleSubmit}>
         {showConfirmation && (
           <div className="mb-8 bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-6">ご注文内容の確認</h2>
+            <h2 className="text-lg font-bold text-gray-900 mb-6">{t.orderConfirmation}</h2>
 
             {/* Shipping info review */}
             <div className="mb-6">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">{allDigital ? '支援者情報' : '配送先情報'}</h3>
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">{allDigital ? t.supporterInfo : t.shippingInfo}</h3>
               <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-1">
                 <p className="font-medium">{form.name}</p>
                 <p className="text-gray-500">{form.email}</p>
                 <p className="text-gray-500">{form.phone}</p>
-                {!allDigital && <p className="text-gray-500">〒{form.postal_code}</p>}
+                {!allDigital && <p className="text-gray-500">{t.postalPrefix}{form.postal_code}</p>}
                 {!allDigital && <p className="text-gray-500">{form.address}</p>}
               </div>
             </div>
 
             {/* Order items review */}
             <div className="mb-6">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">注文商品</h3>
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">{t.orderItems}</h3>
               <div className="space-y-2">
                 {items.map((item, idx) => (
                   <div key={`${item.product_id}-${idx}`} className="flex justify-between text-sm">
                     <div>
-                      <span className="text-gray-700">{item.product?.name} × {item.quantity}</span>
+                      <span className="text-gray-700">{item.product ? pname(item.product) : ''} × {item.quantity}</span>
                       {item.selected_options && Object.keys(item.selected_options).length > 0 && (
                         <p className="text-xs text-gray-400">{formatOptionsText(item.selected_options)}</p>
                       )}
@@ -289,32 +299,32 @@ export default function CheckoutPage() {
 
             {/* Payment method */}
             <div className="mb-6">
-              <h3 className="text-sm font-semibold text-gray-700 mb-2">お支払い方法</h3>
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">{t.paymentMethod}</h3>
               <p className="text-sm text-gray-600">
-                {paymentMethod === 'stripe' ? 'クレジットカード' : paymentMethod === 'jpyc' ? 'JPYC' : '銀行振込'}
+                {paymentMethod === 'stripe' ? t.creditCard : paymentMethod === 'jpyc' ? t.jpyc : t.bankTransfer}
               </p>
             </div>
 
             {/* Total */}
             <div className="border-t border-gray-100 pt-4 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">小計</span>
+                <span className="text-gray-500">{t.subtotal}</span>
                 <span>{formatPrice(subtotal, currency)}</span>
               </div>
               {!allDigital && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">送料</span>
-                  <span>{allShippingIncluded ? '送料込み' : formatPrice(shippingFee, currency)}</span>
+                  <span className="text-gray-500">{t.shipping}</span>
+                  <span>{allShippingIncluded ? t.shippingIncluded : formatPrice(shippingFee, currency)}</span>
                 </div>
               )}
               {couponDiscount > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-green-600">クーポン割引</span>
+                  <span className="text-green-600">{t.couponDiscount}</span>
                   <span className="text-green-600">-{formatPrice(couponDiscount, currency)}</span>
                 </div>
               )}
               <div className="flex justify-between text-base font-bold pt-2 border-t border-gray-100">
-                <span>合計</span>
+                <span>{t.total}</span>
                 <span>{formatPrice(total, currency)}</span>
               </div>
             </div>
@@ -326,14 +336,14 @@ export default function CheckoutPage() {
                 disabled={submitting}
                 className="flex-1 bg-black text-white py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
               >
-                {submitting ? '処理中...' : '注文を確定する'}
+                {submitting ? t.processing : t.confirmOrder}
               </button>
               <button
                 type="button"
                 onClick={() => setShowConfirmation(false)}
                 className="text-center text-sm text-gray-500 hover:text-gray-900 py-3 transition-colors"
               >
-                修正する
+                {t.editOrder}
               </button>
             </div>
           </div>
@@ -344,17 +354,17 @@ export default function CheckoutPage() {
           {/* Shipping Form */}
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-gray-900">
-              {isEur ? 'Shipping Information' : allDigital ? '支援者情報' : '配送先情報'}
+              {isEur ? te.shippingInfo : allDigital ? t.supporterInfo : t.shippingInfo}
             </h2>
             {!allDigital && (isEur ? (
-              <p className="text-xs text-gray-400">International shipping available</p>
+              <p className="text-xs text-gray-400">{t.intlShippingAvailableNote}</p>
             ) : (
-              <p className="text-xs text-gray-400">※ 国内送料1,000円〜</p>
+              <p className="text-xs text-gray-400">{t.domesticShippingNote}</p>
             ))}
 
             <div>
               <label className="block text-sm text-gray-600 mb-1">
-                {isEur ? 'Full Name' : 'お名前'} *
+                {te.fullName} *
               </label>
               <input
                 type="text"
@@ -367,7 +377,7 @@ export default function CheckoutPage() {
 
             <div>
               <label className="block text-sm text-gray-600 mb-1">
-                {isEur ? 'Email' : 'メールアドレス'} *
+                {te.email} *
               </label>
               <input
                 type="email"
@@ -380,7 +390,7 @@ export default function CheckoutPage() {
 
             <div>
               <label className="block text-sm text-gray-600 mb-1">
-                {isEur ? 'Phone' : '電話番号'} *
+                {te.phone} *
               </label>
               <input
                 type="tel"
@@ -394,24 +404,24 @@ export default function CheckoutPage() {
             {!allDigital && (<>
             <div>
               <label className="block text-sm text-gray-600 mb-1">
-                {isEur ? 'Postal Code' : '郵便番号'} *
+                {te.postalCode} *
               </label>
               <input
                 type="text"
                 required
                 value={form.postal_code}
                 onChange={(e) => handlePostalCodeChange(e.target.value)}
-                placeholder={isEur ? '' : '000-0000'}
+                placeholder={te.postalCodePlaceholder}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black"
               />
               {addressLoading && (
-                <p className="text-xs text-gray-400 mt-1">住所を検索中...</p>
+                <p className="text-xs text-gray-400 mt-1">{t.searchingAddress}</p>
               )}
             </div>
 
             <div>
               <label className="block text-sm text-gray-600 mb-1">
-                {isEur ? 'Address' : '住所'} *
+                {te.address} *
               </label>
               <textarea
                 required
@@ -427,7 +437,7 @@ export default function CheckoutPage() {
           {/* Order Summary */}
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              {isEur ? 'Order Summary' : '注文内容'}
+              {te.orderSummary}
             </h2>
             <div className="space-y-3">
               {items.map((item) => (
@@ -436,7 +446,7 @@ export default function CheckoutPage() {
                     {item.product?.images?.[0] ? (
                       <Image
                         src={item.product.images[0]}
-                        alt={item.product?.name || ''}
+                        alt={item.product ? pname(item.product) : ''}
                         fill
                         className="object-cover"
                         sizes="56px"
@@ -449,7 +459,7 @@ export default function CheckoutPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-gray-900 line-clamp-1">
-                      {item.product?.name || '商品'}
+                      {item.product ? pname(item.product) : t.productFallback}
                     </p>
                     {item.selected_options && Object.keys(item.selected_options).length > 0 && (
                       <p className="text-xs text-gray-400">{formatOptionsText(item.selected_options)}</p>
@@ -467,30 +477,30 @@ export default function CheckoutPage() {
 
             <div className="mt-6 border-t border-gray-100 pt-4 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">{isEur ? 'Subtotal' : '小計'}</span>
+                <span className="text-gray-500">{te.subtotal}</span>
                 <span>{formatPrice(subtotal, currency)}</span>
               </div>
               {!allDigital && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">{isEur ? 'Shipping' : '送料'}</span>
+                  <span className="text-gray-500">{te.shipping}</span>
                   <span>{formatPrice(shippingFee, currency)}</span>
                 </div>
               )}
               {couponDiscount > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-green-600">{isEur ? 'Coupon Discount' : 'クーポン割引'}</span>
+                  <span className="text-green-600">{te.couponDiscount}</span>
                   <span className="text-green-600">-{formatPrice(couponDiscount, currency)}</span>
                 </div>
               )}
               <div className="flex justify-between text-base font-bold pt-2 border-t border-gray-100">
-                <span>{isEur ? 'Total' : '合計'}</span>
+                <span>{te.total}</span>
                 <span>{formatPrice(total, currency)}</span>
               </div>
             </div>
 
             {/* Coupon */}
             <div className="pt-3 border-t border-gray-100 mt-4">
-              <p className="text-sm text-gray-600 mb-2">{isEur ? 'Coupon Code' : 'クーポンコード'}</p>
+              <p className="text-sm text-gray-600 mb-2">{te.couponCode}</p>
               {couponApplied ? (
                 <div className="flex items-center justify-between bg-green-50 rounded-lg px-3 py-2">
                   <div>
@@ -502,7 +512,7 @@ export default function CheckoutPage() {
                     onClick={handleRemoveCoupon}
                     className="text-xs text-gray-400 hover:text-red-500"
                   >
-                    取消
+                    {t.removeCoupon}
                   </button>
                 </div>
               ) : (
@@ -511,7 +521,7 @@ export default function CheckoutPage() {
                     type="text"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
-                    placeholder={isEur ? 'Enter code' : 'コードを入力'}
+                    placeholder={te.couponCodePlaceholder}
                     className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black"
                   />
                   <button
@@ -520,7 +530,7 @@ export default function CheckoutPage() {
                     disabled={couponLoading || !couponCode.trim()}
                     className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors disabled:opacity-50"
                   >
-                    {couponLoading ? '...' : (isEur ? 'Apply' : '適用')}
+                    {couponLoading ? '...' : te.apply}
                   </button>
                 </div>
               )}
@@ -533,7 +543,7 @@ export default function CheckoutPage() {
         {/* Payment Method Selection */}
         {(jpycEnabled || bankTransferEnabled) && (
           <div className="mt-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">{isEur ? 'Payment Method' : 'お支払い方法'}</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">{te.paymentMethod}</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <button
                 type="button"
@@ -544,8 +554,8 @@ export default function CheckoutPage() {
                     : 'border-[var(--color-border)] hover:border-gray-400'
                 }`}
               >
-                <p className="text-sm font-medium text-gray-900">{isEur ? 'Credit Card' : 'クレジットカード'}</p>
-                <p className="text-[10px] text-[var(--color-muted)] mt-1">Visa / Mastercard / AMEX</p>
+                <p className="text-sm font-medium text-gray-900">{te.creditCard}</p>
+                <p className="text-[10px] text-[var(--color-muted)] mt-1">{te.creditCardBrands}</p>
               </button>
               {bankTransferEnabled && (
                 <button
@@ -557,8 +567,8 @@ export default function CheckoutPage() {
                       : 'border-[var(--color-border)] hover:border-gray-400'
                   }`}
                 >
-                  <p className="text-sm font-medium text-gray-900">銀行振込</p>
-                  <p className="text-[10px] text-[var(--color-muted)] mt-1">3営業日以内にお振込み</p>
+                  <p className="text-sm font-medium text-gray-900">{t.bankTransfer}</p>
+                  <p className="text-[10px] text-[var(--color-muted)] mt-1">{t.bankTransferDesc}</p>
                 </button>
               )}
               {jpycEnabled && (
@@ -571,8 +581,8 @@ export default function CheckoutPage() {
                       : 'border-[var(--color-border)] hover:border-gray-400'
                   }`}
                 >
-                  <p className="text-sm font-medium text-gray-900">JPYC</p>
-                  <p className="text-[10px] text-[var(--color-muted)] mt-1">Polygon / 手数料ほぼ無料</p>
+                  <p className="text-sm font-medium text-gray-900">{t.jpyc}</p>
+                  <p className="text-[10px] text-[var(--color-muted)] mt-1">{t.jpycDesc}</p>
                 </button>
               )}
             </div>
@@ -592,19 +602,19 @@ export default function CheckoutPage() {
             className="flex-1 bg-black text-white py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting
-              ? (isEur ? 'Processing...' : '処理中...')
+              ? te.processing
               : paymentMethod === 'bank_transfer'
-                ? '銀行振込で注文する'
+                ? t.payByBankTransfer
                 : paymentMethod === 'jpyc'
-                  ? 'JPYC決済へ'
-                  : (isEur ? 'Proceed to Payment' : 'お支払いへ')
+                  ? t.payWithJpyc
+                  : te.proceedToPayment
             }
           </button>
           <Link
-            href="/cart"
+            href={p('/cart')}
             className="text-center text-sm text-gray-500 hover:text-gray-900 py-3 transition-colors"
           >
-            {isEur ? 'Back to Cart' : 'カートに戻る'}
+            {te.backToCart}
           </Link>
         </div>
         </>)}

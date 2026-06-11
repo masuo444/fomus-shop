@@ -2,13 +2,15 @@ import { createClient as createAnonClient } from '@supabase/supabase-js'
 import { notFound, redirect } from 'next/navigation'
 import type { Product } from '@/lib/types'
 import type { Metadata } from 'next'
-import ProductDetailClient from './ProductDetailClient'
+import ProductDetailClient from '@/app/shop/[id]/ProductDetailClient'
 import ProductReviews from '@/components/product/ProductReviews'
 import type { ProductReview } from '@/components/product/ProductReviews'
 import ProductCard from '@/components/product/ProductCard'
 import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import RecentlyViewed from '@/components/product/RecentlyViewed'
 import siteConfig from '@/site.config'
+import { productName, productDescription } from '@/lib/i18n/common'
+import { productDict } from '@/lib/i18n/product'
 
 // cookies()を使わないanon clientで全クエリを実行 → ISRキャッシュが有効になる
 function getSupabase() {
@@ -35,15 +37,17 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+  // select('*') so the page keeps working until the name_en/description_en columns are added
   const { data: product } = await getSupabase()
     .from('products')
-    .select('name, description, images, slug')
+    .select('*')
     .eq(isUuid ? 'id' : 'slug', id)
     .single()
 
-  const title = product?.name || '商品詳細'
-  const description = product?.description || siteConfig.description
-  const slug = product?.slug || id
+  const p = product as (Product | null)
+  const title = (p ? productName(p, 'en') : null) || 'Product'
+  const description = (p ? productDescription(p, 'en') : null) || siteConfig.description
+  const slug = p?.slug || id
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://shop.fomus.jp'
   const ogImage = `${baseUrl}/api/og?id=${slug}`
@@ -52,13 +56,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: {
-      canonical: `/shop/${slug}`,
-      languages: { ja: `/shop/${slug}`, en: `/en/shop/${slug}` },
+      canonical: `/en/shop/${slug}`,
+      languages: {
+        ja: `/shop/${slug}`,
+        en: `/en/shop/${slug}`,
+      },
     },
     openGraph: {
       title: `${title} — ${siteConfig.name}`,
       description,
-      url: `${baseUrl}/shop/${slug}`,
+      url: `${baseUrl}/en/shop/${slug}`,
       siteName: siteConfig.name,
       images: [{ url: ogImage, width: 1200, height: 630 }],
       type: 'website',
@@ -72,9 +79,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function ProductDetailPage({ params }: Props) {
+export default async function EnglishProductDetailPage({ params }: Props) {
   const { id } = await params
   const supabase = getSupabase()
+  const t = productDict.en
 
   // Phase 1: product fetch（UUID or slug で分岐）
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
@@ -93,7 +101,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
   // UUIDでアクセスされてslugがある場合はslugにリダイレクト
   if (isUuid && p.slug) {
-    redirect(`/shop/${p.slug}`)
+    redirect(`/en/shop/${p.slug}`)
   }
 
   // Phase 2: shop / reviews / related products in parallel
@@ -134,12 +142,12 @@ export default async function ProductDetailPage({ params }: Props) {
   return (
     <>
       <ProductJsonLd
-        name={p.name}
-        description={p.description || siteConfig.description}
+        name={productName(p, 'en')}
+        description={productDescription(p, 'en') || siteConfig.description}
         price={p.price}
         currency="JPY"
         image={p.images?.[0]}
-        url={`/shop/${p.slug || p.id}`}
+        url={`/en/shop/${p.slug || p.id}`}
         inStock={p.stock !== 0}
         sku={p.id}
         brand="FOMUS"
@@ -149,23 +157,23 @@ export default async function ProductDetailPage({ params }: Props) {
         } : undefined}
       />
       <BreadcrumbJsonLd items={[
-        { name: 'ホーム', href: '/' },
-        { name: '商品一覧', href: '/shop' },
-        { name: p.name, href: `/shop/${p.slug || p.id}` },
+        { name: 'Home', href: '/en' },
+        { name: 'All Products', href: '/en/shop' },
+        { name: productName(p, 'en'), href: `/en/shop/${p.slug || p.id}` },
       ]} />
       <ProductDetailClient product={p} shopName={shopName} reviewCount={reviewCount} averageRating={averageRating} />
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <ProductReviews reviews={reviews} />
+        <ProductReviews reviews={reviews} locale="en" />
       </div>
 
       {/* Related Products */}
       {relatedProducts.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
           <div className="border-t border-[var(--color-border)] pt-12">
-            <h2 className="text-lg font-medium text-[var(--foreground)] mb-8">関連商品</h2>
+            <h2 className="text-lg font-medium text-[var(--foreground)] mb-8">{t.relatedProducts}</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
               {relatedProducts.map((rp) => (
-                <ProductCard key={rp.id} product={rp} currency="jpy" />
+                <ProductCard key={rp.id} product={rp} currency="jpy" locale="en" />
               ))}
             </div>
           </div>

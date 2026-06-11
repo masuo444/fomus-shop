@@ -7,13 +7,20 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import siteConfig from '@/site.config'
 import { ItemListJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd'
+import { productName } from '@/lib/i18n/common'
+import { productDict, categoryName } from '@/lib/i18n/product'
+
+const t = productDict.en
 
 export const metadata: Metadata = {
-  title: '商品一覧',
-  description: `${siteConfig.name}の商品一覧。最新のアイテムをチェックしよう。`,
+  title: 'All Products',
+  description: `Shop all products from ${siteConfig.name} — masu, card games, and more from Japan.`,
   alternates: {
-    canonical: '/shop',
-    languages: { ja: '/shop', en: '/en/shop' },
+    canonical: '/en/shop',
+    languages: {
+      ja: '/shop',
+      en: '/en/shop',
+    },
   },
 }
 
@@ -24,7 +31,7 @@ interface ShopPageProps {
   }>
 }
 
-export default async function ShopPage({ searchParams }: ShopPageProps) {
+export default async function EnglishShopPage({ searchParams }: ShopPageProps) {
   const params = await searchParams
   const supabase = await createClient()
 
@@ -118,56 +125,56 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <BreadcrumbJsonLd items={[
-        { name: 'ホーム', href: '/' },
-        { name: '商品一覧', href: '/shop' },
+        { name: 'Home', href: '/en' },
+        { name: 'All Products', href: '/en/shop' },
       ]} />
       <ItemListJsonLd
-        name="FOMUS 商品一覧"
+        name="FOMUS Products"
         items={products.slice(0, 20).map((p, i) => ({
-          name: p.name,
-          url: `${process.env.NEXT_PUBLIC_BASE_URL || ''}/shop/${p.slug || p.id}`,
+          name: productName(p, 'en'),
+          url: `${process.env.NEXT_PUBLIC_BASE_URL || ''}/en/shop/${p.slug || p.id}`,
           image: p.images?.[0],
           position: i + 1,
         }))}
       />
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">商品一覧</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-8">{t.shopTitle}</h1>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-8">
         <Link
-          href="/shop"
+          href="/en/shop"
           className={`text-sm px-4 py-2 rounded-full border transition-colors ${
             !params.category
               ? 'bg-black text-white border-black'
               : 'border-gray-200 text-gray-600 hover:border-gray-400'
           }`}
         >
-          すべて{totalCount > 0 && <span className="ml-1 opacity-60">({totalCount})</span>}
+          {t.all}{totalCount > 0 && <span className="ml-1 opacity-60">({totalCount})</span>}
         </Link>
         {categories.map((cat) => (
           <Link
             key={cat.id}
-            href={`/shop?category=${cat.id}${params.sort ? `&sort=${params.sort}` : ''}`}
+            href={`/en/shop?category=${cat.id}${params.sort ? `&sort=${params.sort}` : ''}`}
             className={`text-sm px-4 py-2 rounded-full border transition-colors ${
               params.category === cat.id
                 ? 'bg-black text-white border-black'
                 : 'border-gray-200 text-gray-600 hover:border-gray-400'
             }`}
           >
-            {cat.name}{categoryCounts[cat.id] > 0 && <span className="ml-1 opacity-60">({categoryCounts[cat.id]})</span>}
+            {categoryName(cat, 'en')}{categoryCounts[cat.id] > 0 && <span className="ml-1 opacity-60">({categoryCounts[cat.id]})</span>}
           </Link>
         ))}
 
         <div className="ml-auto flex items-center gap-2">
-          <span className="text-xs text-gray-400">並び替え:</span>
+          <span className="text-xs text-gray-400">{t.sortLabel}</span>
           {[
-            { value: 'newest', label: '新着順' },
-            { value: 'price_asc', label: '安い順' },
-            { value: 'price_desc', label: '高い順' },
+            { value: 'newest', label: t.sortNewest },
+            { value: 'price_asc', label: t.sortPriceAsc },
+            { value: 'price_desc', label: t.sortPriceDesc },
           ].map((sort) => (
             <Link
               key={sort.value}
-              href={`/shop?${params.category ? `category=${params.category}&` : ''}sort=${sort.value}`}
+              href={`/en/shop?${params.category ? `category=${params.category}&` : ''}sort=${sort.value}`}
               className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
                 params.sort === sort.value || (!params.sort && sort.value === 'newest')
                   ? 'bg-black text-white border-black'
@@ -191,12 +198,12 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
               return (
                 <section key={cat.id}>
                   <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-lg font-medium text-[var(--foreground)]">{cat.name}</h2>
+                    <h2 className="text-lg font-medium text-[var(--foreground)]">{categoryName(cat, 'en')}</h2>
                     <Link
-                      href={`/shop?category=${cat.id}`}
+                      href={`/en/shop?category=${cat.id}`}
                       className="text-xs text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors"
                     >
-                      すべて見る ({catProducts.length})
+                      {t.viewAll} ({catProducts.length})
                     </Link>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
@@ -209,6 +216,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                         isPremiumMember={isPremiumMember}
                         currency={currency}
                         hasOptions={productsWithOptions.has(product.id)}
+                        locale="en"
                       />
                     ))}
                   </div>
@@ -221,7 +229,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
               if (uncategorized.length === 0) return null
               return (
                 <section>
-                  <h2 className="text-lg font-medium text-[var(--foreground)] mb-6">その他</h2>
+                  <h2 className="text-lg font-medium text-[var(--foreground)] mb-6">{t.otherCategory}</h2>
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                     {uncategorized.map((product) => (
                       <ProductCard
@@ -232,6 +240,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                         isPremiumMember={isPremiumMember}
                         currency={currency}
                         hasOptions={productsWithOptions.has(product.id)}
+                        locale="en"
                       />
                     ))}
                   </div>
@@ -251,13 +260,14 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                 isPremiumMember={isPremiumMember}
                 currency={currency}
                 hasOptions={productsWithOptions.has(product.id)}
+                locale="en"
               />
             ))}
           </div>
         )
       ) : (
         <div className="text-center py-24">
-          <p className="text-gray-400">商品がありません</p>
+          <p className="text-gray-400">{t.noProducts}</p>
         </div>
       )}
     </div>

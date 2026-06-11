@@ -2,11 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Check, X } from 'lucide-react'
+import { commonDict, localeFromPathname, localePath } from '@/lib/i18n/common'
 
 export default function CartToast() {
   const [visible, setVisible] = useState(false)
   const [productName, setProductName] = useState('')
+  const locale = localeFromPathname(usePathname())
+  const t = commonDict[locale]
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -33,22 +37,22 @@ export default function CartToast() {
           <Check className="w-4 h-4 text-green-600" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-[var(--foreground)] mb-1">カートに追加しました</p>
+          <p className="text-sm font-medium text-[var(--foreground)] mb-1">{t.addedToCart}</p>
           {productName && (
             <p className="text-xs text-[var(--color-muted)] line-clamp-1 mb-3">{productName}</p>
           )}
           <div className="flex items-center gap-3">
             <Link
-              href="/cart"
+              href={localePath(locale, '/cart')}
               className="text-xs font-medium bg-[var(--foreground)] text-white px-4 py-1.5 rounded-full hover:opacity-90 transition-opacity"
             >
-              カートを見る
+              {t.viewCart}
             </Link>
             <button
               onClick={() => setVisible(false)}
               className="text-xs text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors"
             >
-              買い物を続ける
+              {t.continueShopping}
             </button>
           </div>
         </div>

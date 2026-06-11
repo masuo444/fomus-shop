@@ -13,15 +13,27 @@ export const metadata: Metadata = {
   title: {
     absolute: `${siteConfig.name} — Official Online Shop`,
   },
-  description: 'FOMUS公式ショップ。国産ヒノキの枡（FOMUS枡・首掛け枡・アラビア語枡）、SILVA、デジタルアイテムなど。クレジットカード・JPYC決済対応。',
-  keywords: ['FOMUS', '枡', 'ます', 'masu', 'SILVA', 'ヒノキ枡', 'オリジナルグッズ', 'FOMUS GUILD', 'デジタルアイテム'],
+  description: 'The official FOMUS online shop. Handcrafted masu — traditional Japanese cypress (hinoki) boxes — plus the card game SILVA and exclusive digital items. Worldwide shipping, credit card and JPYC payments accepted.',
+  keywords: ['FOMUS', 'masu', 'hinoki', 'Japanese cypress', 'sake cup', 'SILVA', 'Japanese craft', 'made in Japan', 'digital items'],
   alternates: {
-    canonical: '/',
-    languages: { ja: '/', en: '/en' },
+    canonical: '/en',
+    languages: {
+      ja: '/',
+      en: '/en',
+    },
+  },
+  openGraph: {
+    type: 'website',
+    siteName: siteConfig.name,
+    title: `${siteConfig.name} — Official Online Shop`,
+    description: 'Handcrafted masu — traditional Japanese cypress (hinoki) boxes — shipped worldwide from Japan.',
+    locale: 'en_US',
+    url: 'https://shop.fomus.jp/en',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
   },
 }
 
-export default async function HomePage() {
+export default async function EnglishHomePage() {
   const supabase = await createClient()
   const currency = await getCurrency()
   const shopIds = await getPublishedShopIds()
@@ -85,18 +97,18 @@ export default async function HomePage() {
   return (
     <div>
       <FAQPageJsonLd items={[
-        { question: 'FOMUSではどんな商品が買えますか？', answer: '国産ヒノキの枡（一合枡・ミニ枡・名入れ枡）、カードゲーム「SILVA」、FOMUSランニングウェア、デジタルアイテムなどを販売しています。' },
-        { question: '送料はいくらですか？', answer: '国内一律1,000円（税込）です。' },
-        { question: 'どんな決済方法が使えますか？', answer: 'クレジットカード（Visa・Mastercard・Amex・JCB）、JPYC（日本円ステーブルコイン）に対応しています。' },
-        { question: '枡の名入れやオーダーメイドはできますか？', answer: 'はい、法人向け・個人向けともに名入れ・オリジナルデザインの枡を承っています。' },
-        { question: 'JPYC決済とは何ですか？', answer: 'JPYCは1JPYC=1円の日本円ステーブルコインで、Polygonネットワークで決済します。' },
+        { question: 'What products does FOMUS sell?', answer: 'We sell masu — traditional Japanese cypress (hinoki) boxes — in one-go and mini sizes, including name-engraved masu, as well as the card game SILVA, FOMUS running wear, and digital items.' },
+        { question: 'Do you ship internationally?', answer: 'Yes, international shipping is available. Shipping within Japan is a flat ¥1,000 (tax included), and orders paid in EUR ship worldwide.' },
+        { question: 'What payment methods do you accept?', answer: 'We accept credit cards (Visa, Mastercard, American Express, JCB) and JPYC, a Japanese yen stablecoin.' },
+        { question: 'Can I order a custom or name-engraved masu?', answer: 'Yes, we accept name engraving and original custom masu orders for both individuals and businesses.' },
+        { question: 'What is JPYC payment?', answer: 'JPYC is a Japanese yen stablecoin pegged at 1 JPYC = 1 yen, settled on the Polygon network.' },
       ]} />
       {newProducts.length > 0 && (
         <ItemListJsonLd
-          name="FOMUS 新着商品"
+          name="FOMUS Featured Products"
           items={newProducts.map((p, i) => ({
             name: p.name,
-            url: `${process.env.NEXT_PUBLIC_BASE_URL || ''}/shop/${p.slug || p.id}`,
+            url: `${process.env.NEXT_PUBLIC_BASE_URL || ''}/en/shop/${p.slug || p.id}`,
             image: p.images?.[0],
             position: i + 1,
           }))}
@@ -112,14 +124,14 @@ export default async function HomePage() {
               <h1 className="sr-only">FOMUS Official Online Shop</h1>
               <div className="w-8 h-px bg-[var(--color-border)] mb-8" />
               <p className="text-base md:text-lg leading-relaxed tracking-wide text-[var(--foreground)] mb-3">
-                面白いモノを、世の中に。
+                Extraordinary things, made in Japan.
               </p>
               <p className="text-sm leading-relaxed text-[var(--color-muted)] mb-10">
-                ヒノキの香りで、毎日の晩酌を特別に。<br />
-                ここでしか手に入らないプロダクトをお届けします。
+                Meet the masu — a traditional Japanese cypress (hinoki) box, handcrafted by artisans.<br />
+                Products you won&apos;t find anywhere else, shipped from Japan.
               </p>
               <div className="flex flex-col items-center gap-4">
-                <Link href="/shop" className="btn-primary inline-flex items-center gap-3">
+                <Link href="/en/shop" className="btn-primary inline-flex items-center gap-3">
                   SHOP
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                 </Link>
@@ -130,7 +142,7 @@ export default async function HomePage() {
             </div>
           </div>
           <div className="md:w-2/3 relative min-h-[40vh] md:min-h-0">
-            <img src="/hero.jpg" alt="枡で乾杯するシーン" className="w-full h-full object-cover absolute inset-0" />
+            <img src="/hero.jpg" alt="A toast with masu boxes" className="w-full h-full object-cover absolute inset-0" />
           </div>
         </div>
       </section>
@@ -140,7 +152,7 @@ export default async function HomePage() {
         <section className="bg-[var(--foreground)] text-[var(--background)]">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
             <ScrollReveal>
-              <Link href={`/shop/${limitedProduct.id}`} className="block group">
+              <Link href={`/en/shop/${limitedProduct.id}`} className="block group">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center py-16 md:py-24">
                   {/* Image */}
                   {limitedProduct.images?.[0] && (
@@ -164,14 +176,14 @@ export default async function HomePage() {
                       {limitedProduct.name}
                     </h2>
                     <p className="text-[11px] tracking-[0.1em] text-[var(--background)]/40 mb-8">
-                      完全受注生産 — 数量限定
+                      Made to order — limited quantities
                     </p>
 
                     {limitedProduct.sale_end_date && (
                       <div className="flex items-center gap-2 mb-8">
                         <div className="w-1 h-1 rounded-full bg-orange-400" />
                         <p className="text-xs tracking-wide text-orange-400">
-                          {new Date(limitedProduct.sale_end_date).toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' })} まで
+                          Until {new Date(limitedProduct.sale_end_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
                         </p>
                       </div>
                     )}
@@ -214,9 +226,9 @@ export default async function HomePage() {
               <div className="flex items-end justify-between mb-14">
                 <div>
                   <p className="text-[10px] tracking-[0.25em] uppercase text-[var(--color-muted)] mb-3">Pick Up</p>
-                  <h2 className="text-2xl md:text-3xl font-light tracking-tight text-[var(--foreground)]">おすすめ</h2>
+                  <h2 className="text-2xl md:text-3xl font-light tracking-tight text-[var(--foreground)]">Featured</h2>
                 </div>
-                <Link href="/shop" className="hidden md:inline-flex items-center gap-2 text-[11px] tracking-[0.12em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors group">
+                <Link href="/en/shop" className="hidden md:inline-flex items-center gap-2 text-[11px] tracking-[0.12em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors group">
                   View All
                   <svg className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                 </Link>
@@ -230,7 +242,7 @@ export default async function HomePage() {
               ))}
             </div>
             <div className="mt-12 text-center md:hidden">
-              <Link href="/shop" className="btn-outline inline-block">すべての商品を見る</Link>
+              <Link href="/en/shop" className="btn-outline inline-block">View All Products</Link>
             </div>
           </div>
         </section>
@@ -241,12 +253,12 @@ export default async function HomePage() {
         <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-10">
           <ScrollReveal>
             <p className="text-[10px] tracking-[0.25em] uppercase text-[var(--color-muted)] mb-3 text-center">Reviews</p>
-            <h2 className="text-2xl md:text-3xl font-light tracking-tight text-[var(--foreground)] text-center mb-12">お客様の声</h2>
+            <h2 className="text-2xl md:text-3xl font-light tracking-tight text-[var(--foreground)] text-center mb-12">What Our Customers Say</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { name: 'KM', rating: 5, title: 'コーティング枡が最高', body: '防水コーティングをお願いしました。ヒノキの香りはそのままに、水を入れても全く漏れません。日本酒を注いで毎晩楽しんでいます。見た目も美しく、来客時にも話題になります。' },
-                { name: 'TY', rating: 5, title: '贈り物に喜ばれました', body: '海外の友人への贈り物として名入れ枡を注文。コーティング仕上げにしたので実用的で、とても喜んでもらえました。梱包も丁寧で安心して贈れます。' },
-                { name: 'SA', rating: 5, title: 'ヒノキの香りに癒される', body: '一合枡をコーティング付きで購入。木の温もりとヒノキの香りが素晴らしいです。普段使いできる品質で、毎日のお酒の時間が特別になりました。リピート確定です。' },
+                { name: 'KM', rating: 5, title: 'The coated masu is outstanding', body: 'I ordered mine with the waterproof coating. The hinoki aroma is fully intact, and not a drop leaks even when filled. I pour sake into it every evening. It is beautiful to look at too, and guests always ask about it.' },
+                { name: 'TY', rating: 5, title: 'A gift that was truly loved', body: 'I ordered a name-engraved masu as a gift for a friend overseas. With the coated finish it is practical as well as beautiful, and they were delighted. The careful packaging made it easy to give with confidence.' },
+                { name: 'SA', rating: 5, title: 'Soothed by the scent of hinoki', body: 'I bought the one-go masu with the coating. The warmth of the wood and the hinoki fragrance are wonderful. The quality holds up to everyday use, and it has turned my evening drink into something special. I will definitely order again.' },
               ].map((review, i) => (
                 <div key={i} className="bg-white rounded-xl p-6">
                   <div className="flex items-center gap-0.5 mb-3">
@@ -273,26 +285,26 @@ export default async function HomePage() {
             <div className="text-center">
               <div className="w-8 h-px bg-[var(--color-border)] mx-auto mb-10" />
               <p className="text-base md:text-lg tracking-wide text-[var(--foreground)] mb-4">
-                まずは、1個から。
+                Start with just one.
               </p>
               <p className="text-[11px] tracking-[0.15em] text-[var(--color-muted)] mb-12">
-                ¥2,200〜 / 送料¥1,000 / Visa・Mastercard対応
+                From ¥2,200 / International shipping available / Visa &amp; Mastercard accepted
               </p>
               <div className="flex items-center justify-center gap-6 flex-wrap">
-                <Link href="/shop" className="btn-primary inline-flex items-center gap-3">
+                <Link href="/en/shop" className="btn-primary inline-flex items-center gap-3">
                   SHOP
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                 </Link>
-                <Link href="/contact" className="btn-outline inline-block">
+                <Link href="/en/contact" className="btn-outline inline-block">
                   CONTACT
                 </Link>
               </div>
               {!isLoggedIn && (
                 <p className="mt-10 text-[11px] text-[var(--color-muted)]">
                   <Link href="/auth/register" className="underline underline-offset-4 hover:text-[var(--foreground)] transition-colors">
-                    アカウント作成
+                    Create an account
                   </Link>
-                  {' '}でポイント還元やお気に入り機能が使えます
+                  {' '}to earn points and save your favorites
                 </p>
               )}
             </div>
@@ -310,7 +322,7 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
           <ScrollReveal>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[var(--color-border)]">
-              <Link href="/shop" className="group bg-[var(--background)] transition-colors hover:bg-[var(--color-subtle)]">
+              <Link href="/en/shop" className="group bg-[var(--background)] transition-colors hover:bg-[var(--color-subtle)]">
                 {shopCoverImage && (
                   <div className="aspect-[4/3] overflow-hidden">
                     <img src={shopCoverImage} alt="Shop" className="w-full h-full object-cover img-hover" />
@@ -320,8 +332,8 @@ export default async function HomePage() {
                   <p className="text-[10px] tracking-[0.25em] uppercase text-[var(--color-muted)] mb-6">01</p>
                   <h3 className="font-display text-3xl md:text-4xl font-light text-[var(--foreground)] mb-4 italic">Shop</h3>
                   <p className="text-xs leading-[2] text-[var(--color-muted)]">
-                    FOMUS枡・SILVA・バッジ。
-                    <br />防水コーティング対応。
+                    FOMUS masu, SILVA, and badges.
+                    <br />Waterproof coating available.
                   </p>
                   <div className="mt-8 flex items-center gap-2 text-[10px] tracking-[0.15em] uppercase text-[var(--color-muted)] group-hover:text-[var(--foreground)] transition-colors">
                     <span>View</span>
@@ -340,8 +352,8 @@ export default async function HomePage() {
                   <p className="text-[10px] tracking-[0.25em] uppercase text-[var(--color-muted)] mb-6">02</p>
                   <h3 className="font-display text-3xl md:text-4xl font-light text-[var(--foreground)] mb-4 italic">Digital</h3>
                   <p className="text-xs leading-[2] text-[var(--color-muted)]">
-                    活動記・限定デジタルアイテム・
-                    <br />チケット。
+                    Journals, exclusive digital items,
+                    <br />and tickets.
                   </p>
                   <div className="mt-8 flex items-center gap-2 text-[10px] tracking-[0.15em] uppercase text-[var(--color-muted)] group-hover:text-[var(--foreground)] transition-colors">
                     <span>View</span>
@@ -360,7 +372,7 @@ export default async function HomePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 min-h-[50vh]">
           {/* Photo side */}
           <div className="relative min-h-[40vh] md:min-h-[50vh]">
-            <img src="/masu-sakura.jpg" alt="国産ヒノキ枡" className="w-full h-full object-cover absolute inset-0" />
+            <img src="/masu-sakura.jpg" alt="Japanese hinoki masu" className="w-full h-full object-cover absolute inset-0" />
           </div>
           {/* Text side */}
           <div className="bg-[var(--foreground)] flex items-center px-8 md:px-16 lg:px-24 py-16 md:py-0">
@@ -368,11 +380,11 @@ export default async function HomePage() {
               <div>
                 <p className="text-[10px] tracking-[0.3em] uppercase text-white/40 mb-6">Masu Specialist</p>
                 <h2 className="text-2xl md:text-3xl lg:text-4xl font-light text-white leading-snug mb-6">
-                  通常枡・法人注文は
-                  <br />枡の専門サイトへ
+                  For classic masu and
+                  <br />corporate orders
                 </h2>
                 <p className="text-sm leading-[2] text-white/50 mb-10 max-w-sm">
-                  全8サイズの国産ヒノキ枡、名入れ・焼印・レーザー刻印、企業ノベルティ。法人様は20個から承ります。
+                  All eight sizes of Japanese hinoki masu, with name engraving, branding, and laser etching. Corporate orders welcome from 20 pieces.
                 </p>
                 <a
                   href="https://masu.fomus.jp"
@@ -391,61 +403,16 @@ export default async function HomePage() {
 
       {/* ===== ABOUT ===== */}
       <section className="max-w-3xl mx-auto px-6 sm:px-8 lg:px-10 py-16 md:py-20">
-        <h2 className="text-lg font-medium text-[var(--foreground)] mb-6">FOMUSについて</h2>
+        <h2 className="text-lg font-medium text-[var(--foreground)] mb-6">About FOMUS</h2>
         <p className="text-xs leading-[2.2] text-[var(--color-muted)] mb-8">
-          FOMUSは、日本の伝統工芸「枡」を起点に、アート・物語・テクノロジーを掛け合わせ、新たな文化の表現と価値創造に挑むブランドです。国産ヒノキの枡を「文化と世界をつなぐコミュニケーションツール」として再定義し、世界15ヶ国以上で文化発信活動を展開しています。枡のプロダクト販売に加え、カードゲーム「SILVA」、ジュエリーブランド「FOMUS PARURE」、物語プロジェクト「KUKU」など、多彩なクリエイティブ事業を手がけています。
+          FOMUS is a brand built around the masu — a traditional Japanese craft — weaving together art, storytelling, and technology to create new forms of cultural expression and value. We have reimagined the Japanese hinoki masu as a communication tool that connects culture with the world, sharing it through cultural activities in more than 15 countries. Beyond our masu products, we run a range of creative ventures including the card game SILVA, the jewelry brand FOMUS PARURE, and the story project KUKU.
         </p>
         <a href="https://www.fomus.jp/" target="_blank" rel="noopener noreferrer" className="btn-outline inline-flex items-center gap-3">
-          FOMUS公式サイト
+          FOMUS Official Website
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
         </a>
       </section>
       <div className="max-w-3xl mx-auto px-6 sm:px-8 lg:px-10"><div className="h-px bg-[var(--color-border)]" /></div>
-
-      {/* ===== GUILD MEMBERSHIP ===== */}
-      {siteConfig.features.membershipProgram && (
-        <section className="py-20 md:py-32 bg-[var(--color-subtle)]">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
-            <ScrollReveal>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-                <div className="relative overflow-hidden aspect-[4/5] max-w-md mx-auto lg:mx-0">
-                  <img src="/fomus-guild.png" alt="FOMUS枡" className="w-full h-full object-cover" />
-                </div>
-                <div>
-                  <p className="text-[10px] tracking-[0.25em] uppercase text-[var(--color-member)] mb-4">Membership</p>
-                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-light text-[var(--foreground)] leading-snug mb-6">
-                    FOMUS {siteConfig.features.membershipName}
-                  </h2>
-                  <p className="text-xs leading-[2.2] text-[var(--color-muted)] mb-12 max-w-sm">
-                    メンバーになって、FOMUSの世界をもっと楽しもう。
-                  </p>
-                  <div className="space-y-6 mb-12">
-                    {[
-                      { label: 'メンバー限定価格', desc: '対象商品が特別価格に' },
-                      { label: 'ポイント還元', desc: 'お買い物でポイントが貯まる' },
-                      { label: '限定アイテム', desc: 'メンバー限定商品の購入' },
-                    ].map((item) => (
-                      <div key={item.label} className="flex items-start gap-4">
-                        <div className="w-px h-8 bg-[var(--color-member)] mt-0.5 shrink-0" />
-                        <div>
-                          <p className="text-xs font-medium text-[var(--foreground)] mb-0.5">{item.label}</p>
-                          <p className="text-[11px] text-[var(--color-muted)]">{item.desc}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  {siteConfig.features.membershipUrl && (
-                    <a href={siteConfig.features.membershipUrl} target="_blank" rel="noopener noreferrer" className="btn-primary inline-flex items-center gap-2" style={{ background: 'var(--color-member)' }}>
-                      {siteConfig.features.membershipName}について
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                    </a>
-                  )}
-                </div>
-              </div>
-            </ScrollReveal>
-          </div>
-        </section>
-      )}
 
       {/* ===== FEATURES ===== */}
       <section className="py-14 md:py-20">
@@ -454,10 +421,10 @@ export default async function HomePage() {
             <div className="border-t border-b border-[var(--color-border)] py-10 md:py-12">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-6">
                 {[
-                  { label: '多彩な決済', desc: 'Visa / Mastercard / 振込 / JPYC', href: '/jpyc' },
-                  { label: '国内送料', desc: '¥1,000〜' },
-                  { label: '海外発送', desc: 'EUR決済・国際配送対応' },
-                  { label: 'カスタマイズ', desc: '防水コーティング・名入れ' },
+                  { label: 'Flexible Payment', desc: 'Visa / Mastercard / Bank transfer / JPYC', href: '/jpyc' },
+                  { label: 'Shipping in Japan', desc: 'From ¥1,000' },
+                  { label: 'Worldwide Delivery', desc: 'EUR payment & international shipping' },
+                  { label: 'Customization', desc: 'Waterproof coating & name engraving' },
                 ].map((item) => {
                   const inner = (
                     <>
@@ -481,14 +448,14 @@ export default async function HomePage() {
 
       {/* ===== FAQ ===== */}
       <section className="max-w-3xl mx-auto px-6 sm:px-8 lg:px-10 py-16 md:py-20">
-        <h2 className="text-lg font-medium text-[var(--foreground)] mb-8">よくあるご質問</h2>
+        <h2 className="text-lg font-medium text-[var(--foreground)] mb-8">Frequently Asked Questions</h2>
         <div className="space-y-6">
           {[
-            { q: 'FOMUSではどんな商品が買えますか？', a: '国産ヒノキの枡（一合枡・ミニ枡・名入れ枡）、カードゲーム「SILVA」、FOMUSランニングウェア、デジタルアイテムなどを販売しています。' },
-            { q: '送料はいくらですか？', a: '国内一律1,000円（税込）です。商品はヤマト運輸または日本郵便でお届けします。' },
-            { q: 'どんな決済方法が使えますか？', a: 'クレジットカード（Visa・Mastercard・Amex・JCB）、JPYC（日本円ステーブルコイン）に対応しています。' },
-            { q: '枡の名入れやオーダーメイドはできますか？', a: 'はい、法人向け・個人向けともに名入れ・オリジナルデザインの枡を承っています。お問い合わせページからご相談ください。' },
-            { q: 'JPYC決済とは何ですか？', a: 'JPYC（Japanese Yen Coin）は1JPYC=1円の日本円ステーブルコインです。Polygonネットワークで送金し、ブロックチェーン上で決済が完了します。' },
+            { q: 'What products does FOMUS sell?', a: 'We sell masu — traditional Japanese cypress (hinoki) boxes — in one-go and mini sizes, including name-engraved masu, as well as the card game SILVA, FOMUS running wear, and digital items.' },
+            { q: 'Do you ship internationally?', a: 'Yes, international shipping is available. Within Japan, shipping is a flat ¥1,000 (tax included) via Yamato Transport or Japan Post. Orders paid in EUR ship worldwide.' },
+            { q: 'What payment methods do you accept?', a: 'We accept credit cards (Visa, Mastercard, American Express, JCB) and JPYC, a Japanese yen stablecoin.' },
+            { q: 'Can I order a custom or name-engraved masu?', a: 'Yes, we accept name engraving and original custom masu orders for both individuals and businesses. Please reach out through our contact page.' },
+            { q: 'What is JPYC payment?', a: 'JPYC (Japanese Yen Coin) is a Japanese yen stablecoin pegged at 1 JPYC = 1 yen. Payments are sent over the Polygon network and settled on the blockchain.' },
           ].map((item, i) => (
             <div key={i}>
               <h3 className="text-sm font-medium text-[var(--foreground)] mb-2">{item.q}</h3>

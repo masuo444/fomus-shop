@@ -5,7 +5,7 @@ import { BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 export const metadata: Metadata = {
   title: 'FOMUSストーリー',
   description: '日本の伝統的な木製枡を現代のライフスタイルに。FOMUSのストーリーをご紹介します。',
-  alternates: { canonical: '/story' },
+  alternates: { canonical: '/story', languages: { ja: '/story', en: '/en/story' } },
 }
 
 export default function StoryPage() {

@@ -34,7 +34,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { items, shipping, currency: requestCurrency, coupon_code, gift_wrapping, gift_message, guild_secret } = (await request.json()) as {
+    const { items, shipping, currency: requestCurrency, coupon_code, gift_wrapping, gift_message, guild_secret, locale } = (await request.json()) as {
       items: CheckoutItem[]
       shipping: ShippingInfo
       currency?: Currency
@@ -42,7 +42,12 @@ export async function POST(request: Request) {
       gift_wrapping?: boolean
       gift_message?: string
       guild_secret?: string
+      locale?: string
     }
+
+    // EN pages get /en-prefixed redirect URLs and an English Stripe Checkout
+    const isEnLocale = locale === 'en'
+    const localePrefix = isEnLocale ? '/en' : ''
 
     // GUILD member verification via shared secret
     const guildSsoSecret = process.env.GUILD_SSO_SECRET || process.env.MEMBERSHIP_SSO_SECRET || ''
@@ -338,8 +343,12 @@ export async function POST(request: Request) {
         shop_id: shopId,
         currency,
       },
-      success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}&email=${encodeURIComponent(shipping.email)}&name=${encodeURIComponent(shipping.name)}`,
-      cancel_url: `${origin}/cart`,
+      success_url: `${origin}${localePrefix}/checkout/success?session_id={CHECKOUT_SESSION_ID}&email=${encodeURIComponent(shipping.email)}&name=${encodeURIComponent(shipping.name)}`,
+      cancel_url: `${origin}${localePrefix}/cart`,
+    }
+
+    if (isEnLocale) {
+      sessionParams.locale = 'en'
     }
 
     if (invoiceEnabled) {

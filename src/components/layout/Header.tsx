@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ShoppingCart, User, LogOut, Menu, X, Shield, Store } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -9,6 +10,11 @@ import type { User as SupabaseUser } from '@supabase/supabase-js'
 import SearchBar from '@/components/layout/SearchBar'
 import { ADMIN_EMAILS } from '@/lib/constants'
 import siteConfig from '@/site.config'
+import { commonDict, localeFromPathname, localePath } from '@/lib/i18n/common'
+
+// Pages that exist in both languages — the header language switcher keeps
+// the visitor on the same page when a counterpart exists, otherwise goes home.
+const EN_MIRRORED = ['/shop', '/cart', '/checkout', '/contact', '/story']
 
 export default function Header() {
   const [user, setUser] = useState<SupabaseUser | null>(null)
@@ -19,6 +25,22 @@ export default function Header() {
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const supabase = createClient()
+  const pathname = usePathname()
+  const locale = localeFromPathname(pathname)
+  const t = commonDict[locale]
+  const p = (path: string) => localePath(locale, path)
+
+  // Language switcher target: same page in the other language when available
+  const switchTarget = (() => {
+    if (locale === 'en') {
+      const stripped = pathname?.replace(/^\/en/, '') || '/'
+      return stripped === '' ? '/' : stripped
+    }
+    if (pathname === '/' || EN_MIRRORED.some(m => pathname?.startsWith(m))) {
+      return `/en${pathname === '/' ? '' : pathname}` || '/en'
+    }
+    return '/en'
+  })()
 
   useEffect(() => {
     const loadUser = async () => {
@@ -73,7 +95,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link href="/" className="font-display text-xl tracking-[0.15em] text-[var(--foreground)] hover:opacity-70 transition-opacity">
+          <Link href={locale === 'en' ? '/en' : '/'} className="font-display text-xl tracking-[0.15em] text-[var(--foreground)] hover:opacity-70 transition-opacity">
             {siteConfig.logoUrl ? (
               <img src={siteConfig.logoUrl} alt={siteConfig.logoText} className="h-8" />
             ) : (
@@ -83,13 +105,13 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-10">
-            <Link href="/shop" className="text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
+            <Link href={p('/shop')} className="text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
               Shop
             </Link>
             <Link href="/digital" className="text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
               Digital
             </Link>
-            <Link href="/contact" className="text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
+            <Link href={p('/contact')} className="text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
               Contact
             </Link>
           </nav>
@@ -99,8 +121,16 @@ export default function Header() {
             {/* Search */}
             <SearchBar />
 
+            {/* Language switcher */}
+            <Link
+              href={switchTarget}
+              className="text-[10px] tracking-[0.12em] text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors"
+            >
+              {locale === 'en' ? '日本語' : 'EN'}
+            </Link>
+
             {/* Cart */}
-            <Link href="/cart" className="relative p-2 text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
+            <Link href={p('/cart')} className="relative p-2 text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
               <ShoppingCart className="w-[18px] h-[18px]" strokeWidth={1.5} />
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1.5 bg-[var(--foreground)] text-[var(--background)] text-[9px] font-medium w-4 h-4 rounded-full flex items-center justify-center">
@@ -132,7 +162,7 @@ export default function Header() {
                           onClick={() => setUserMenuOpen(false)}
                         >
                           <Shield className="w-3.5 h-3.5" strokeWidth={1.5} />
-                          管理画面
+                          {t.adminPanel}
                         </Link>
                       )}
                       {userRole === 'partner' && (
@@ -142,7 +172,7 @@ export default function Header() {
                           onClick={() => setUserMenuOpen(false)}
                         >
                           <Store className="w-3.5 h-3.5" strokeWidth={1.5} />
-                          パートナー管理
+                          {t.partnerPanel}
                         </Link>
                       )}
                       {(userRole === 'admin' || userRole === 'partner') && (
@@ -153,21 +183,21 @@ export default function Header() {
                         className="block px-5 py-2.5 text-xs tracking-wide text-[var(--foreground)] hover:bg-[var(--color-subtle)]"
                         onClick={() => setUserMenuOpen(false)}
                       >
-                        マイページ
+                        {t.myPage}
                       </Link>
                       <Link
                         href="/account/orders"
                         className="block px-5 py-2.5 text-xs tracking-wide text-[var(--foreground)] hover:bg-[var(--color-subtle)]"
                         onClick={() => setUserMenuOpen(false)}
                       >
-                        注文履歴
+                        {t.orderHistory}
                       </Link>
                       <Link
                         href="/account/digital"
                         className="block px-5 py-2.5 text-xs tracking-wide text-[var(--foreground)] hover:bg-[var(--color-subtle)]"
                         onClick={() => setUserMenuOpen(false)}
                       >
-                        デジタルアイテム
+                        {t.digitalItems}
                       </Link>
                       <div className="my-1.5 mx-5 h-px bg-[var(--color-border)]" />
                       <button
@@ -175,7 +205,7 @@ export default function Header() {
                         className="w-full text-left px-5 py-2.5 text-xs tracking-wide text-[var(--color-muted)] hover:text-[var(--foreground)] hover:bg-[var(--color-subtle)] flex items-center gap-2.5"
                       >
                         <LogOut className="w-3.5 h-3.5" strokeWidth={1.5} />
-                        ログアウト
+                        {t.logout}
                       </button>
                     </div>
                   </>
@@ -211,14 +241,17 @@ export default function Header() {
         {/* Mobile Navigation */}
         {menuOpen && (
           <div className="md:hidden border-t border-[var(--color-border)] py-8 space-y-5">
-            <Link href="/shop" className="block text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
+            <Link href={p('/shop')} className="block text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
               Shop
             </Link>
             <Link href="/digital" className="block text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
               Digital
             </Link>
-            <Link href="/contact" className="block text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
+            <Link href={p('/contact')} className="block text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
               Contact
+            </Link>
+            <Link href={switchTarget} className="block text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
+              {locale === 'en' ? '日本語' : 'English'}
             </Link>
             {!user && (
               <div className="pt-5 border-t border-[var(--color-border)] space-y-4">

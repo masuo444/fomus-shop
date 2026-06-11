@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { Search, X } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import { useCurrency } from '@/hooks/useCurrency'
+import { commonDict, localeFromPathname, localePath } from '@/lib/i18n/common'
 
 interface SearchResult {
   id: string
@@ -16,6 +17,8 @@ interface SearchResult {
 export default function SearchBar() {
   const router = useRouter()
   const currency = useCurrency()
+  const locale = localeFromPathname(usePathname())
+  const t = commonDict[locale]
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
   const [open, setOpen] = useState(false)
@@ -70,7 +73,7 @@ export default function SearchBar() {
     setOpen(false)
     setQuery('')
     setExpanded(false)
-    router.push(`/shop/${id}`)
+    router.push(localePath(locale, `/shop/${id}`))
   }
 
   const handleExpandToggle = () => {
@@ -126,7 +129,7 @@ export default function SearchBar() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => { if (results.length > 0) setOpen(true) }}
-                placeholder="商品を検索..."
+                placeholder={t.searchPlaceholder}
                 className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-full bg-gray-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-gray-300"
               />
             </div>
@@ -144,7 +147,7 @@ export default function SearchBar() {
       {open && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden min-w-[280px]">
           {loading ? (
-            <div className="p-4 text-center text-sm text-gray-400">検索中...</div>
+            <div className="p-4 text-center text-sm text-gray-400">{t.searching}</div>
           ) : results.length > 0 ? (
             <div className="max-h-80 overflow-y-auto">
               {results.map((product) => (
@@ -171,7 +174,7 @@ export default function SearchBar() {
             </div>
           ) : (
             <div className="p-4 text-center text-sm text-gray-400">
-              「{query}」に一致する商品はありません
+              {t.noResultsPrefix}{query}{t.noResultsSuffix}
             </div>
           )}
         </div>
