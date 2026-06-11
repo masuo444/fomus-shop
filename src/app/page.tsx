@@ -123,9 +123,11 @@ export default async function HomePage() {
                   SHOP
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                 </Link>
-                <Link href="/digital" className="text-[11px] tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
-                  Digital Items
-                </Link>
+                {siteConfig.features.digitalItems && (
+                  <Link href="/digital" className="text-[11px] tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
+                    Digital Items
+                  </Link>
+                )}
               </div>
             </div>
           </div>
@@ -309,7 +311,7 @@ export default async function HomePage() {
       <section className="py-20 md:py-32">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
           <ScrollReveal>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[var(--color-border)]">
+            <div className={`grid grid-cols-1 ${siteConfig.features.digitalItems ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-px bg-[var(--color-border)]`}>
               <Link href="/shop" className="group bg-[var(--background)] transition-colors hover:bg-[var(--color-subtle)]">
                 {shopCoverImage && (
                   <div className="aspect-[4/3] overflow-hidden">
@@ -330,25 +332,27 @@ export default async function HomePage() {
                 </div>
               </Link>
 
-              <Link href="/digital" className="group bg-[var(--background)] transition-colors hover:bg-[var(--color-subtle)]">
-                {digitalCoverImage && (
-                  <div className="aspect-[4/3] overflow-hidden">
-                    <img src={digitalCoverImage} alt="Digital" className="w-full h-full object-cover img-hover" />
+              {siteConfig.features.digitalItems && (
+                <Link href="/digital" className="group bg-[var(--background)] transition-colors hover:bg-[var(--color-subtle)]">
+                  {digitalCoverImage && (
+                    <div className="aspect-[4/3] overflow-hidden">
+                      <img src={digitalCoverImage} alt="Digital" className="w-full h-full object-cover img-hover" />
+                    </div>
+                  )}
+                  <div className="p-10 md:p-14">
+                    <p className="text-[10px] tracking-[0.25em] uppercase text-[var(--color-muted)] mb-6">02</p>
+                    <h3 className="font-display text-3xl md:text-4xl font-light text-[var(--foreground)] mb-4 italic">Digital</h3>
+                    <p className="text-xs leading-[2] text-[var(--color-muted)]">
+                      活動記・限定デジタルアイテム・
+                      <br />チケット。
+                    </p>
+                    <div className="mt-8 flex items-center gap-2 text-[10px] tracking-[0.15em] uppercase text-[var(--color-muted)] group-hover:text-[var(--foreground)] transition-colors">
+                      <span>View</span>
+                      <svg className="w-3 h-3 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                    </div>
                   </div>
-                )}
-                <div className="p-10 md:p-14">
-                  <p className="text-[10px] tracking-[0.25em] uppercase text-[var(--color-muted)] mb-6">02</p>
-                  <h3 className="font-display text-3xl md:text-4xl font-light text-[var(--foreground)] mb-4 italic">Digital</h3>
-                  <p className="text-xs leading-[2] text-[var(--color-muted)]">
-                    活動記・限定デジタルアイテム・
-                    <br />チケット。
-                  </p>
-                  <div className="mt-8 flex items-center gap-2 text-[10px] tracking-[0.15em] uppercase text-[var(--color-muted)] group-hover:text-[var(--foreground)] transition-colors">
-                    <span>View</span>
-                    <svg className="w-3 h-3 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                  </div>
-                </div>
-              </Link>
+                </Link>
+              )}
 
             </div>
           </ScrollReveal>

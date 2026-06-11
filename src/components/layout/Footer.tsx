@@ -54,7 +54,7 @@ export default function Footer() {
               <ul className="space-y-3">
                 <li><Link href={p('/shop')} className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerShopList}</Link></li>
                 <li><Link href="/shop/masu" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerAboutMasu}</Link></li>
-                <li><Link href="/digital" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerDigital}</Link></li>
+                {siteConfig.features.digitalItems && <li><Link href="/digital" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerDigital}</Link></li>}
                 <li><Link href="/gallery" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerGallery}</Link></li>
                 <li><Link href={p('/story')} className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerStory}</Link></li>
                 <li><Link href="/column" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerColumn}</Link></li>

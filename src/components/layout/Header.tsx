@@ -108,9 +108,11 @@ export default function Header() {
             <Link href={p('/shop')} className="text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
               Shop
             </Link>
-            <Link href="/digital" className="text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
-              Digital
-            </Link>
+            {siteConfig.features.digitalItems && (
+              <Link href="/digital" className="text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
+                Digital
+              </Link>
+            )}
             <Link href={p('/contact')} className="text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
               Contact
             </Link>
@@ -192,13 +194,15 @@ export default function Header() {
                       >
                         {t.orderHistory}
                       </Link>
-                      <Link
-                        href="/account/digital"
-                        className="block px-5 py-2.5 text-xs tracking-wide text-[var(--foreground)] hover:bg-[var(--color-subtle)]"
-                        onClick={() => setUserMenuOpen(false)}
-                      >
-                        {t.digitalItems}
-                      </Link>
+                      {siteConfig.features.digitalItems && (
+                        <Link
+                          href="/account/digital"
+                          className="block px-5 py-2.5 text-xs tracking-wide text-[var(--foreground)] hover:bg-[var(--color-subtle)]"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          {t.digitalItems}
+                        </Link>
+                      )}
                       <div className="my-1.5 mx-5 h-px bg-[var(--color-border)]" />
                       <button
                         onClick={handleLogout}
@@ -244,9 +248,11 @@ export default function Header() {
             <Link href={p('/shop')} className="block text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
               Shop
             </Link>
-            <Link href="/digital" className="block text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
-              Digital
-            </Link>
+            {siteConfig.features.digitalItems && (
+              <Link href="/digital" className="block text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
+                Digital
+              </Link>
+            )}
             <Link href={p('/contact')} className="block text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
               Contact
             </Link>

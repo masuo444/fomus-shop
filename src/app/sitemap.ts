@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPublishedShopIds } from '@/lib/shop'
+import siteConfig from '@/site.config'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://shop.fomus.co.jp'
@@ -11,7 +12,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: new Date(), changeFrequency: 'daily', priority: 1 },
     { url: `${baseUrl}/shop`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-    { url: `${baseUrl}/digital`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
+    ...(siteConfig.features.digitalItems
+      ? [{ url: `${baseUrl}/digital`, lastModified: new Date(), changeFrequency: 'daily' as const, priority: 0.8 }]
+      : []),
     { url: `${baseUrl}/shop/masu`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/shop/masu/custom`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${baseUrl}/story`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
@@ -61,7 +64,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Digital item pages
   let digitalPages: MetadataRoute.Sitemap = []
-  if (shopIds.length > 0) {
+  if (siteConfig.features.digitalItems && shopIds.length > 0) {
     const { data: items } = await admin
       .from('digital_items')
       .select('id, updated_at')

@@ -70,7 +70,7 @@ const siteConfig = {
     membershipSso: process.env.FEATURE_MEMBERSHIP_SSO === 'true',
     membershipUrl: process.env.MEMBERSHIP_URL || '',
     membershipName: process.env.NEXT_PUBLIC_MEMBERSHIP_NAME || process.env.MEMBERSHIP_NAME || 'Premium',
-    digitalItems: process.env.FEATURE_DIGITAL !== 'false',
+    digitalItems: (process.env.NEXT_PUBLIC_FEATURE_DIGITAL ?? process.env.FEATURE_DIGITAL) !== 'false',
     partnerMarketplace: process.env.FEATURE_PARTNERS !== 'false',
     birthdayCoupons: process.env.FEATURE_BIRTHDAY_COUPONS !== 'false',
   },
