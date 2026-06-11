@@ -8,6 +8,7 @@ import type { ProductReview } from '@/components/product/ProductReviews'
 import ProductCard from '@/components/product/ProductCard'
 import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import RecentlyViewed from '@/components/product/RecentlyViewed'
+import MasuStorySection from '@/components/product/MasuStorySection'
 import siteConfig from '@/site.config'
 
 // cookies()を使わないanon clientで全クエリを実行 → ISRキャッシュが有効になる
@@ -154,6 +155,7 @@ export default async function ProductDetailPage({ params }: Props) {
         { name: p.name, href: `/shop/${p.slug || p.id}` },
       ]} />
       <ProductDetailClient product={p} shopName={shopName} reviewCount={reviewCount} averageRating={averageRating} />
+      <MasuStorySection product={p} locale="ja" />
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <ProductReviews reviews={reviews} />
       </div>

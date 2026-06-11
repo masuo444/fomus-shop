@@ -8,6 +8,7 @@ import type { ProductReview } from '@/components/product/ProductReviews'
 import ProductCard from '@/components/product/ProductCard'
 import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import RecentlyViewed from '@/components/product/RecentlyViewed'
+import MasuStorySection from '@/components/product/MasuStorySection'
 import siteConfig from '@/site.config'
 import { productName, productDescription } from '@/lib/i18n/common'
 import { productDict } from '@/lib/i18n/product'
@@ -162,6 +163,7 @@ export default async function EnglishProductDetailPage({ params }: Props) {
         { name: productName(p, 'en'), href: `/en/shop/${p.slug || p.id}` },
       ]} />
       <ProductDetailClient product={p} shopName={shopName} reviewCount={reviewCount} averageRating={averageRating} />
+      <MasuStorySection product={p} locale="en" />
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <ProductReviews reviews={reviews} locale="en" />
       </div>
