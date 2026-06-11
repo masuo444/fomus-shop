@@ -1,15 +1,20 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 import { getPlatformShopId } from '@/lib/shop'
 
-export async function POST(request: Request) {
+export async function POST() {
   try {
-    const { userId } = await request.json()
+    // Only the referred user themselves can trigger completion — the user id
+    // comes from the authenticated session, never from the request body.
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
-    if (!userId) {
-      return NextResponse.json({ error: 'userId is required' }, { status: 400 })
+    if (!user) {
+      return NextResponse.json({ error: 'ログインが必要です' }, { status: 401 })
     }
 
+    const userId = user.id
     const admin = createAdminClient()
 
     // Check if user has a pending referral

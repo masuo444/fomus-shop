@@ -113,6 +113,49 @@ export async function sendOrderConfirmation(order: Order, orderItems: OrderItem[
   }
 }
 
+export async function sendPaymentReminder(order: Order, orderItems: OrderItem[], paymentUrl: string) {
+  const isEur = order.currency === 'eur'
+  const content = `
+    <p style="font-size:14px;color:#555;line-height:1.7;margin:0 0 20px;">
+      ${order.shipping_name} 様<br><br>
+      ${siteConfig.name}をご利用いただきありがとうございます。<br>
+      以下のご注文のお支払いがまだ完了していないようです。<br>
+      お支払い手続きの途中でページを閉じてしまった場合は、下のボタンからお手続きを再開いただけます。
+    </p>
+
+    <div style="background:#f9f9f9;border-radius:8px;padding:16px;margin:16px 0;">
+      <p style="margin:0 0 8px;font-size:12px;color:#999;">注文番号</p>
+      <p style="margin:0;font-size:16px;font-weight:600;color:#111;">#${order.order_number}</p>
+    </div>
+
+    ${itemsTable(orderItems, order.currency)}
+
+    <div style="margin:16px 0;padding-top:8px;border-top:1px solid #eee;">
+      <span style="font-size:16px;font-weight:600;color:#111;">${isEur ? 'Total' : '合計'}　${formatPrice(order.total, order.currency)}</span>
+    </div>
+
+    <div style="text-align:center;margin:28px 0;">
+      <a href="${paymentUrl}" style="display:inline-block;background:#111;color:#fff;font-size:15px;font-weight:600;text-decoration:none;padding:14px 40px;border-radius:8px;">お支払いを完了する</a>
+    </div>
+
+    <p style="font-size:13px;color:#999;line-height:1.6;margin:24px 0 0;">
+      ※お支払いリンクの有効期限はご注文から24時間です。期限が切れた場合は、お手数ですが再度ご注文ください。<br>
+      ※すでにお支払い済み、またはご注文の意思がない場合は、このメールは破棄してください。
+    </p>
+  `
+
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: order.email,
+      subject: `【${siteConfig.name}】お支払いがお済みでないご注文があります（#${order.order_number}）`,
+      html: baseLayout('お支払いのご案内', content),
+    })
+  } catch (err) {
+    console.error('Failed to send payment reminder email:', err)
+  }
+}
+
 export async function sendShippingNotification(order: Order) {
   const carrierName = order.shipping_carrier
     ? SHIPPING_CARRIERS[order.shipping_carrier] || order.shipping_carrier

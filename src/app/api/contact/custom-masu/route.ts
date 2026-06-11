@@ -1,14 +1,34 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import siteConfig from '@/site.config'
+import { rateLimit } from '@/lib/rate-limit'
+import { escapeHtml, sanitizeString } from '@/lib/validation'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(request: Request) {
   try {
+    const ip = request.headers.get('x-forwarded-for') || 'unknown'
+    const { success } = rateLimit(`custom-masu:${ip}`, 5, 3600000)
+    if (!success) {
+      return NextResponse.json({ error: '送信回数の上限に達しました。しばらく経ってからお試しください。' }, { status: 429 })
+    }
+
     const body = await request.json()
 
-    const { name, email, phone, company, size, quantity, purpose, engravingType, engravingText, deadline, message } = body
+    const rawEmail = typeof body.email === 'string' ? body.email.trim() : ''
+    // Escape everything that gets interpolated into the email HTML below
+    const name = escapeHtml(sanitizeString(body.name, 100))
+    const email = escapeHtml(rawEmail.slice(0, 200))
+    const phone = escapeHtml(sanitizeString(body.phone, 50))
+    const company = escapeHtml(sanitizeString(body.company, 200))
+    const size = escapeHtml(sanitizeString(body.size, 100))
+    const quantity = escapeHtml(sanitizeString(String(body.quantity ?? ''), 20))
+    const purpose = escapeHtml(sanitizeString(body.purpose, 200))
+    const engravingType = sanitizeString(body.engravingType, 50)
+    const engravingText = escapeHtml(sanitizeString(body.engravingText, 500))
+    const deadline = escapeHtml(sanitizeString(body.deadline, 100))
+    const message = escapeHtml(sanitizeString(body.message, 5000))
 
     // Validate required fields
     if (!name || !email || !size || !quantity || !purpose) {
@@ -16,7 +36,7 @@ export async function POST(request: Request) {
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(rawEmail)) {
       return NextResponse.json({ error: 'メールアドレスの形式が正しくありません' }, { status: 400 })
     }
 
@@ -67,7 +87,7 @@ export async function POST(request: Request) {
 
       <h3 style="font-size:14px;color:#666;margin:24px 0 12px;text-transform:uppercase;letter-spacing:1px;">名入れ・刻印</h3>
       <table style="width:100%;border-collapse:collapse;font-size:14px;">
-        <tr><td style="padding:8px 0;color:#666;width:120px;">刻印方法</td><td style="padding:8px 0;color:#111;">${engravingLabels[engravingType] || engravingType}</td></tr>
+        <tr><td style="padding:8px 0;color:#666;width:120px;">刻印方法</td><td style="padding:8px 0;color:#111;">${engravingLabels[engravingType] || escapeHtml(engravingType)}</td></tr>
         ${engravingText ? `<tr><td style="padding:8px 0;color:#666;">刻印内容</td><td style="padding:8px 0;color:#111;">${engravingText}</td></tr>` : ''}
       </table>
 
@@ -88,7 +108,7 @@ export async function POST(request: Request) {
     // Send auto-reply to customer
     await resend.emails.send({
       from: siteConfig.emailFrom,
-      to: email,
+      to: rawEmail,
       subject: `【${siteConfig.name}】お問い合わせありがとうございます`,
       html: `<!DOCTYPE html>
 <html lang="ja">

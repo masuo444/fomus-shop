@@ -1,14 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { rateLimit } from '@/lib/rate-limit'
+import { escapeHtml, sanitizeString } from '@/lib/validation'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, subject, message } = await request.json()
+    const ip = request.headers.get('x-forwarded-for') || 'unknown'
+    const { success } = rateLimit(`contact:${ip}`, 5, 3600000)
+    if (!success) {
+      return NextResponse.json({ error: '送信回数の上限に達しました。しばらく経ってからお試しください。' }, { status: 429 })
+    }
+
+    const body = await request.json()
+    const rawEmail = typeof body.email === 'string' ? body.email.trim() : ''
+    // Escape everything that gets interpolated into the email HTML below
+    const name = escapeHtml(sanitizeString(body.name, 100))
+    const email = escapeHtml(sanitizeString(body.email, 200))
+    const subject = escapeHtml(sanitizeString(body.subject, 200))
+    const message = escapeHtml(sanitizeString(body.message, 5000))
 
     if (!name || !email || !message) {
       return NextResponse.json({ error: '必須項目を入力してください' }, { status: 400 })
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail)) {
+      return NextResponse.json({ error: 'メールアドレスの形式が正しくありません' }, { status: 400 })
     }
 
     const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL
@@ -30,7 +48,7 @@ export async function POST(request: NextRequest) {
           <tr><td style="padding:8px;border:1px solid #eee;font-weight:bold">内容</td><td style="padding:8px;border:1px solid #eee;white-space:pre-wrap">${message}</td></tr>
         </table>
       `,
-      replyTo: email,
+      replyTo: rawEmail,
     })
 
     return NextResponse.json({ success: true })

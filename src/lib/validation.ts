@@ -11,6 +11,17 @@ export function sanitizeString(val: unknown, maxLength: number): string {
   return val.trim().slice(0, maxLength)
 }
 
+/** Escape HTML special characters. Required for any user input interpolated into email HTML. */
+export function escapeHtml(val: unknown): string {
+  if (typeof val !== 'string') return ''
+  return val
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 /** Validate that a value is a non-empty string */
 export function requireString(val: unknown, fieldName: string): string {
   if (typeof val !== 'string' || val.trim().length === 0) {
