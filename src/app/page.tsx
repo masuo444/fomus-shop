@@ -354,6 +354,38 @@ export default async function HomePage() {
                 </Link>
               )}
 
+              <Link href="/iwaimasu" className="group bg-[var(--background)] transition-colors hover:bg-[var(--color-subtle)]">
+                <div className="aspect-[4/3] overflow-hidden bg-[#f3efe7] flex items-center justify-center">
+                  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-40 md:w-48 img-hover" aria-hidden="true">
+                    <g fill="none" stroke="#b89150" strokeWidth="1.2" strokeLinejoin="round" opacity="0.55">
+                      <path d="M100 38 L168 74 L100 110 L32 74 Z" />
+                      <path d="M32 74 L32 140 L100 176 L168 140 L168 74" />
+                      <path d="M100 110 L100 176" />
+                      <path d="M48 83 L48 131" />
+                      <path d="M152 83 L152 131" />
+                    </g>
+                  </svg>
+                </div>
+                <div className="p-10 md:p-14">
+                  <p className="text-[10px] tracking-[0.25em] uppercase text-[var(--color-muted)] mb-6">
+                    {siteConfig.features.digitalItems ? '03' : '02'}
+                  </p>
+                  <h3 className="font-display text-3xl md:text-4xl font-light text-[var(--foreground)] mb-4">
+                    祝枡
+                    <span className="ml-3 text-sm tracking-[0.2em] text-[#b89150] italic">Iwaimasu</span>
+                  </h3>
+                  <p className="text-xs leading-[2] text-[var(--color-muted)]">
+                    祝い花のように贈る、新しいお祝いの形。
+                    <br />
+                    周年・蔵開き・ライブの節目に。
+                  </p>
+                  <div className="mt-8 flex items-center gap-2 text-[10px] tracking-[0.15em] uppercase text-[var(--color-muted)] group-hover:text-[var(--foreground)] transition-colors">
+                    <span>View</span>
+                    <svg className="w-3 h-3 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                  </div>
+                </div>
+              </Link>
+
             </div>
           </ScrollReveal>
         </div>

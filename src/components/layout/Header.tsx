@@ -113,6 +113,9 @@ export default function Header() {
                 Digital
               </Link>
             )}
+            <Link href="/iwaimasu" className="text-xs tracking-[0.15em] text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
+              祝枡
+            </Link>
             <Link href={p('/contact')} className="text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
               Contact
             </Link>
@@ -253,6 +256,9 @@ export default function Header() {
                 Digital
               </Link>
             )}
+            <Link href="/iwaimasu" className="block text-xs tracking-[0.15em] text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
+              祝枡
+            </Link>
             <Link href={p('/contact')} className="block text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
               Contact
             </Link>
