@@ -120,7 +120,7 @@ export function IwaimasuCta({
         <p className="mt-8 text-xs leading-[2.4] text-[var(--iw-wood-pale)]">{lead}</p>
         <div className="mt-12">
           <Link
-            href="/contact"
+            href="/contact?subject=祝枡について（導入のご相談）"
             className="inline-block border border-[var(--iw-gold)] text-[var(--iw-wood-pale)] hover:bg-[var(--iw-gold)] hover:text-[var(--iw-ink)] transition-colors px-12 py-4 text-xs tracking-[0.2em]"
           >
             お問い合わせ →

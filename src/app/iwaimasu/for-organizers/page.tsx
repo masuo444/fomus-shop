@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { BreadcrumbJsonLd } from '@/components/seo/JsonLd'
-import { MasuMotif, SectionHead, IwaimasuCta, IWAI_COLORS } from '../_components/Shared'
+import Image from 'next/image'
+import { SectionHead, IwaimasuCta, IWAI_COLORS } from '../_components/Shared'
 
 export const metadata: Metadata = {
   title: '導入をお考えの方へ',
@@ -136,7 +137,13 @@ export default function ForOrganizersPage() {
       <section>
         <div className="max-w-5xl mx-auto px-6 py-20 md:py-28 grid md:grid-cols-2 gap-12 items-center">
           <div className="flex justify-center order-2 md:order-1">
-            <MasuMotif stroke="var(--iw-wood)" className="w-56 md:w-72" />
+            <Image
+              src="/iwaimasu/masu-1.jpg"
+              alt="ロゴ焼印入りのFOMUS枡"
+              width={1024}
+              height={1024}
+              className="w-full max-w-sm shadow-lg"
+            />
           </div>
           <div className="order-1 md:order-2">
             <p className="text-[10px] tracking-[0.3em] uppercase text-[var(--iw-gold)] mb-4">
@@ -269,7 +276,7 @@ export default function ForOrganizersPage() {
           </div>
           <div className="mt-14 text-center">
             <Link
-              href="/contact"
+              href="/contact?subject=祝枡について（導入のご相談）"
               className="inline-block bg-[var(--iw-ink)] text-white px-12 py-4 text-xs tracking-[0.2em] hover:bg-[var(--iw-wood)] transition-colors"
             >
               導入のご相談はこちら →

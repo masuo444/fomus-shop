@@ -15,6 +15,16 @@ export const metadata: Metadata = {
   },
   description:
     '祝枡（いわいます）は、企業や団体の節目を祝うための新しいお祝いの選択肢。祝い花のように贈り、その先も残る。FOMUSが受付から制作までを担います。',
+  openGraph: {
+    title: '祝枡 IWAIMASU ｜ 祝福を、形に残す。',
+    description:
+      '祝い花のように贈る、新しいお祝いの形。周年・蔵開き・ライブの節目に。',
+    images: [{ url: '/iwaimasu/og.jpg', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    images: ['/iwaimasu/og.jpg'],
+  },
 }
 
 const nav = [

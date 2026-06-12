@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import type { Metadata } from 'next'
 import { BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import { MasuMotif, MasuCluster, SectionHead, IwaimasuCta } from './_components/Shared'
@@ -86,7 +87,13 @@ export default function IwaimasuPage() {
             </div>
           </div>
           <div className="flex justify-center">
-            <MasuMotif stroke="var(--iw-wood)" className="w-56 md:w-72" />
+            <Image
+              src="/iwaimasu/masu-tower.jpg"
+              alt="金屏風の前に積まれた祝枡のタワー"
+              width={864}
+              height={1184}
+              className="w-full max-w-sm shadow-lg"
+            />
           </div>
         </div>
       </section>
@@ -173,7 +180,7 @@ export default function IwaimasuPage() {
           </p>
           <div className="mt-10">
             <Link
-              href="/contact"
+              href="/contact?subject=祝枡について（贈りたい）"
               className="inline-block border border-[var(--iw-ink)] px-10 py-4 text-xs tracking-[0.2em] hover:bg-[var(--iw-ink)] hover:text-white transition-colors"
             >
               贈りたい相手がいる →
