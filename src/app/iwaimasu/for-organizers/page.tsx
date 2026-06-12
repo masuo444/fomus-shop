@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import Image from 'next/image'
-import { SectionHead, IwaimasuCta, IWAI_COLORS } from '../_components/Shared'
+import { MasuCluster, SectionHead, IwaimasuCta, IWAI_COLORS } from '../_components/Shared'
 
 export const metadata: Metadata = {
   title: '導入をお考えの方へ',
@@ -42,7 +42,6 @@ const comparison: Array<[string, string, string]> = [
   ['イベント後', '処分が必要', '展示・使用・贈答に活用'],
   ['贈り主のお名前', '立て札', '芳名板と受付ページに掲載'],
   ['会場スペース', '設置場所が必要', '省スペースで飾れる'],
-  ['主催者の費用', 'かからない', 'かからない'],
 ]
 
 const flow = [
@@ -80,8 +79,9 @@ export default function ForOrganizersPage() {
       />
 
       {/* Hero */}
-      <section>
-        <div className="max-w-5xl mx-auto px-6 py-24 md:py-32">
+      <section className="relative overflow-hidden">
+        <div className="max-w-5xl mx-auto px-6 py-24 md:py-32 relative">
+          <MasuCluster className="absolute right-0 top-1/2 -translate-y-1/2 hidden md:block pointer-events-none" />
           <p className="text-[10px] tracking-[0.3em] uppercase text-[var(--iw-gold)] mb-6">
             For Organizers
           </p>
