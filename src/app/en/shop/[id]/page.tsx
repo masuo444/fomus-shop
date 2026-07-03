@@ -111,14 +111,21 @@ export default async function EnglishProductDetailPage({ params }: Props) {
       .from('products')
       .select('*')
       .eq('is_published', true)
-      .eq('hidden_from_listing', false)
       .neq('id', p.id)
       .gt('price', 0)
       .order('sort_order', { ascending: true })
     const all = (data || []) as Product[]
-    const masu = all.filter((r) => r.name.includes('枡'))
-    const others = all.filter((r) => !r.name.includes('枡'))
-    return [...masu, ...others].slice(0, 4)
+    // Hidden (direct-link only) products may appear only among their own category,
+    // and only when the current product is itself hidden (e.g. KUMIKI → KUMIKI)
+    const visible = all.filter((r) =>
+      !r.hidden_from_listing ||
+      (p.hidden_from_listing && p.category_id != null && r.category_id === p.category_id)
+    )
+    const sameCategory = p.category_id ? visible.filter((r) => r.category_id === p.category_id) : []
+    const rest = visible.filter((r) => !sameCategory.some((s) => s.id === r.id))
+    const masu = rest.filter((r) => r.name.includes('枡'))
+    const others = rest.filter((r) => !r.name.includes('枡'))
+    return [...sameCategory, ...masu, ...others].slice(0, 4)
   }
 
   const [{ data: shop }, { data: reviewsData }, relatedProducts] = await Promise.all([

@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '**.fomus.jp',
       },
+      {
+        protocol: 'https',
+        hostname: 'kumiki.fomusglobal.com',
+      },
     ],
   },
   headers: async () => [

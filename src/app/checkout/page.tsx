@@ -8,7 +8,8 @@ import { getLocalCart, getOptionsAdjustment, formatOptionsText, type LocalCartIt
 import { createClient } from '@/lib/supabase/client'
 import { formatPrice } from '@/lib/utils'
 import { fetchAddressFromPostalCode } from '@/lib/address'
-import { SHIPPING_FEE, SHIPPING_FEE_EUR } from '@/lib/constants'
+import { SHIPPING_FEE, SHIPPING_FEE_EUR, SHIPPING_FEE_INTL } from '@/lib/constants'
+import { SHIPPING_COUNTRIES, countryLabel } from '@/lib/countries'
 import type { Product, Profile } from '@/lib/types'
 import siteConfig from '@/site.config'
 import { useCurrency } from '@/hooks/useCurrency'
@@ -44,6 +45,7 @@ export default function CheckoutPage() {
     phone: '',
     postal_code: '',
     address: '',
+    country: 'JP',
   })
 
   const currency = useCurrency()
@@ -64,6 +66,14 @@ export default function CheckoutPage() {
   useEffect(() => {
     loadData()
   }, [])
+
+  // EN page visitors are mostly overseas — default to US (user can change)
+  useEffect(() => {
+    if (locale === 'en') {
+      setForm((prev) => (prev.country === 'JP' ? { ...prev, country: 'US' } : prev))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locale])
 
   const loadData = async () => {
     const cart = getLocalCart()
@@ -102,13 +112,14 @@ export default function CheckoutPage() {
       if (profileData) {
         const p = profileData as Profile
         setProfile(p)
-        setForm({
+        setForm((prev) => ({
+          ...prev,
           name: p.name || '',
           email: p.email || user.email || '',
           phone: p.phone || '',
           postal_code: p.postal_code || '',
           address: p.address || '',
-        })
+        }))
       } else {
         setForm((prev) => ({ ...prev, email: user.email || '' }))
       }
@@ -128,7 +139,11 @@ export default function CheckoutPage() {
     0
   )
   const allShippingIncluded = items.length > 0 && items.every(i => i.product?.shipping_included)
-  const shippingFee = (allDigital || allShippingIncluded) ? 0 : (isEur ? SHIPPING_FEE_EUR : SHIPPING_FEE)
+  const isIntl = form.country !== 'JP'
+  const shippingFee = (allDigital || allShippingIncluded) ? 0
+    : isEur ? SHIPPING_FEE_EUR
+    : isIntl ? SHIPPING_FEE_INTL
+    : SHIPPING_FEE
   const total = subtotal + shippingFee - couponDiscount
 
   const handleApplyCoupon = async () => {
@@ -167,7 +182,7 @@ export default function CheckoutPage() {
 
   const handlePostalCodeChange = async (value: string) => {
     setForm({ ...form, postal_code: value })
-    if (!isEur) {
+    if (!isEur && form.country === 'JP') {
       const cleaned = value.replace(/[-\s]/g, '')
       if (cleaned.length === 7 && /^\d{7}$/.test(cleaned)) {
         setAddressLoading(true)
@@ -274,8 +289,9 @@ export default function CheckoutPage() {
                 <p className="font-medium">{form.name}</p>
                 <p className="text-gray-500">{form.email}</p>
                 <p className="text-gray-500">{form.phone}</p>
-                {!allDigital && <p className="text-gray-500">{t.postalPrefix}{form.postal_code}</p>}
+                {!allDigital && <p className="text-gray-500">{form.country === 'JP' ? t.postalPrefix : ''}{form.postal_code}</p>}
                 {!allDigital && <p className="text-gray-500">{form.address}</p>}
+                {!allDigital && <p className="text-gray-500">{countryLabel(form.country, locale)}</p>}
               </div>
             </div>
 
@@ -402,6 +418,24 @@ export default function CheckoutPage() {
             </div>
 
             {!allDigital && (<>
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">
+                {te.country} *
+              </label>
+              <select
+                required
+                value={form.country}
+                onChange={(e) => setForm({ ...form, country: e.target.value })}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black"
+              >
+                {SHIPPING_COUNTRIES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {locale === 'ja' ? c.nameJa : c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div>
               <label className="block text-sm text-gray-600 mb-1">
                 {te.postalCode} *

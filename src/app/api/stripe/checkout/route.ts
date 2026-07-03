@@ -11,6 +11,7 @@ import { requireString, validateEmail, ValidationError } from '@/lib/validation'
 import { rateLimit } from '@/lib/rate-limit'
 import { checkOrderFraud } from '@/lib/fraud'
 import { validateItemQuantities, verifyOptionPrices, verifyCouponDiscount, reserveStock, restoreStock } from '@/lib/checkout-validation'
+import { isValidShippingCountry } from '@/lib/countries'
 
 interface CheckoutItem {
   product_id: string
@@ -24,6 +25,7 @@ interface ShippingInfo {
   phone: string
   postal_code: string
   address: string
+  country?: string
 }
 
 export async function POST(request: Request) {
@@ -91,6 +93,10 @@ export async function POST(request: Request) {
         shipping.phone = requireString(shipping.phone, '電話番号').slice(0, 20)
         shipping.postal_code = requireString(shipping.postal_code, '郵便番号').slice(0, 10)
         shipping.address = requireString(shipping.address, '住所').slice(0, 500)
+        shipping.country = (shipping.country || 'JP').toUpperCase()
+        if (!isValidShippingCountry(shipping.country)) {
+          return NextResponse.json({ error: 'この国への配送には対応していません / We do not ship to this country yet' }, { status: 400 })
+        }
       }
     } catch (err) {
       if (err instanceof ValidationError) return NextResponse.json({ error: err.message }, { status: 400 })
@@ -190,8 +196,10 @@ export async function POST(request: Request) {
 
     // Shipping fee: digital or shipping_included products are free, GUILD members get flat 800 yen
     const allShippingIncluded = products.every((p: any) => p.shipping_included)
+    const isIntlAddress = !allDigital && (shipping.country || 'JP') !== 'JP'
     const shippingFee = (allDigital || allShippingIncluded) ? 0
       : currency === 'eur' ? siteConfig.shippingFeeEur
+      : isIntlAddress ? siteConfig.shippingFeeIntl
       : isGuildMember ? 800
       : SHIPPING_FEE
 
@@ -248,6 +256,7 @@ export async function POST(request: Request) {
       shipping_name: shipping.name,
       shipping_postal_code: shipping.postal_code,
       shipping_address: shipping.address,
+      shipping_country: allDigital ? 'JP' : (shipping.country || 'JP'),
       shipping_phone: shipping.phone,
       points_used: 0,
       is_flagged: fraudCheck.flagged,

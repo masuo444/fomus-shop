@@ -364,8 +364,9 @@ export default function OrderDetailPage() {
           <div className="bg-white rounded-xl border border-gray-200 p-5">
             <h2 className="font-semibold text-gray-900 mb-3">配送先</h2>
             <div className="text-sm text-gray-900">
-              <p>〒{order.shipping_postal_code}</p>
+              <p>{(!order.shipping_country || order.shipping_country === 'JP') ? '〒' : ''}{order.shipping_postal_code}</p>
               <p>{order.shipping_address}</p>
+              {order.shipping_country && order.shipping_country !== 'JP' && <p className="font-medium">{order.shipping_country}</p>}
               <p>{order.shipping_name}</p>
             </div>
           </div>

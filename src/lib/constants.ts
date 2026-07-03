@@ -8,3 +8,4 @@ export const SITE_NAME = siteConfig.name
 export const SITE_DESCRIPTION = siteConfig.description
 export const DEFAULT_COMMISSION_RATE = siteConfig.defaultCommissionRate
 export const SHIPPING_FEE_EUR = siteConfig.shippingFeeEur
+export const SHIPPING_FEE_INTL = siteConfig.shippingFeeIntl

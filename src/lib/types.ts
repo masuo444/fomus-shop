@@ -135,6 +135,7 @@ export interface Order {
   shipping_name: string
   shipping_postal_code: string
   shipping_address: string
+  shipping_country?: string
   shipping_phone: string
   tracking_number: string | null
   shipping_carrier: string | null

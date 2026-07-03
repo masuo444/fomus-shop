@@ -19,6 +19,7 @@ const siteConfig = {
   // Pricing
   shippingFee: Number(process.env.SHIPPING_FEE || 1000),
   shippingFeeEur: Number(process.env.SHIPPING_FEE_EUR || 1500), // EUR in cents (€15.00)
+  shippingFeeIntl: Number(process.env.SHIPPING_FEE_INTL || 3000), // JPY, non-Japan address with JPY currency
   defaultCommissionRate: Number(process.env.DEFAULT_COMMISSION_RATE || 10),
 
   // Admin

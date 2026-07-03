@@ -90,8 +90,9 @@ export async function sendOrderConfirmation(order: Order, orderItems: OrderItem[
     <div style="background:#f9f9f9;border-radius:8px;padding:16px;margin:16px 0;">
       <p style="margin:0 0 8px;font-size:12px;color:#999;">配送先</p>
       <p style="margin:0;font-size:14px;color:#333;line-height:1.6;">
-        〒${order.shipping_postal_code}<br>
+        ${order.shipping_country && order.shipping_country !== 'JP' ? '' : '〒'}${order.shipping_postal_code}<br>
         ${order.shipping_address}<br>
+        ${order.shipping_country && order.shipping_country !== 'JP' ? order.shipping_country + '<br>' : ''}
         ${order.shipping_name}
       </p>
     </div>
@@ -227,8 +228,9 @@ export async function sendOrderNotificationToAdmin(order: Order, orderItems: Ord
     <div style="background:#f9f9f9;border-radius:8px;padding:16px;margin:16px 0;">
       <p style="margin:0 0 8px;font-size:12px;color:#999;">配送先</p>
       <p style="margin:0;font-size:14px;color:#333;line-height:1.6;">
-        〒${order.shipping_postal_code}<br>
+        ${order.shipping_country && order.shipping_country !== 'JP' ? '' : '〒'}${order.shipping_postal_code}<br>
         ${order.shipping_address}<br>
+        ${order.shipping_country && order.shipping_country !== 'JP' ? order.shipping_country + '<br>' : ''}
         ${order.shipping_name}<br>
         ${order.shipping_phone}
       </p>

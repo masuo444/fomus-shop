@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
     .select('id, name, price, images')
     .in('shop_id', shopIds)
     .eq('is_published', true)
+    .eq('hidden_from_listing', false)
     .or(`name.ilike.${searchTerm},description.ilike.${searchTerm}`)
     .order('created_at', { ascending: false })
     .limit(10)
