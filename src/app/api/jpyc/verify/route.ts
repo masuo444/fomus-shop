@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { verifyJpycTransfer, getProvider } from '@/lib/jpyc'
 import { sendOrderConfirmation, sendOrderNotificationToAdmin } from '@/lib/email'
+import { notifyGuildSalesCredit } from '@/lib/guild-sales'
 import siteConfig from '@/site.config'
 import { rateLimit } from '@/lib/rate-limit'
 
@@ -137,6 +138,23 @@ export async function POST(request: Request) {
       if (fullOrder) {
         await sendOrderConfirmation(fullOrder, fullOrder.order_items)
         await sendOrderNotificationToAdmin(fullOrder, fullOrder.order_items)
+
+        // FOMUS GUILD 会員の紹介コードによる売上ポイント還元
+        if (fullOrder.referral_code) {
+          try {
+            await notifyGuildSalesCredit({
+              id: fullOrder.id,
+              referral_code: fullOrder.referral_code,
+              subtotal: fullOrder.subtotal,
+              coupon_discount: fullOrder.coupon_discount,
+              currency: fullOrder.currency,
+              email: fullOrder.email,
+            })
+            await admin.from('orders').update({ referral_credited: true }).eq('id', order_id)
+          } catch (referralErr) {
+            console.error('GUILD referral credit failed:', referralErr)
+          }
+        }
       }
     } catch (emailErr) {
       console.error('Email send error:', emailErr)

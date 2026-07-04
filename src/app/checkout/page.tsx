@@ -37,6 +37,7 @@ export default function CheckoutPage() {
   const [couponError, setCouponError] = useState('')
   const [couponApplied, setCouponApplied] = useState(false)
   const [couponLoading, setCouponLoading] = useState(false)
+  const [referralCode, setReferralCode] = useState('')
   const [giftWrapping, setGiftWrapping] = useState(false)
   const [giftMessage, setGiftMessage] = useState('')
   const [form, setForm] = useState({
@@ -217,7 +218,7 @@ export default function CheckoutPage() {
         const res = await fetch('/api/bank-transfer/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ items: cartItems, shipping: form, coupon_code: couponApplied ? couponCode : undefined, gift_wrapping: giftWrapping, gift_message: giftWrapping ? giftMessage : undefined }),
+          body: JSON.stringify({ items: cartItems, shipping: form, coupon_code: couponApplied ? couponCode : undefined, referral_code: referralCode.trim() || undefined, gift_wrapping: giftWrapping, gift_message: giftWrapping ? giftMessage : undefined }),
         })
 
         const data = await res.json()
@@ -233,7 +234,7 @@ export default function CheckoutPage() {
         const res = await fetch('/api/jpyc/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ items: cartItems, shipping: form, coupon_code: couponApplied ? couponCode : undefined, gift_wrapping: giftWrapping, gift_message: giftWrapping ? giftMessage : undefined }),
+          body: JSON.stringify({ items: cartItems, shipping: form, coupon_code: couponApplied ? couponCode : undefined, referral_code: referralCode.trim() || undefined, gift_wrapping: giftWrapping, gift_message: giftWrapping ? giftMessage : undefined }),
         })
 
         const data = await res.json()
@@ -251,7 +252,7 @@ export default function CheckoutPage() {
         const res = await fetch('/api/stripe/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ items: cartItems, shipping: form, currency, locale, coupon_code: couponApplied ? couponCode : undefined, gift_wrapping: giftWrapping, gift_message: giftWrapping ? giftMessage : undefined }),
+          body: JSON.stringify({ items: cartItems, shipping: form, currency, locale, coupon_code: couponApplied ? couponCode : undefined, referral_code: referralCode.trim() || undefined, gift_wrapping: giftWrapping, gift_message: giftWrapping ? giftMessage : undefined }),
         })
 
         const data = await res.json()
@@ -569,6 +570,20 @@ export default function CheckoutPage() {
                 </div>
               )}
               {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
+            </div>
+
+            {/* Referral code (GUILD member) */}
+            <div className="pt-3 border-t border-gray-100 mt-4">
+              <p className="text-sm text-gray-600 mb-1">{te.referralCode}</p>
+              <input
+                type="text"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value)}
+                placeholder={te.referralCodePlaceholder}
+                maxLength={20}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black"
+              />
+              <p className="text-xs text-gray-400 mt-1">{te.referralCodeNote}</p>
             </div>
           </div>
         </div>

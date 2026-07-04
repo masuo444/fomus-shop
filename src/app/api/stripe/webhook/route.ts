@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendOrderConfirmation, sendOrderNotificationToAdmin } from '@/lib/email'
+import { notifyGuildSalesCredit } from '@/lib/guild-sales'
 import type { Order, OrderItem } from '@/lib/types'
 import Stripe from 'stripe'
 
@@ -134,6 +135,24 @@ export async function POST(request: Request) {
           } catch (commissionError) {
             console.error('Commission calculation failed:', commissionError)
             // Don't fail the webhook - order is already processed
+          }
+
+          // FOMUS GUILD 会員の紹介コードによる売上ポイント還元
+          if (orderData.referral_code) {
+            try {
+              await notifyGuildSalesCredit({
+                id: orderData.id,
+                referral_code: orderData.referral_code,
+                subtotal: orderData.subtotal,
+                coupon_discount: orderData.coupon_discount,
+                currency: orderData.currency,
+                email: orderData.email,
+              })
+              await admin.from('orders').update({ referral_credited: true }).eq('id', orderId)
+            } catch (referralError) {
+              console.error('GUILD referral credit failed:', referralError)
+              // Don't fail the webhook - order is already processed
+            }
           }
         }
       }

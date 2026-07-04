@@ -36,11 +36,12 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { items, shipping, currency: requestCurrency, coupon_code, gift_wrapping, gift_message, guild_secret, locale } = (await request.json()) as {
+    const { items, shipping, currency: requestCurrency, coupon_code, referral_code, gift_wrapping, gift_message, guild_secret, locale } = (await request.json()) as {
       items: CheckoutItem[]
       shipping: ShippingInfo
       currency?: Currency
       coupon_code?: string
+      referral_code?: string
       gift_wrapping?: boolean
       gift_message?: string
       guild_secret?: string
@@ -221,6 +222,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '合計金額が不正です' }, { status: 400 })
     }
 
+    // 紹介コード（GUILD会員向け）: 英数字のみ・最大20文字に正規化。実在チェックはGUILD側で行う。
+    const sanitizedReferralCode = referral_code
+      ? referral_code.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 20) || null
+      : null
+
     // P0 Fix: Reserve stock atomically BEFORE creating order (skip made-to-order)
     const stockItems = items
       .filter((item) => {
@@ -263,6 +269,7 @@ export async function POST(request: Request) {
       fraud_reasons: fraudCheck.reasons,
       coupon_id: couponId,
       coupon_discount: couponDiscount,
+      referral_code: sanitizedReferralCode,
       gift_wrapping: gift_wrapping || false,
       gift_message: gift_message || null,
       payment_method: 'stripe',
