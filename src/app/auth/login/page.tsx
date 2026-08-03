@@ -58,7 +58,7 @@ function LoginContent() {
       {siteConfig.features.membershipSso && siteConfig.features.membershipUrl && (
         <div className="mb-8">
           <a
-            href="https://guild-app.fomusglobal.com/invite/FOMUS-SHOP"
+            href={siteConfig.features.membershipUrl}
             className="block w-full rounded-xl border-2 border-[var(--color-member)] px-5 py-4 text-center hover:bg-[var(--color-member-bg)] transition-colors"
           >
             <p className="text-sm font-bold" style={{ color: 'var(--color-member)' }}>

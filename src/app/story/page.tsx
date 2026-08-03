@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import { BreadcrumbJsonLd } from '@/components/seo/JsonLd'
+import siteConfig from '@/site.config'
 
 export const metadata: Metadata = {
   title: 'FOMUSストーリー',
@@ -9,6 +11,9 @@ export const metadata: Metadata = {
 }
 
 export default function StoryPage() {
+  if (!siteConfig.features.brandPages) {
+    notFound()
+  }
   return (
     <div className="max-w-3xl mx-auto px-6 sm:px-8 lg:px-10">
       <BreadcrumbJsonLd items={[

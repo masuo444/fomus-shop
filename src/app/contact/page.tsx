@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
 import ContactClient from './ContactClient'
 import { FAQPageJsonLd } from '@/components/seo/JsonLd'
+import siteConfig from '@/site.config'
 
 export const metadata: Metadata = {
   title: 'お問い合わせ',
-  description: 'FOMUSへのお問い合わせ。商品・配送・オーダーメイドに関するご質問はこちらから。',
+  description: `${siteConfig.name}へのお問い合わせ。商品・配送・オーダーメイドに関するご質問はこちらから。`,
   alternates: {
     canonical: '/contact',
     languages: { ja: '/contact', en: '/en/contact' },

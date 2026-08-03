@@ -47,6 +47,7 @@ export async function PUT(
     sale_start_date: 'sale_start_date',
     sale_end_date: 'sale_end_date',
     hidden_from_listing: 'hidden_from_listing',
+    external_url: 'external_url',
   }
 
   for (const [key, dbField] of Object.entries(fieldMap)) {

@@ -99,12 +99,18 @@ export default async function ProductDetailPage({ params }: Props) {
 
   // Phase 2: shop / reviews / related products in parallel
   const fetchRelated = async (): Promise<Product[]> => {
+    // 関連商品は自ブランドのショップのみ（他ブランドの商品を混ぜない）
+    const { data: platformShops } = await supabase
+      .from('shops')
+      .select('id')
+      .eq('platform', siteConfig.defaultShopSlug)
     const { data } = await supabase
       .from('products')
       .select('*')
       .eq('is_published', true)
       .neq('id', p.id)
       .gt('price', 0)
+      .in('shop_id', (platformShops || []).map((s) => s.id))
       .order('sort_order', { ascending: true })
     const all = (data || []) as Product[]
     // Hidden (direct-link only) products may appear only among their own category,
@@ -122,7 +128,7 @@ export default async function ProductDetailPage({ params }: Props) {
   }
 
   const [{ data: shop }, { data: reviewsData }, relatedProducts] = await Promise.all([
-    supabase.from('shops').select('name, slug').eq('id', p.shop_id).single(),
+    supabase.from('shops').select('name, slug, platform').eq('id', p.shop_id).single(),
     supabase
       .from('product_reviews')
       .select('id, reviewer_name, rating, title, body, verified_purchase, created_at')
@@ -132,7 +138,12 @@ export default async function ProductDetailPage({ params }: Props) {
     fetchRelated(),
   ])
 
-  const shopName = shop && shop.slug !== 'fomus' ? shop.name : undefined
+  // 他ブランドの商品はID直打ちでも表示しない
+  if (!shop || shop.platform !== siteConfig.defaultShopSlug) {
+    notFound()
+  }
+
+  const shopName = shop.slug !== siteConfig.defaultShopSlug ? shop.name : undefined
 
   const reviews: ProductReview[] = (reviewsData || []) as ProductReview[]
   const reviewCount = reviews.length
@@ -151,7 +162,7 @@ export default async function ProductDetailPage({ params }: Props) {
         url={`/shop/${p.slug || p.id}`}
         inStock={p.stock !== 0}
         sku={p.id}
-        brand="FOMUS"
+        brand={siteConfig.name}
         aggregateRating={reviewCount > 0 ? {
           ratingValue: Math.round(averageRating * 10) / 10,
           reviewCount,

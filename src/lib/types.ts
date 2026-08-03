@@ -62,6 +62,7 @@ export interface Product {
   price_eur: number | null
   member_price_eur: number | null
   compare_at_price_eur: number | null
+  external_url: string | null
   created_at: string
   updated_at: string
   product_options?: ProductOption[]

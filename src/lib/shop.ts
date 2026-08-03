@@ -3,7 +3,7 @@ import siteConfig from '@/site.config'
 
 const PLATFORM_SHOP_SLUG = siteConfig.defaultShopSlug
 
-/** Get all published shop IDs */
+/** Get published shop IDs belonging to this deployment's brand platform */
 export async function getPublishedShopIds(): Promise<string[]> {
   const admin = createAdminClient()
   const { data } = await admin
@@ -11,6 +11,7 @@ export async function getPublishedShopIds(): Promise<string[]> {
     .select('id')
     .eq('is_published', true)
     .eq('status', 'active')
+    .eq('platform', PLATFORM_SHOP_SLUG)
 
   return data?.map((s) => s.id) ?? []
 }
@@ -49,6 +50,18 @@ export async function getShopForUser(userId: string): Promise<string | null> {
     .single()
 
   return data?.shop_id ?? null
+}
+
+/** Check whether a shop belongs to this deployment's brand platform */
+export async function isPlatformShop(shopId: string): Promise<boolean> {
+  const admin = createAdminClient()
+  const { data } = await admin
+    .from('shops')
+    .select('platform')
+    .eq('id', shopId)
+    .single()
+
+  return data?.platform === PLATFORM_SHOP_SLUG
 }
 
 /** Get shop by ID with full details */

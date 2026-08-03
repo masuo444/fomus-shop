@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkAdmin } from '@/lib/auth'
-import { DEFAULT_COMMISSION_RATE } from '@/lib/constants'
+import { DEFAULT_COMMISSION_RATE, DEFAULT_SHOP_SLUG } from '@/lib/constants'
 import { requireString, validateSlug, validateEmail, sanitizeString, clampNumber, ValidationError } from '@/lib/validation'
 
 export async function GET() {
@@ -15,7 +15,8 @@ export async function GET() {
   const { data: shops, error } = await admin
     .from('shops')
     .select('*')
-    .neq('slug', 'fomus')
+    .eq('platform', DEFAULT_SHOP_SLUG)
+    .neq('slug', DEFAULT_SHOP_SLUG)
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -64,6 +65,7 @@ export async function POST(request: NextRequest) {
         commission_rate,
         is_published: body.is_published ?? false,
         status: 'active',
+        platform: DEFAULT_SHOP_SLUG,
       })
       .select()
       .single()

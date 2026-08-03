@@ -1,6 +1,9 @@
 import { ImageResponse } from 'next/og'
+import siteConfig from '@/site.config'
 
 export const runtime = 'edge'
+
+const SHOP_LABEL = `${siteConfig.name.toUpperCase()} SHOP`
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -10,14 +13,14 @@ export async function GET(request: Request) {
     return new ImageResponse(
       (
         <div style={{ display: 'flex', width: '100%', height: '100%', background: '#111', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ fontSize: 48, color: '#fff', fontWeight: 300, letterSpacing: '0.05em' }}>FOMUS SHOP</div>
+          <div style={{ fontSize: 48, color: '#fff', fontWeight: 300, letterSpacing: '0.05em' }}>{SHOP_LABEL}</div>
         </div>
       ),
       { width: 1200, height: 630 }
     )
   }
 
-  let name = 'FOMUS SHOP'
+  let name = SHOP_LABEL
   let price = ''
   let imageUrl = ''
 
@@ -72,7 +75,7 @@ export async function GET(request: Request) {
           }}
         >
           <div style={{ fontSize: 14, color: '#666', letterSpacing: '0.15em', marginBottom: 20 }}>
-            FOMUS SHOP
+            {SHOP_LABEL}
           </div>
           <div style={{ fontSize: 40, fontWeight: 600, lineHeight: 1.3, marginBottom: 24 }}>
             {name}

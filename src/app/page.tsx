@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getPublishedShopIds } from '@/lib/shop'
 import { getCurrency } from '@/lib/currency'
 import ProductCard from '@/components/product/ProductCard'
+import GenericHome from '@/components/home/GenericHome'
 import ScrollReveal from '@/components/ui/ScrollReveal'
 import siteConfig from '@/site.config'
 import { FAQPageJsonLd, ItemListJsonLd } from '@/components/seo/JsonLd'
@@ -13,8 +14,12 @@ export const metadata: Metadata = {
   title: {
     absolute: `${siteConfig.name} — Official Online Shop`,
   },
-  description: 'FOMUS公式ショップ。国産ヒノキの枡（FOMUS枡・首掛け枡・アラビア語枡）、SILVA、デジタルアイテムなど。クレジットカード・JPYC決済対応。',
-  keywords: ['FOMUS', '枡', 'ます', 'masu', 'SILVA', 'ヒノキ枡', 'オリジナルグッズ', 'FOMUS GUILD', 'デジタルアイテム'],
+  description: siteConfig.features.brandPages
+    ? `${siteConfig.name}公式ショップ。国産ヒノキの枡（${siteConfig.name}枡・首掛け枡・アラビア語枡）、SILVA、デジタルアイテムなど。クレジットカード・JPYC決済対応。`
+    : `${siteConfig.name}公式オンラインショップ。${siteConfig.description}`,
+  keywords: siteConfig.features.brandPages
+    ? [siteConfig.name, '枡', 'ます', 'masu', 'SILVA', 'ヒノキ枡', 'オリジナルグッズ', `${siteConfig.name} GUILD`, 'デジタルアイテム']
+    : [siteConfig.name, `${siteConfig.name} 公式`, 'オンラインショップ'],
   alternates: {
     canonical: '/',
     languages: { ja: '/', en: '/en' },
@@ -82,10 +87,22 @@ export default async function HomePage() {
     if (digitalData?.[0]?.images?.[0]) digitalCoverImage = digitalData[0].images[0]
   }
 
+  // Non-FOMUS brands get a neutral home page until their own design is built
+  if (!siteConfig.features.brandPages) {
+    return (
+      <GenericHome
+        newProducts={newProducts}
+        currency={currency}
+        isLoggedIn={isLoggedIn}
+        isPremiumMember={isPremiumMember}
+      />
+    )
+  }
+
   return (
     <div>
       <FAQPageJsonLd items={[
-        { question: 'FOMUSではどんな商品が買えますか？', answer: '国産ヒノキの枡（一合枡・ミニ枡・名入れ枡）、カードゲーム「SILVA」、FOMUSランニングウェア、デジタルアイテムなどを販売しています。' },
+        { question: `${siteConfig.name}ではどんな商品が買えますか？`, answer: `国産ヒノキの枡（一合枡・ミニ枡・名入れ枡）、カードゲーム「SILVA」、${siteConfig.name}ランニングウェア、デジタルアイテムなどを販売しています。` },
         { question: '送料はいくらですか？', answer: '国内一律1,000円（税込）です。' },
         { question: 'どんな決済方法が使えますか？', answer: 'クレジットカード（Visa・Mastercard・Amex・JCB）、JPYC（日本円ステーブルコイン）に対応しています。' },
         { question: '枡の名入れやオーダーメイドはできますか？', answer: 'はい、法人向け・個人向けともに名入れ・オリジナルデザインの枡を承っています。' },
@@ -93,7 +110,7 @@ export default async function HomePage() {
       ]} />
       {newProducts.length > 0 && (
         <ItemListJsonLd
-          name="FOMUS 新着商品"
+          name={`${siteConfig.name} 新着商品`}
           items={newProducts.map((p, i) => ({
             name: p.name,
             url: `${process.env.NEXT_PUBLIC_BASE_URL || ''}/shop/${p.slug || p.id}`,
@@ -108,8 +125,8 @@ export default async function HomePage() {
         <div className="flex flex-col md:flex-row min-h-[70vh] md:min-h-[80vh]">
           <div className="md:w-1/3 flex flex-col items-center justify-center px-8 py-16 md:py-0 bg-[var(--background)]">
             <div className="flex flex-col items-center text-center max-w-xs">
-              <img src="/fomus-logo.png" alt="FOMUS" className="w-28 sm:w-32 md:w-36 mb-10" />
-              <h1 className="sr-only">FOMUS Official Online Shop</h1>
+              <img src="/fomus-logo.png" alt={siteConfig.name} className="w-28 sm:w-32 md:w-36 mb-10" />
+              <h1 className="sr-only">{siteConfig.name} Official Online Shop</h1>
               <div className="w-8 h-px bg-[var(--color-border)] mb-8" />
               <p className="text-base md:text-lg leading-relaxed tracking-wide text-[var(--foreground)] mb-3">
                 面白いモノを、世の中に。
@@ -322,7 +339,7 @@ export default async function HomePage() {
                   <p className="text-[10px] tracking-[0.25em] uppercase text-[var(--color-muted)] mb-6">01</p>
                   <h3 className="font-display text-3xl md:text-4xl font-light text-[var(--foreground)] mb-4 italic">Shop</h3>
                   <p className="text-xs leading-[2] text-[var(--color-muted)]">
-                    FOMUS枡・SILVA・バッジ。
+                    {siteConfig.name}枡・SILVA・バッジ。
                     <br />防水コーティング対応。
                   </p>
                   <div className="mt-8 flex items-center gap-2 text-[10px] tracking-[0.15em] uppercase text-[var(--color-muted)] group-hover:text-[var(--foreground)] transition-colors">
@@ -391,7 +408,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ===== MASU SPECIALIST ===== */}
+      {/* ===== MASU SPECIALIST (FOMUS brand content) ===== */}
+      {siteConfig.features.brandPages && (
       <section className="relative overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-2 min-h-[50vh]">
           {/* Photo side */}
@@ -424,18 +442,21 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
-      {/* ===== ABOUT ===== */}
+      {/* ===== ABOUT (FOMUS brand content) ===== */}
+      {siteConfig.features.brandPages && (
       <section className="max-w-3xl mx-auto px-6 sm:px-8 lg:px-10 py-16 md:py-20">
-        <h2 className="text-lg font-medium text-[var(--foreground)] mb-6">FOMUSについて</h2>
+        <h2 className="text-lg font-medium text-[var(--foreground)] mb-6">{siteConfig.name}について</h2>
         <p className="text-xs leading-[2.2] text-[var(--color-muted)] mb-8">
-          FOMUSは、日本の伝統工芸「枡」を起点に、アート・物語・テクノロジーを掛け合わせ、新たな文化の表現と価値創造に挑むブランドです。国産ヒノキの枡を「文化と世界をつなぐコミュニケーションツール」として再定義し、世界15ヶ国以上で文化発信活動を展開しています。枡のプロダクト販売に加え、カードゲーム「SILVA」、ジュエリーブランド「FOMUS PARURE」、物語プロジェクト「KUKU」など、多彩なクリエイティブ事業を手がけています。
+          {siteConfig.name}は、日本の伝統工芸「枡」を起点に、アート・物語・テクノロジーを掛け合わせ、新たな文化の表現と価値創造に挑むブランドです。国産ヒノキの枡を「文化と世界をつなぐコミュニケーションツール」として再定義し、世界15ヶ国以上で文化発信活動を展開しています。枡のプロダクト販売に加え、カードゲーム「SILVA」、ジュエリーブランド「FOMUS PARURE」、物語プロジェクト「KUKU」など、多彩なクリエイティブ事業を手がけています。
         </p>
-        <a href="https://www.fomus.jp/" target="_blank" rel="noopener noreferrer" className="btn-outline inline-flex items-center gap-3">
-          FOMUS公式サイト
+        <a href={siteConfig.corporateUrl} target="_blank" rel="noopener noreferrer" className="btn-outline inline-flex items-center gap-3">
+          {siteConfig.name}公式サイト
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
         </a>
       </section>
+      )}
       <div className="max-w-3xl mx-auto px-6 sm:px-8 lg:px-10"><div className="h-px bg-[var(--color-border)]" /></div>
 
       {/* ===== GUILD MEMBERSHIP ===== */}
@@ -445,15 +466,15 @@ export default async function HomePage() {
             <ScrollReveal>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
                 <div className="relative overflow-hidden aspect-[4/5] max-w-md mx-auto lg:mx-0">
-                  <img src="/fomus-guild.png" alt="FOMUS枡" className="w-full h-full object-cover" />
+                  <img src="/fomus-guild.png" alt={`${siteConfig.name}枡`} className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <p className="text-[10px] tracking-[0.25em] uppercase text-[var(--color-member)] mb-4">Membership</p>
                   <h2 className="text-2xl md:text-3xl lg:text-4xl font-light text-[var(--foreground)] leading-snug mb-6">
-                    FOMUS {siteConfig.features.membershipName}
+                    {siteConfig.name} {siteConfig.features.membershipName}
                   </h2>
                   <p className="text-xs leading-[2.2] text-[var(--color-muted)] mb-12 max-w-sm">
-                    メンバーになって、FOMUSの世界をもっと楽しもう。
+                    メンバーになって、{siteConfig.name}の世界をもっと楽しもう。
                   </p>
                   <div className="space-y-6 mb-12">
                     {[
@@ -520,7 +541,7 @@ export default async function HomePage() {
         <h2 className="text-lg font-medium text-[var(--foreground)] mb-8">よくあるご質問</h2>
         <div className="space-y-6">
           {[
-            { q: 'FOMUSではどんな商品が買えますか？', a: '国産ヒノキの枡（一合枡・ミニ枡・名入れ枡）、カードゲーム「SILVA」、FOMUSランニングウェア、デジタルアイテムなどを販売しています。' },
+            { q: `${siteConfig.name}ではどんな商品が買えますか？`, a: `国産ヒノキの枡（一合枡・ミニ枡・名入れ枡）、カードゲーム「SILVA」、${siteConfig.name}ランニングウェア、デジタルアイテムなどを販売しています。` },
             { q: '送料はいくらですか？', a: '国内一律1,000円（税込）です。商品はヤマト運輸または日本郵便でお届けします。' },
             { q: 'どんな決済方法が使えますか？', a: 'クレジットカード（Visa・Mastercard・Amex・JCB）、JPYC（日本円ステーブルコイン）に対応しています。' },
             { q: '枡の名入れやオーダーメイドはできますか？', a: 'はい、法人向け・個人向けともに名入れ・オリジナルデザインの枡を承っています。お問い合わせページからご相談ください。' },

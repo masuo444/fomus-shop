@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: '利用規約',
-  description: 'FOMUSの利用規約。アカウント登録・商品購入・支払い・配送・返品に関する条件。',
+  description: `${siteConfig.name}の利用規約。アカウント登録・商品購入・支払い・配送・返品に関する条件。`,
   alternates: { canonical: '/legal/terms' },
 }
 

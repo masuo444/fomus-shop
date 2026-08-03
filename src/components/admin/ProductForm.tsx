@@ -108,6 +108,9 @@ export default function ProductForm({
   const [madeToOrder, setMadeToOrder] = useState(product?.made_to_order ?? false)
   const [productionTime, setProductionTime] = useState(product?.production_time ?? '')
 
+  // External purchase link (purchase happens on an external site)
+  const [externalUrl, setExternalUrl] = useState(product?.external_url ?? '')
+
   // Sale period
   const [saleStartDate, setSaleStartDate] = useState(product?.sale_start_date ? product.sale_start_date.slice(0, 16) : '')
   const [saleEndDate, setSaleEndDate] = useState(product?.sale_end_date ? product.sale_end_date.slice(0, 16) : '')
@@ -283,6 +286,7 @@ export default function ProductForm({
         sale_start_date: saleStartDate ? new Date(saleStartDate).toISOString() : null,
         sale_end_date: saleEndDate ? new Date(saleEndDate).toISOString() : null,
         hidden_from_listing: hiddenFromListing,
+        external_url: externalUrl.trim() || null,
       },
       options: options
         .filter((o) => o.name.trim())
@@ -834,6 +838,22 @@ export default function ProductForm({
               />
             </div>
           )}
+        </div>
+      </Section>
+
+      {/* 外部販売リンク */}
+      <Section id="external-link" title="外部販売リンク" isOpen={expandedSections["external-link"]} onToggle={toggleSection}>
+        <div className="space-y-2">
+          <p className="text-xs text-gray-500">
+            設定すると、この商品はカートに入れられなくなり、商品ページに外部購入リンクだけが表示されます（例: 他社サイトで販売する商品の紹介）。
+          </p>
+          <input
+            type="url"
+            value={externalUrl}
+            onChange={(e) => setExternalUrl(e.target.value)}
+            placeholder="https://example.com/products/beer"
+            className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-member focus:border-member"
+          />
         </div>
       </Section>
 

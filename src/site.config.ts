@@ -11,6 +11,10 @@ const siteConfig = {
   logoText: process.env.NEXT_PUBLIC_SITE_NAME || 'My Store',
   logoUrl: process.env.NEXT_PUBLIC_LOGO_URL || null,
 
+  tagline: process.env.NEXT_PUBLIC_SITE_TAGLINE || '面白いモノを世の中に。\n枡・カードゲーム・デジタルアイテム。',
+  corporateUrl: process.env.NEXT_PUBLIC_CORPORATE_URL || 'https://www.fomus.jp',
+  corporateName: process.env.NEXT_PUBLIC_CORPORATE_NAME || 'FOMUS.jp',
+
   // Shop
   defaultShopSlug: process.env.DEFAULT_SHOP_SLUG || 'main',
   orderPrefix: process.env.ORDER_PREFIX || 'OR',
@@ -74,6 +78,8 @@ const siteConfig = {
     digitalItems: (process.env.NEXT_PUBLIC_FEATURE_DIGITAL ?? process.env.FEATURE_DIGITAL) !== 'false',
     partnerMarketplace: process.env.FEATURE_PARTNERS !== 'false',
     birthdayCoupons: process.env.FEATURE_BIRTHDAY_COUPONS !== 'false',
+    // FOMUS brand content pages (/story, /gallery, /shop/masu) — disable on other brands
+    brandPages: process.env.FEATURE_BRAND_PAGES !== 'false',
   },
   // Legal
   legal: {

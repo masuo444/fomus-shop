@@ -11,7 +11,7 @@ export function OrganizationJsonLd() {
     description: siteConfig.description,
     url: baseUrl,
     logo: siteConfig.logoUrl || undefined,
-    sameAs: ['https://www.fomus.jp'],
+    sameAs: [siteConfig.corporateUrl],
     contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', availableLanguage: ['Japanese', 'English'] },
     knowsAbout: ['枡', 'masu', 'ヒノキ', '日本の伝統工芸', '木製品', 'Japanese traditional crafts'],
   }
@@ -79,7 +79,7 @@ export function ProductJsonLd({ name, description, price, currency = 'JPY', imag
       priceCurrency: currency,
       availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut',
       url: `${baseUrl}${url}`,
-      seller: { '@type': 'Organization', name: 'FOMUS' },
+      seller: { '@type': 'Organization', name: siteConfig.name },
     },
   }
   if (image) data.image = image

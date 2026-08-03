@@ -64,9 +64,9 @@ export async function POST(request: Request) {
     const item = token.digital_item
     const royaltyPercentage = item.royalty_percentage
 
-    // All money goes to FOMUS via Stripe.
+    // All money goes to the platform via Stripe.
     // Seller receives points (not cash) equivalent to their share.
-    // Royalty = FOMUS platform fee, sellerAmount = points awarded to seller
+    // Royalty = platform fee, sellerAmount = points awarded to seller
     const royaltyAmount = Math.floor(listing.price * (royaltyPercentage / 100))
     const sellerAmount = listing.price - royaltyAmount
 

@@ -15,29 +15,39 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...(siteConfig.features.digitalItems
       ? [{ url: `${baseUrl}/digital`, lastModified: new Date(), changeFrequency: 'daily' as const, priority: 0.8 }]
       : []),
-    { url: `${baseUrl}/shop/masu`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/shop/masu/custom`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${baseUrl}/story`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
-    // 祝枡 IWAIMASU
-    { url: `${baseUrl}/iwaimasu`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/iwaimasu/for-organizers`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/iwaimasu/story`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 },
-    { url: `${baseUrl}/iwaimasu/faq`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${baseUrl}/gallery`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.5 },
+    // FOMUSブランド固有ページ（他ブランドのデプロイでは404）
+    ...(siteConfig.features.brandPages
+      ? ([
+          { url: `${baseUrl}/shop/masu`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
+          { url: `${baseUrl}/shop/masu/custom`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+          { url: `${baseUrl}/story`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+          // 祝枡 IWAIMASU
+          { url: `${baseUrl}/iwaimasu`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
+          { url: `${baseUrl}/iwaimasu/for-organizers`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
+          { url: `${baseUrl}/iwaimasu/story`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 },
+          { url: `${baseUrl}/iwaimasu/faq`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+          { url: `${baseUrl}/gallery`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.5 },
+        ] as MetadataRoute.Sitemap)
+      : []),
     { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
     { url: `${baseUrl}/legal`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
     { url: `${baseUrl}/legal/commercial-transactions`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
     { url: `${baseUrl}/legal/privacy`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
     { url: `${baseUrl}/legal/terms`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
-    { url: `${baseUrl}/column`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${baseUrl}/column/masu-history`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${baseUrl}/column/masu-gift`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${baseUrl}/column/masu-care`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
-    // English pages
-    { url: `${baseUrl}/en`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-    { url: `${baseUrl}/en/shop`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
-    { url: `${baseUrl}/en/story`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${baseUrl}/en/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
+    // 枡コラム・英語ページもFOMUS固有コンテンツ
+    ...(siteConfig.features.brandPages
+      ? ([
+          { url: `${baseUrl}/column`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+          { url: `${baseUrl}/column/masu-history`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+          { url: `${baseUrl}/column/masu-gift`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+          { url: `${baseUrl}/column/masu-care`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+          // English pages
+          { url: `${baseUrl}/en`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+          { url: `${baseUrl}/en/shop`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
+          { url: `${baseUrl}/en/story`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+          { url: `${baseUrl}/en/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
+        ] as MetadataRoute.Sitemap)
+      : []),
   ]
 
   // Product pages

@@ -54,6 +54,7 @@ export async function GET(
       .eq('id', product.shop_id)
       .eq('is_published', true)
       .eq('status', 'active')
+      .eq('platform', siteConfig.defaultShopSlug)
       .single()
 
     if (!shop) {

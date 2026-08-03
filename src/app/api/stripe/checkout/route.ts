@@ -3,7 +3,7 @@ import Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
-import { SHIPPING_FEE } from '@/lib/constants'
+import { SHIPPING_FEE, DEFAULT_SHOP_SLUG } from '@/lib/constants'
 import siteConfig from '@/site.config'
 import type { Product } from '@/lib/types'
 import type { Currency } from '@/lib/currency'
@@ -84,6 +84,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '一部の商品が見つかりません' }, { status: 400 })
     }
 
+    if (products.some((p: any) => p.external_url)) {
+      return NextResponse.json({ error: '外部販売の商品はこのサイトでは購入できません' }, { status: 400 })
+    }
+
     const allDigital = products.every((p: any) => p.item_type === 'digital')
 
     // Validate shipping fields (address/phone not required for digital-only orders)
@@ -119,12 +123,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '異なるショップの商品を同時に購入することはできません' }, { status: 400 })
     }
 
-    // Get shop info for invoice
+    // Get shop info for invoice (reject cross-brand products)
     const { data: shop } = await admin
       .from('shops')
-      .select('name, invoice_registration_number')
+      .select('name, invoice_registration_number, platform')
       .eq('id', shopId)
       .single()
+
+    if (!shop || shop.platform !== DEFAULT_SHOP_SLUG) {
+      return NextResponse.json({ error: 'このショップの商品は購入できません' }, { status: 400 })
+    }
 
     // Check sale period and stock
     const now = new Date()

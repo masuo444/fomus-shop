@@ -7,6 +7,7 @@ import type { Product } from '@/lib/types'
 import { requireString, validateEmail, ValidationError } from '@/lib/validation'
 import { rateLimit } from '@/lib/rate-limit'
 import { validateItemQuantities, verifyOptionPrices, verifyCouponDiscount, reserveStock, restoreStock } from '@/lib/checkout-validation'
+import { isPlatformShop } from '@/lib/shop'
 
 interface CheckoutItem {
   product_id: string
@@ -85,11 +86,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '一部の商品が見つかりません' }, { status: 400 })
     }
 
+    if (products.some((p: any) => p.external_url)) {
+      return NextResponse.json({ error: '外部販売の商品はこのサイトでは購入できません' }, { status: 400 })
+    }
+
     // JPYC is JPY only
     const shopId = (products[0] as Product).shop_id
     const mixedShops = products.some((p: any) => p.shop_id !== shopId)
     if (mixedShops) {
       return NextResponse.json({ error: '異なるショップの商品を同時に購入することはできません' }, { status: 400 })
+    }
+    if (!(await isPlatformShop(shopId))) {
+      return NextResponse.json({ error: 'このショップの商品は購入できません' }, { status: 400 })
     }
 
     // Check sale period and stock

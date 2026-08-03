@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
-import { Minus, Plus, ShoppingCart, ChevronLeft, Mail, Heart } from 'lucide-react'
+import { Minus, Plus, ShoppingCart, ChevronLeft, Mail, Heart, ExternalLink } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import { addToLocalCart, wouldMixShops, clearLocalCart, getOptionsAdjustment, type SelectedOptions } from '@/lib/cart'
 import type { Product } from '@/lib/types'
@@ -51,8 +51,9 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
   const isDigital = product.item_type === 'digital'
   const isDirectCheckout = isDigital
   const isMadeToOrder = product.made_to_order
-  const isSoldOut = product.stock === 0 && !isMadeToOrder
-  const isInquiryOnly = mainPrice === 0
+  const isExternal = !!product.external_url
+  const isSoldOut = product.stock === 0 && !isMadeToOrder && !isExternal
+  const isInquiryOnly = mainPrice === 0 && !isExternal
   const hasMemberPrice = memberPriceVal != null && memberPriceVal < mainPrice
   const hasOptions = product.product_options && product.product_options.length > 0
 
@@ -67,7 +68,7 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
 
   // Auto-add to cart when ?add=true
   useEffect(() => {
-    if (searchParams.get('add') === 'true' && !autoAddDone.current && !isSoldOut) {
+    if (searchParams.get('add') === 'true' && !autoAddDone.current && !isSoldOut && !isExternal) {
       autoAddDone.current = true
       if (wouldMixShops(product.shop_id)) {
         clearLocalCart()
@@ -291,7 +292,7 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
                   {fmt(t.memberPriceHint, { name: memberName, price: formatPrice(memberPriceVal!, currency) })}
                 </p>
                 <a
-                  href="https://guild-app.fomusglobal.com/invite/FOMUS-SHOP"
+                  href={siteConfig.features.membershipUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs underline hover:no-underline"
@@ -362,7 +363,7 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
           )}
 
           {/* Product Options */}
-          {hasOptions && !isSoldOut && isSalePeriodActive && (
+          {hasOptions && !isSoldOut && !isExternal && isSalePeriodActive && (
             <div className="mt-6 pt-6 border-t border-gray-100">
               <ProductOptionSelector
                 options={product.product_options!}
@@ -384,6 +385,24 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
             </div>
           )}
 
+          {/* External purchase link (e.g. products sold on a partner site) */}
+          {isExternal && (
+            <div className="mt-8">
+              <a
+                href={product.external_url!}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-black text-white py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
+              >
+                <ExternalLink className="w-4 h-4" />
+                公式販売サイトで購入
+              </a>
+              <p className="mt-2 text-xs text-gray-500 text-center">
+                この商品は外部の販売サイトでご購入いただけます
+              </p>
+            </div>
+          )}
+
           {/* Inquiry button for price=0 products */}
           {isInquiryOnly && (
             <div className="mt-8">
@@ -401,7 +420,7 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
           )}
 
           {/* Quantity & Add to Cart */}
-          {!isSoldOut && !isInquiryOnly && isSalePeriodActive && (
+          {!isSoldOut && !isInquiryOnly && !isExternal && isSalePeriodActive && (
             <div className="mt-8 space-y-4">
               <div className="flex items-center gap-3">
                 <span className="text-sm text-gray-600">{t.quantity}</span>
@@ -458,7 +477,7 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
             </div>
           )}
 
-          {!isSalePeriodActive && !isInquiryOnly && (
+          {!isSalePeriodActive && !isInquiryOnly && !isExternal && (
             <div className="mt-8">
               <button
                 disabled

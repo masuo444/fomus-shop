@@ -8,7 +8,7 @@ interface MemberCTAProps {
 }
 
 const memberName = siteConfig.features.membershipName
-const memberUrl = 'https://guild-app.fomusglobal.com/invite/FOMUS-SHOP'
+const memberUrl = siteConfig.features.membershipUrl
 
 export default function MemberCTA({ compact = false, locale = 'ja' }: MemberCTAProps) {
   if (!siteConfig.features.membershipProgram || !memberUrl) return null

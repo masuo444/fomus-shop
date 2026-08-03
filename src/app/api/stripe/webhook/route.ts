@@ -179,7 +179,7 @@ export async function POST(request: Request) {
       }
 
       // Handle digital resale purchases
-      // All money goes to FOMUS. Seller receives points equivalent to their share.
+      // All money goes to the platform. Seller receives points equivalent to their share.
       if (type === 'digital_resale') {
         const resaleListingId = metadata.resale_listing_id
         const digitalTokenId = metadata.digital_token_id

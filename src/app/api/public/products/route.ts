@@ -41,6 +41,7 @@ export async function GET(request: NextRequest) {
         .eq('slug', shopSlug)
         .eq('is_published', true)
         .eq('status', 'active')
+        .eq('platform', siteConfig.defaultShopSlug)
         .single()
       if (!shop) {
         return NextResponse.json([], {
@@ -54,6 +55,7 @@ export async function GET(request: NextRequest) {
         .select('id')
         .eq('is_published', true)
         .eq('status', 'active')
+        .eq('platform', siteConfig.defaultShopSlug)
       shopIds = shops?.map((s) => s.id) ?? []
     }
 

@@ -122,7 +122,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         { name: '商品一覧', href: '/shop' },
       ]} />
       <ItemListJsonLd
-        name="FOMUS 商品一覧"
+        name={`${siteConfig.name} 商品一覧`}
         items={products.slice(0, 20).map((p, i) => ({
           name: p.name,
           url: `${process.env.NEXT_PUBLIC_BASE_URL || ''}/shop/${p.slug || p.id}`,

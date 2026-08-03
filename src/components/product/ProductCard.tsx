@@ -22,7 +22,7 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
   const t = commonDict[locale]
   const displayName = productName(product, locale)
   const isMadeToOrder = product.made_to_order
-  const isSoldOut = product.stock === 0 && !isMadeToOrder
+  const isSoldOut = product.stock === 0 && !isMadeToOrder && !product.external_url
 
   // Sale period
   const now = new Date()
@@ -180,8 +180,8 @@ export default function ProductCard({ product, shopName, isLoggedIn, isPremiumMe
           </div>
         </div>
       </Link>
-      {/* Quick Add to Cart */}
-      {!isSoldOut && mainPrice > 0 && isSalePeriodActive && (
+      {/* Quick Add to Cart (not for external-link products) */}
+      {!isSoldOut && mainPrice > 0 && isSalePeriodActive && !product.external_url && (
         <QuickAddToCart
           productId={product.id}
           productSlug={product.slug}

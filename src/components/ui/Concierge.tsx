@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { MessageCircle, X, Send, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import siteConfig from '@/site.config'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -94,7 +95,7 @@ export default function Concierge() {
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--foreground)]">
             <div>
-              <p className="text-sm font-medium text-white">FOMUS コンシェルジュ</p>
+              <p className="text-sm font-medium text-white">{siteConfig.name} コンシェルジュ</p>
               <p className="text-[10px] text-white/50">商品選びをお手伝いします</p>
             </div>
             <button onClick={() => setOpen(false)} className="text-white/60 hover:text-white">

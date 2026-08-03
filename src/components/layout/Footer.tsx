@@ -19,18 +19,24 @@ export default function Footer() {
             <h3 className="text-[11px] tracking-[0.3em] uppercase font-medium text-[var(--foreground)]">
               {siteConfig.name.toUpperCase()}
             </h3>
-            <p className="mt-4 text-xs leading-[2] text-[var(--color-muted)] max-w-xs">
-              {t.footerTagline1}
-              <br />{t.footerTagline2}
+            <p className="mt-4 text-xs leading-[2] text-[var(--color-muted)] max-w-xs whitespace-pre-line">
+              {siteConfig.features.brandPages ? (
+                <>
+                  {t.footerTagline1}
+                  <br />{t.footerTagline2}
+                </>
+              ) : (
+                siteConfig.tagline
+              )}
             </p>
             <div className="flex items-center gap-4 mt-6">
               <a
-                href="https://www.fomus.jp"
+                href={siteConfig.corporateUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[10px] tracking-[0.12em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors"
               >
-                FOMUS.jp
+                {siteConfig.corporateName}
               </a>
               {siteConfig.features.membershipUrl && (
                 <>
@@ -53,11 +59,17 @@ export default function Footer() {
               <h4 className="text-[10px] tracking-[0.2em] uppercase text-[var(--color-muted)] mb-5">Shop</h4>
               <ul className="space-y-3">
                 <li><Link href={p('/shop')} className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerShopList}</Link></li>
-                <li><Link href="/shop/masu" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerAboutMasu}</Link></li>
+                {siteConfig.features.brandPages && (
+                  <li><Link href="/shop/masu" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerAboutMasu}</Link></li>
+                )}
                 {siteConfig.features.digitalItems && <li><Link href="/digital" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerDigital}</Link></li>}
-                <li><Link href="/gallery" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerGallery}</Link></li>
-                <li><Link href={p('/story')} className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerStory}</Link></li>
-                <li><Link href="/column" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerColumn}</Link></li>
+                {siteConfig.features.brandPages && (
+                  <>
+                    <li><Link href="/gallery" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerGallery}</Link></li>
+                    <li><Link href={p('/story')} className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerStory}</Link></li>
+                    <li><Link href="/column" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerColumn}</Link></li>
+                  </>
+                )}
               </ul>
             </div>
             <div>
@@ -72,9 +84,13 @@ export default function Footer() {
               <h4 className="text-[10px] tracking-[0.2em] uppercase text-[var(--color-muted)] mb-5">Support</h4>
               <ul className="space-y-3">
                 <li><Link href={p('/contact')} className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerContact}</Link></li>
-                <li><Link href="/shop/masu/custom" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerCustomOrder}</Link></li>
+                {siteConfig.features.brandPages && (
+                  <li><Link href="/shop/masu/custom" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerCustomOrder}</Link></li>
+                )}
                 <li><Link href="/legal/commercial-transactions" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerShipping}</Link></li>
-                <li><Link href="/jpyc" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerJpyc}</Link></li>
+                {siteConfig.jpyc.enabled && (
+                  <li><Link href="/jpyc" className="text-xs text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors">{t.footerJpyc}</Link></li>
+                )}
               </ul>
             </div>
             <div>

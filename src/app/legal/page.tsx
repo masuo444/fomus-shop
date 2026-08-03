@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: '法的情報',
-  description: 'FOMUSの利用規約・プライバシーポリシー・特定商取引法に基づく表記。',
+  description: `${siteConfig.name}の利用規約・プライバシーポリシー・特定商取引法に基づく表記。`,
   alternates: { canonical: '/legal' },
 }
 
