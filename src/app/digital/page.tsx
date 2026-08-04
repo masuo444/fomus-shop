@@ -45,15 +45,6 @@ export default async function DigitalPage() {
           <h1 className="text-2xl font-bold text-gray-900">デジタルアイテム</h1>
           <p className="text-sm text-gray-500 mt-1">限定デジタルアイテム・デジタルチケット</p>
         </div>
-        <Link
-          href="/digital/marketplace"
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors bg-gray-50 hover:bg-gray-100 px-4 py-2 rounded-full"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
-          </svg>
-          マーケットプレイス
-        </Link>
       </div>
 
       {/* Login prompt */}

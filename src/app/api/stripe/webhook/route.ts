@@ -178,86 +178,6 @@ export async function POST(request: Request) {
         }
       }
 
-      // Handle digital resale purchases
-      // All money goes to the platform. Seller receives points equivalent to their share.
-      if (type === 'digital_resale') {
-        const resaleListingId = metadata.resale_listing_id
-        const digitalTokenId = metadata.digital_token_id
-        const buyerId = metadata.buyer_id
-        const sellerId = metadata.seller_id
-        const price = parseInt(metadata.price || '0')
-        const royaltyAmount = parseInt(metadata.royalty_amount || '0')
-        const sellerAmount = parseInt(metadata.seller_amount || '0')
-
-        if (resaleListingId && digitalTokenId && buyerId && sellerId) {
-          // Transfer token ownership to buyer
-          await admin
-            .from('digital_tokens')
-            .update({
-              current_owner_id: buyerId,
-              status: 'owned',
-            })
-            .eq('id', digitalTokenId)
-
-          // Update listing status to sold
-          await admin
-            .from('resale_listings')
-            .update({ status: 'sold' })
-            .eq('id', resaleListingId)
-
-          // Record ownership transfer
-          await admin.from('ownership_transfers').insert({
-            digital_token_id: digitalTokenId,
-            from_user_id: sellerId,
-            to_user_id: buyerId,
-            price,
-            royalty_amount: royaltyAmount,
-            seller_amount: sellerAmount,
-            transfer_type: 'resale',
-            stripe_payment_intent_id: session.payment_intent as string,
-          })
-
-          // Award points to seller (seller_amount converted to points)
-          if (sellerAmount > 0) {
-            try {
-              // Get item name for description
-              const { data: tokenData } = await admin
-                .from('digital_tokens')
-                .select('token_number, digital_item:digital_items(name)')
-                .eq('id', digitalTokenId)
-                .single()
-
-              const itemName = (tokenData?.digital_item as any)?.name || 'デジタルアイテム'
-              const tokenNum = tokenData?.token_number || 0
-
-              // Increment seller's points
-              const { data: sellerProfile } = await admin
-                .from('profiles')
-                .select('points')
-                .eq('id', sellerId)
-                .single()
-              if (sellerProfile) {
-                await admin
-                  .from('profiles')
-                  .update({ points: sellerProfile.points + sellerAmount })
-                  .eq('id', sellerId)
-              }
-
-              // Record point transaction
-              await admin.from('point_transactions').insert({
-                user_id: sellerId,
-                amount: sellerAmount,
-                type: 'resale',
-                description: `リセール収益: ${itemName} #${tokenNum}（${sellerAmount}pt）`,
-              })
-            } catch (pointsError) {
-              console.error('Resale points award failed:', pointsError)
-              // Don't fail the webhook
-            }
-          }
-        }
-      }
-
       // Legacy handling for digital purchases without type metadata
       if (!type && !orderId) {
         const digitalTokenId = metadata.digital_token_id
@@ -268,13 +188,6 @@ export async function POST(request: Request) {
             .eq('id', digitalTokenId)
         }
 
-        const resaleListingId = metadata.resale_listing_id
-        if (resaleListingId) {
-          await admin
-            .from('resale_listings')
-            .update({ status: 'sold' })
-            .eq('id', resaleListingId)
-        }
       }
 
       break

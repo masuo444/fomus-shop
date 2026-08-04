@@ -48,12 +48,6 @@ export default function DigitalItemCard({ item }: Props) {
           </div>
         )}
 
-        {/* Resale badge */}
-        {item.resale_enabled && !isSoldOut && (
-          <div className="absolute bottom-2.5 right-2.5 bg-white/90 backdrop-blur-sm text-[10px] text-gray-600 px-2 py-0.5 rounded-full">
-            リセール可
-          </div>
-        )}
       </div>
 
       <div className="mt-3 px-0.5">

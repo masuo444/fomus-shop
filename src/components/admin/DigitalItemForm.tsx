@@ -25,7 +25,6 @@ export default function DigitalItemForm({ item, shopId, apiBasePath = '/api/admi
     price: item?.price ?? 0,
     total_supply: item?.total_supply ?? 100,
     royalty_percentage: item?.royalty_percentage ?? 10,
-    resale_enabled: item?.resale_enabled ?? true,
     is_published: item?.is_published ?? false,
     secret_content: item?.secret_content ?? '',
     metadata: item?.metadata ? JSON.stringify(item.metadata, null, 2) : '{}',
@@ -53,7 +52,6 @@ export default function DigitalItemForm({ item, shopId, apiBasePath = '/api/admi
       price: Number(form.price),
       total_supply: Number(form.total_supply),
       royalty_percentage: Number(form.royalty_percentage),
-      resale_enabled: form.resale_enabled,
       is_published: form.is_published,
       secret_content: form.secret_content || null,
       metadata,
@@ -181,15 +179,6 @@ export default function DigitalItemForm({ item, shopId, apiBasePath = '/api/admi
       </div>
 
       <div className="space-y-3">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={form.resale_enabled}
-            onChange={(e) => setForm({ ...form, resale_enabled: e.target.checked })}
-            className="rounded text-gray-900 focus:ring-gray-900"
-          />
-          <span className="text-sm font-medium text-gray-700">リセールを許可する</span>
-        </label>
         <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"

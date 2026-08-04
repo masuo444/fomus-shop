@@ -137,21 +137,6 @@ export default function DigitalItemDetailClient({ item, transfers, isLoggedIn, h
             </div>
           </div>
 
-          {/* Resale info */}
-          {item.resale_enabled && (
-            <div className="mt-3 flex items-center gap-2">
-              <span className="inline-flex items-center text-[11px] font-medium text-teal-700 bg-teal-50 border border-teal-100 px-2.5 py-0.5 rounded-full">
-                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                </svg>
-                リセール可能
-              </span>
-              <span className="text-[11px] text-gray-400">
-                ロイヤリティ {item.royalty_percentage}%
-              </span>
-            </div>
-          )}
-
           {/* Description */}
           {item.description && (
             <div className="mt-6 text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">

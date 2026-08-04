@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { formatPrice, formatDateTime } from '@/lib/utils'
 import DigitalItemForm from '@/components/admin/DigitalItemForm'
 import Link from 'next/link'
-import { ArrowLeft, User, TrendingUp, DollarSign, Hash } from 'lucide-react'
+import { ArrowLeft, User, DollarSign, Hash } from 'lucide-react'
 
 export default async function EditDigitalItemPage({
   params,
@@ -62,10 +62,7 @@ export default async function EditDigitalItemPage({
 
   // Calculate stats
   const totalRevenue = transfers.reduce((sum, t) => sum + t.price, 0)
-  const resaleTransfers = transfers.filter((t) => t.transfer_type === 'resale')
-  const totalRoyalty = resaleTransfers.reduce((sum, t) => sum + (t.royalty_amount || 0), 0)
   const purchaseCount = transfers.filter((t) => t.transfer_type === 'purchase').length
-  const resaleCount = resaleTransfers.length
 
   // Group transfers by token
   const transfersByToken: Record<string, typeof transfers> = {}
@@ -74,18 +71,6 @@ export default async function EditDigitalItemPage({
       transfersByToken[t.digital_token_id] = []
     }
     transfersByToken[t.digital_token_id].push(t)
-  }
-
-  // Get active listings count
-  let activeListingsCount = 0
-  if (tokenIds.length > 0) {
-    const { count } = await supabase
-      .from('resale_listings')
-      .select('id', { count: 'exact', head: true })
-      .in('digital_token_id', tokenIds)
-      .eq('status', 'active')
-
-    activeListingsCount = count || 0
   }
 
   return (
@@ -113,7 +98,7 @@ export default async function EditDigitalItemPage({
       </div>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <div className="flex items-center gap-2 mb-1">
             <Hash size={14} className="text-gray-400" />
@@ -132,31 +117,6 @@ export default async function EditDigitalItemPage({
           <p className="text-xl font-bold text-gray-900">
             {formatPrice(purchaseCount * item.price)}
           </p>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <TrendingUp size={14} className="text-teal-500" />
-            <p className="text-xs text-gray-500">ロイヤリティ収入</p>
-          </div>
-          <p className="text-xl font-bold text-teal-600">{formatPrice(totalRoyalty)}</p>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-            </svg>
-            <p className="text-xs text-gray-500">リセール数</p>
-          </div>
-          <p className="text-xl font-bold text-gray-900">{resaleCount}</p>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <svg className="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
-            </svg>
-            <p className="text-xs text-gray-500">出品中</p>
-          </div>
-          <p className="text-xl font-bold text-blue-600">{activeListingsCount}</p>
         </div>
       </div>
 

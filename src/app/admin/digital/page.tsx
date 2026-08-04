@@ -18,15 +18,15 @@ export default async function AdminDigitalPage() {
     .eq('shop_id', shopId)
     .order('created_at', { ascending: false })
 
-  // Get resale stats
-  const { data: resaleStats } = await supabase
+  // Sales aggregation per item
+  const { data: salesTransfers } = await supabase
     .from('ownership_transfers')
-    .select('digital_token_id, royalty_amount, price, transfer_type')
+    .select('digital_token_id, price')
 
   // Aggregate royalty revenue per item
-  const royaltyByItem: Record<string, { totalRevenue: number; totalRoyalty: number; resaleCount: number }> = {}
+  const salesByItem: Record<string, { totalRevenue: number }> = {}
 
-  if (resaleStats && items) {
+  if (salesTransfers && items) {
     // Get token-to-item mapping
     const { data: allTokens } = await supabase
       .from('digital_tokens')
@@ -40,17 +40,13 @@ export default async function AdminDigitalPage() {
       }
     }
 
-    for (const transfer of resaleStats) {
+    for (const transfer of salesTransfers) {
       const itemId = tokenItemMap[transfer.digital_token_id]
       if (!itemId) continue
-      if (!royaltyByItem[itemId]) {
-        royaltyByItem[itemId] = { totalRevenue: 0, totalRoyalty: 0, resaleCount: 0 }
+      if (!salesByItem[itemId]) {
+        salesByItem[itemId] = { totalRevenue: 0 }
       }
-      royaltyByItem[itemId].totalRevenue += transfer.price
-      if (transfer.transfer_type === 'resale') {
-        royaltyByItem[itemId].totalRoyalty += transfer.royalty_amount || 0
-        royaltyByItem[itemId].resaleCount += 1
-      }
+      salesByItem[itemId].totalRevenue += transfer.price
     }
   }
 
@@ -69,7 +65,7 @@ export default async function AdminDigitalPage() {
 
       {/* Stats summary */}
       {items && items.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-xl border border-gray-200 p-4">
             <p className="text-xs text-gray-500">アイテム数</p>
             <p className="text-2xl font-bold text-gray-900 mt-1">{items.length}</p>
@@ -83,13 +79,7 @@ export default async function AdminDigitalPage() {
           <div className="bg-white rounded-xl border border-gray-200 p-4">
             <p className="text-xs text-gray-500">総売上</p>
             <p className="text-2xl font-bold text-gray-900 mt-1">
-              {formatPrice(Object.values(royaltyByItem).reduce((sum, s) => sum + s.totalRevenue, 0))}
-            </p>
-          </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <p className="text-xs text-gray-500">リセールロイヤリティ</p>
-            <p className="text-2xl font-bold text-teal-600 mt-1">
-              {formatPrice(Object.values(royaltyByItem).reduce((sum, s) => sum + s.totalRoyalty, 0))}
+              {formatPrice(Object.values(salesByItem).reduce((sum, s) => sum + s.totalRevenue, 0))}
             </p>
           </div>
         </div>
@@ -104,14 +94,13 @@ export default async function AdminDigitalPage() {
                 <th className="text-right py-3 px-4 font-medium text-gray-500">価格</th>
                 <th className="text-right py-3 px-4 font-medium text-gray-500">発行数 / 供給数</th>
                 <th className="text-right py-3 px-4 font-medium text-gray-500 hidden md:table-cell">売上</th>
-                <th className="text-center py-3 px-4 font-medium text-gray-500">リセール</th>
                 <th className="text-center py-3 px-4 font-medium text-gray-500">ステータス</th>
                 <th className="text-right py-3 px-4 font-medium text-gray-500"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {(items as DigitalItem[]).map((item) => {
-                const stats = royaltyByItem[item.id] || { totalRevenue: 0, totalRoyalty: 0, resaleCount: 0 }
+                const stats = salesByItem[item.id] || { totalRevenue: 0 }
                 return (
                   <tr key={item.id} className="hover:bg-gray-50 transition-colors">
                     <td className="py-3 px-4">
@@ -129,9 +118,6 @@ export default async function AdminDigitalPage() {
                         )}
                         <div>
                           <p className="font-medium text-gray-900">{item.name}</p>
-                          <p className="text-xs text-gray-500">
-                            ロイヤリティ: {item.royalty_percentage}%
-                          </p>
                         </div>
                       </div>
                     </td>
@@ -150,23 +136,7 @@ export default async function AdminDigitalPage() {
                     <td className="py-3 px-4 text-right hidden md:table-cell">
                       <div>
                         <p className="text-gray-900 font-medium">{formatPrice(stats.totalRevenue)}</p>
-                        {stats.totalRoyalty > 0 && (
-                          <p className="text-[10px] text-teal-600">
-                            ロイヤリティ: {formatPrice(stats.totalRoyalty)} ({stats.resaleCount}件)
-                          </p>
-                        )}
                       </div>
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded-full ${
-                          item.resale_enabled
-                            ? 'bg-green-50 text-green-700'
-                            : 'bg-gray-100 text-gray-500'
-                        }`}
-                      >
-                        {item.resale_enabled ? '有効' : '無効'}
-                      </span>
                     </td>
                     <td className="py-3 px-4 text-center">
                       <span

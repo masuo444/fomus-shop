@@ -13,11 +13,6 @@ interface TokenWithItem extends DigitalToken {
   digital_item: DigitalItem
 }
 
-interface TokenListing {
-  id: string
-  price: number
-}
-
 interface Transfer {
   id: string
   from_user_id: string | null
@@ -42,14 +37,8 @@ function MyDigitalContent() {
   const justPurchased = searchParams.get('purchased') === 'true'
 
   const [tokens, setTokens] = useState<TokenWithItem[]>([])
-  const [listings, setListings] = useState<Record<string, TokenListing>>({})
   const [transfers, setTransfers] = useState<Record<string, Transfer[]>>({})
   const [loading, setLoading] = useState(true)
-  const [listingTokenId, setListingTokenId] = useState<string | null>(null)
-  const [listingPrice, setListingPrice] = useState('')
-  const [listingError, setListingError] = useState('')
-  const [listingLoading, setListingLoading] = useState(false)
-  const [cancellingId, setCancellingId] = useState<string | null>(null)
   const [expandedToken, setExpandedToken] = useState<string | null>(null)
   const [showPurchaseSuccess, setShowPurchaseSuccess] = useState(justPurchased)
 
@@ -74,67 +63,11 @@ function MyDigitalContent() {
 
       const data = await res.json()
       setTokens(data.tokens || [])
-      setListings(data.listings || {})
       setTransfers(data.transfers || {})
     } catch (err) {
       console.error('Load tokens error:', err)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleListForResale = async (tokenId: string) => {
-    setListingError('')
-    setListingLoading(true)
-
-    const price = parseInt(listingPrice)
-    if (!price || price <= 0) {
-      setListingError('有効な価格を入力してください')
-      setListingLoading(false)
-      return
-    }
-
-    try {
-      const res = await fetch('/api/digital/listings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ digital_token_id: tokenId, price }),
-      })
-
-      const data = await res.json()
-      if (!res.ok) {
-        throw new Error(data.error || '出品に失敗しました')
-      }
-
-      setListingTokenId(null)
-      setListingPrice('')
-      await loadTokens()
-    } catch (err) {
-      setListingError(err instanceof Error ? err.message : '出品に失敗しました')
-    } finally {
-      setListingLoading(false)
-    }
-  }
-
-  const handleCancelListing = async (listingId: string) => {
-    setCancellingId(listingId)
-    try {
-      const res = await fetch('/api/digital/listings', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ listing_id: listingId }),
-      })
-
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || 'キャンセルに失敗しました')
-      }
-
-      await loadTokens()
-    } catch (err) {
-      console.error('Cancel error:', err)
-    } finally {
-      setCancellingId(null)
     }
   }
 
@@ -159,12 +92,6 @@ function MyDigitalContent() {
             className="text-sm text-gray-500 hover:text-gray-900 transition-colors bg-gray-50 hover:bg-gray-100 px-4 py-2 rounded-full"
           >
             ストア
-          </Link>
-          <Link
-            href="/digital/marketplace"
-            className="text-sm text-gray-500 hover:text-gray-900 transition-colors bg-gray-50 hover:bg-gray-100 px-4 py-2 rounded-full"
-          >
-            マーケット
           </Link>
         </div>
       </div>
@@ -206,7 +133,6 @@ function MyDigitalContent() {
       ) : (
         <div className="space-y-4">
           {tokens.map((token) => {
-            const activeListing = listings[token.id]
             const tokenTransfers = transfers[token.id] || []
             const isExpanded = expandedToken === token.id
 
@@ -271,87 +197,11 @@ function MyDigitalContent() {
                       </div>
                     )}
 
-                    {/* Listing price */}
-                    {activeListing && (
-                      <div className="mt-1.5 text-xs text-blue-600 font-medium">
-                        出品価格: {formatPrice(activeListing.price)}
-                      </div>
-                    )}
                   </div>
                 </div>
 
                 {/* Actions */}
                 <div className="px-4 pb-4">
-                  {/* Resale listing form */}
-                  {token.status === 'owned' && token.digital_item?.resale_enabled && (
-                    <div className="mt-1">
-                      {listingTokenId === token.id ? (
-                        <div className="bg-gray-50 rounded-lg p-3 space-y-2.5">
-                          <div className="flex items-center gap-2">
-                            <div className="relative flex-1">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
-                                ¥
-                              </span>
-                              <input
-                                type="number"
-                                value={listingPrice}
-                                onChange={(e) => setListingPrice(e.target.value)}
-                                placeholder="出品価格を入力"
-                                className="w-full pl-7 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400"
-                              />
-                            </div>
-                          </div>
-                          {listingPrice && parseInt(listingPrice) > 0 && (
-                            <p className="text-[10px] text-gray-400">
-                              ロイヤリティ {token.digital_item.royalty_percentage}%: {formatPrice(Math.floor(parseInt(listingPrice) * (token.digital_item.royalty_percentage / 100)))} → {siteConfig.name} /
-                              獲得ポイント: {(parseInt(listingPrice) - Math.floor(parseInt(listingPrice) * (token.digital_item.royalty_percentage / 100))).toLocaleString()}pt
-                            </p>
-                          )}
-                          {listingError && (
-                            <p className="text-xs text-red-500">{listingError}</p>
-                          )}
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleListForResale(token.id)}
-                              disabled={listingLoading}
-                              className="flex-1 bg-gray-900 text-white py-2 rounded-full text-xs font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
-                            >
-                              {listingLoading ? '出品中...' : 'マーケットに出品'}
-                            </button>
-                            <button
-                              onClick={() => {
-                                setListingTokenId(null)
-                                setListingPrice('')
-                                setListingError('')
-                              }}
-                              className="px-4 py-2 border border-gray-200 rounded-full text-xs text-gray-500 hover:border-gray-400 transition-colors"
-                            >
-                              キャンセル
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => setListingTokenId(token.id)}
-                          className="w-full border border-gray-200 text-gray-700 py-2 rounded-full text-xs font-medium hover:border-gray-400 hover:bg-gray-50 transition-colors"
-                        >
-                          出品する
-                        </button>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Cancel listing button */}
-                  {token.status === 'listed' && activeListing && (
-                    <button
-                      onClick={() => handleCancelListing(activeListing.id)}
-                      disabled={cancellingId === activeListing.id}
-                      className="w-full mt-1 border border-red-200 text-red-600 py-2 rounded-full text-xs font-medium hover:bg-red-50 transition-colors disabled:opacity-50"
-                    >
-                      {cancellingId === activeListing.id ? 'キャンセル中...' : '出品をキャンセル'}
-                    </button>
-                  )}
-
                   {/* Transfer history toggle */}
                   {tokenTransfers.length > 0 && (
                     <div className="mt-3">

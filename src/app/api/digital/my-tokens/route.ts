@@ -28,23 +28,7 @@ export async function GET() {
       return NextResponse.json({ error: 'トークンの取得に失敗しました' }, { status: 500 })
     }
 
-    // Get active listings for these tokens
     const tokenIds = (tokens || []).map((t) => t.id)
-    let listings: Record<string, { id: string; price: number }> = {}
-
-    if (tokenIds.length > 0) {
-      const { data: activeListings } = await admin
-        .from('resale_listings')
-        .select('id, digital_token_id, price')
-        .in('digital_token_id', tokenIds)
-        .eq('status', 'active')
-
-      if (activeListings) {
-        for (const l of activeListings) {
-          listings[l.digital_token_id] = { id: l.id, price: l.price }
-        }
-      }
-    }
 
     // Get transfer history for each token
     let transfersByToken: Record<string, unknown[]> = {}
@@ -68,7 +52,6 @@ export async function GET() {
 
     return NextResponse.json({
       tokens: tokens || [],
-      listings,
       transfers: transfersByToken,
     })
   } catch (error) {
