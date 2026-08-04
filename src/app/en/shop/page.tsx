@@ -151,7 +151,7 @@ export default async function EnglishShopPage({ searchParams }: ShopPageProps) {
         >
           {t.all}{totalCount > 0 && <span className="ml-1 opacity-60">({totalCount})</span>}
         </Link>
-        {categories.map((cat) => (
+        {categories.filter((cat) => (categoryCounts[cat.id] || 0) > 0).map((cat) => (
           <Link
             key={cat.id}
             href={`/en/shop?category=${cat.id}${params.sort ? `&sort=${params.sort}` : ''}`}

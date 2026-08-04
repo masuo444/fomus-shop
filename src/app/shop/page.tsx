@@ -144,7 +144,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         >
           すべて{totalCount > 0 && <span className="ml-1 opacity-60">({totalCount})</span>}
         </Link>
-        {categories.map((cat) => (
+        {categories.filter((cat) => (categoryCounts[cat.id] || 0) > 0).map((cat) => (
           <Link
             key={cat.id}
             href={`/shop?category=${cat.id}${params.sort ? `&sort=${params.sort}` : ''}`}

@@ -49,7 +49,8 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
 
   const optionsAdjustment = getOptionsAdjustment(selectedOptions)
   const isDigital = product.item_type === 'digital'
-  const isDirectCheckout = isDigital
+  // Digital and direct-link-only (hidden_from_listing, e.g. KUMIKI) products skip the cart
+  const isDirectCheckout = isDigital || product.hidden_from_listing === true
   const isMadeToOrder = product.made_to_order
   const isExternal = !!product.external_url
   const isSoldOut = product.stock === 0 && !isMadeToOrder && !isExternal
@@ -460,7 +461,7 @@ export default function ProductDetailClient({ product, shopName, reviewCount = 0
                   className="w-full bg-black text-white py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
                 >
                   <ShoppingCart className="w-4 h-4" />
-                  {addedToCart ? t.addedToCart : t.addToCart}
+                  {isDirectCheckout ? t.buyNow : addedToCart ? t.addedToCart : t.addToCart}
                 </button>
               )}
             </div>

@@ -21,6 +21,7 @@ const ja = {
   // Product detail
   addedToCart: 'カートに追加しました',
   addToCart: 'カートに追加',
+  buyNow: '購入する',
   support: '支援する',
   quantity: '数量',
   reviewsSuffix: '件のレビュー',
@@ -101,6 +102,7 @@ const en: typeof ja = {
 
   addedToCart: 'Added to cart',
   addToCart: 'Add to Cart',
+  buyNow: 'Buy Now',
   support: 'Support This Project',
   quantity: 'Quantity',
   reviewsSuffix: ' reviews',
