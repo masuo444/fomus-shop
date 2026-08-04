@@ -65,7 +65,6 @@ FEATURE_BRAND_PAGES=false        # /story /gallery /shop/masu を404に
 FEATURE_MEMBERSHIP=false
 FEATURE_MEMBERSHIP_SSO=false
 FEATURE_JPYC=false               # 使うなら別途ウォレット設定
-FEATURE_MARKETPLACE=false        # 二次流通(根の市)を使わないなら
 FEATURE_PARTNERS=false           # パートナー出店を使わないなら
 
 # --- Stripe(KACHIU専用) ---
