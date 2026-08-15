@@ -269,43 +269,43 @@ export default function CheckoutPage() {
   if (loading) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
-        <div className="animate-pulse text-gray-400">{t.loading}</div>
+        <div className="animate-pulse text-[var(--color-muted)]">{t.loading}</div>
       </div>
     )
   }
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">{te.checkoutTitle}</h1>
+      <h1 className="text-2xl font-bold text-[var(--foreground)] mb-8">{te.checkoutTitle}</h1>
 
       <form onSubmit={handleSubmit}>
         {showConfirmation && (
-          <div className="mb-8 bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-6">{t.orderConfirmation}</h2>
+          <div className="mb-8 bg-white border border-[var(--color-border)] rounded-[var(--radius-lg)] p-4 sm:p-6">
+            <h2 className="text-lg font-bold text-[var(--foreground)] mb-6">{t.orderConfirmation}</h2>
 
             {/* Shipping info review */}
             <div className="mb-6">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">{allDigital ? t.supporterInfo : t.shippingInfo}</h3>
-              <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-1">
+              <h3 className="text-sm font-semibold text-[var(--foreground)] mb-3">{allDigital ? t.supporterInfo : t.shippingInfo}</h3>
+              <div className="bg-[var(--color-subtle)] rounded-[var(--radius-md)] p-4 text-sm space-y-1">
                 <p className="font-medium">{form.name}</p>
-                <p className="text-gray-500">{form.email}</p>
-                <p className="text-gray-500">{form.phone}</p>
-                {!allDigital && <p className="text-gray-500">{form.country === 'JP' ? t.postalPrefix : ''}{form.postal_code}</p>}
-                {!allDigital && <p className="text-gray-500">{form.address}</p>}
-                {!allDigital && <p className="text-gray-500">{countryLabel(form.country, locale)}</p>}
+                <p className="text-[var(--color-muted)]">{form.email}</p>
+                <p className="text-[var(--color-muted)]">{form.phone}</p>
+                {!allDigital && <p className="text-[var(--color-muted)]">{form.country === 'JP' ? t.postalPrefix : ''}{form.postal_code}</p>}
+                {!allDigital && <p className="text-[var(--color-muted)]">{form.address}</p>}
+                {!allDigital && <p className="text-[var(--color-muted)]">{countryLabel(form.country, locale)}</p>}
               </div>
             </div>
 
             {/* Order items review */}
             <div className="mb-6">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">{t.orderItems}</h3>
+              <h3 className="text-sm font-semibold text-[var(--foreground)] mb-3">{t.orderItems}</h3>
               <div className="space-y-2">
                 {items.map((item, idx) => (
                   <div key={`${item.product_id}-${idx}`} className="flex justify-between text-sm">
                     <div>
-                      <span className="text-gray-700">{item.product ? pname(item.product) : ''} × {item.quantity}</span>
+                      <span className="text-[var(--foreground)]">{item.product ? pname(item.product) : ''} × {item.quantity}</span>
                       {item.selected_options && Object.keys(item.selected_options).length > 0 && (
-                        <p className="text-xs text-gray-400">{formatOptionsText(item.selected_options)}</p>
+                        <p className="text-xs text-[var(--color-muted)]">{formatOptionsText(item.selected_options)}</p>
                       )}
                     </div>
                     <span className="font-medium">{item.product ? formatPrice(getItemPrice(item) * item.quantity, currency) : '-'}</span>
@@ -316,21 +316,21 @@ export default function CheckoutPage() {
 
             {/* Payment method */}
             <div className="mb-6">
-              <h3 className="text-sm font-semibold text-gray-700 mb-2">{t.paymentMethod}</h3>
-              <p className="text-sm text-gray-600">
+              <h3 className="text-sm font-semibold text-[var(--foreground)] mb-2">{t.paymentMethod}</h3>
+              <p className="text-sm text-[var(--color-muted)]">
                 {paymentMethod === 'stripe' ? t.creditCard : paymentMethod === 'jpyc' ? t.jpyc : t.bankTransfer}
               </p>
             </div>
 
             {/* Total */}
-            <div className="border-t border-gray-100 pt-4 space-y-2">
+            <div className="border-t border-[var(--color-border)] pt-4 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">{t.subtotal}</span>
+                <span className="text-[var(--color-muted)]">{t.subtotal}</span>
                 <span>{formatPrice(subtotal, currency)}</span>
               </div>
               {!allDigital && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">{t.shipping}</span>
+                  <span className="text-[var(--color-muted)]">{t.shipping}</span>
                   <span>{allShippingIncluded ? t.shippingIncluded : formatPrice(shippingFee, currency)}</span>
                 </div>
               )}
@@ -340,7 +340,7 @@ export default function CheckoutPage() {
                   <span className="text-green-600">-{formatPrice(couponDiscount, currency)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-base font-bold pt-2 border-t border-gray-100">
+              <div className="flex justify-between text-base font-bold pt-2 border-t border-[var(--color-border)]">
                 <span>{t.total}</span>
                 <span>{formatPrice(total, currency)}</span>
               </div>
@@ -351,14 +351,14 @@ export default function CheckoutPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="flex-1 bg-black text-white py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+                className="flex-1 bg-[var(--foreground)] text-[var(--background)] py-3 rounded-[var(--radius-pill)] text-sm font-medium hover:opacity-85 transition-colors disabled:opacity-50"
               >
                 {submitting ? t.processing : t.confirmOrder}
               </button>
               <button
                 type="button"
                 onClick={() => setShowConfirmation(false)}
-                className="text-center text-sm text-gray-500 hover:text-gray-900 py-3 transition-colors"
+                className="text-center text-sm text-[var(--color-muted)] hover:text-[var(--foreground)] py-3 transition-colors"
               >
                 {t.editOrder}
               </button>
@@ -370,17 +370,17 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Shipping Form */}
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-[var(--foreground)]">
               {isEur ? te.shippingInfo : allDigital ? t.supporterInfo : t.shippingInfo}
             </h2>
             {!allDigital && (isEur ? (
-              <p className="text-xs text-gray-400">{t.intlShippingAvailableNote}</p>
+              <p className="text-xs text-[var(--color-muted)]">{t.intlShippingAvailableNote}</p>
             ) : (
-              <p className="text-xs text-gray-400">{t.domesticShippingNote}</p>
+              <p className="text-xs text-[var(--color-muted)]">{t.domesticShippingNote}</p>
             ))}
 
             <div>
-              <label className="block text-sm text-gray-600 mb-1">
+              <label className="block text-sm text-[var(--color-muted)] mb-1">
                 {te.fullName} *
               </label>
               <input
@@ -388,12 +388,12 @@ export default function CheckoutPage() {
                 required
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black"
+                className="w-full border border-[var(--color-border)] rounded-[var(--radius-md)] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/5 focus:border-[var(--foreground)]"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-600 mb-1">
+              <label className="block text-sm text-[var(--color-muted)] mb-1">
                 {te.email} *
               </label>
               <input
@@ -401,12 +401,12 @@ export default function CheckoutPage() {
                 required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black"
+                className="w-full border border-[var(--color-border)] rounded-[var(--radius-md)] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/5 focus:border-[var(--foreground)]"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-600 mb-1">
+              <label className="block text-sm text-[var(--color-muted)] mb-1">
                 {te.phone} *
               </label>
               <input
@@ -414,20 +414,20 @@ export default function CheckoutPage() {
                 required
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black"
+                className="w-full border border-[var(--color-border)] rounded-[var(--radius-md)] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/5 focus:border-[var(--foreground)]"
               />
             </div>
 
             {!allDigital && (<>
             <div>
-              <label className="block text-sm text-gray-600 mb-1">
+              <label className="block text-sm text-[var(--color-muted)] mb-1">
                 {te.country} *
               </label>
               <select
                 required
                 value={form.country}
                 onChange={(e) => setForm({ ...form, country: e.target.value })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black"
+                className="w-full border border-[var(--color-border)] rounded-[var(--radius-md)] px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/5 focus:border-[var(--foreground)]"
               >
                 {SHIPPING_COUNTRIES.map((c) => (
                   <option key={c.code} value={c.code}>
@@ -438,7 +438,7 @@ export default function CheckoutPage() {
             </div>
 
             <div>
-              <label className="block text-sm text-gray-600 mb-1">
+              <label className="block text-sm text-[var(--color-muted)] mb-1">
                 {te.postalCode} *
               </label>
               <input
@@ -447,15 +447,15 @@ export default function CheckoutPage() {
                 value={form.postal_code}
                 onChange={(e) => handlePostalCodeChange(e.target.value)}
                 placeholder={te.postalCodePlaceholder}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black"
+                className="w-full border border-[var(--color-border)] rounded-[var(--radius-md)] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/5 focus:border-[var(--foreground)]"
               />
               {addressLoading && (
-                <p className="text-xs text-gray-400 mt-1">{t.searchingAddress}</p>
+                <p className="text-xs text-[var(--color-muted)] mt-1">{t.searchingAddress}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm text-gray-600 mb-1">
+              <label className="block text-sm text-[var(--color-muted)] mb-1">
                 {te.address} *
               </label>
               <textarea
@@ -463,7 +463,7 @@ export default function CheckoutPage() {
                 value={form.address}
                 onChange={(e) => setForm({ ...form, address: e.target.value })}
                 rows={3}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black resize-none"
+                className="w-full border border-[var(--color-border)] rounded-[var(--radius-md)] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/5 focus:border-[var(--foreground)] resize-none"
               />
             </div>
             </>)}
@@ -471,13 +471,13 @@ export default function CheckoutPage() {
 
           {/* Order Summary */}
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
               {te.orderSummary}
             </h2>
             <div className="space-y-3">
               {items.map((item) => (
                 <div key={item.product_id} className="flex gap-3">
-                  <div className="w-14 h-14 bg-gray-100 rounded overflow-hidden flex-shrink-0 relative">
+                  <div className="w-14 h-14 bg-[var(--color-subtle)] rounded overflow-hidden flex-shrink-0 relative">
                     {item.product?.images?.[0] ? (
                       <Image
                         src={item.product.images[0]}
@@ -487,37 +487,37 @@ export default function CheckoutPage() {
                         sizes="56px"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-300 text-[10px]">
+                      <div className="w-full h-full flex items-center justify-center text-[var(--color-muted)] text-[10px]">
                         No Image
                       </div>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-900 line-clamp-1">
+                    <p className="text-sm text-[var(--foreground)] line-clamp-1">
                       {item.product ? pname(item.product) : t.productFallback}
                     </p>
                     {item.selected_options && Object.keys(item.selected_options).length > 0 && (
-                      <p className="text-xs text-gray-400">{formatOptionsText(item.selected_options)}</p>
+                      <p className="text-xs text-[var(--color-muted)]">{formatOptionsText(item.selected_options)}</p>
                     )}
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-[var(--color-muted)]">
                       {item.product ? formatPrice(getItemPrice(item), currency) : '-'} x {item.quantity}
                     </p>
                   </div>
-                  <div className="text-sm font-medium text-gray-900">
+                  <div className="text-sm font-medium text-[var(--foreground)]">
                     {item.product ? formatPrice(getItemPrice(item) * item.quantity, currency) : '-'}
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="mt-6 border-t border-gray-100 pt-4 space-y-2">
+            <div className="mt-6 border-t border-[var(--color-border)] pt-4 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">{te.subtotal}</span>
+                <span className="text-[var(--color-muted)]">{te.subtotal}</span>
                 <span>{formatPrice(subtotal, currency)}</span>
               </div>
               {!allDigital && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">{te.shipping}</span>
+                  <span className="text-[var(--color-muted)]">{te.shipping}</span>
                   <span>{formatPrice(shippingFee, currency)}</span>
                 </div>
               )}
@@ -527,17 +527,17 @@ export default function CheckoutPage() {
                   <span className="text-green-600">-{formatPrice(couponDiscount, currency)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-base font-bold pt-2 border-t border-gray-100">
+              <div className="flex justify-between text-base font-bold pt-2 border-t border-[var(--color-border)]">
                 <span>{te.total}</span>
                 <span>{formatPrice(total, currency)}</span>
               </div>
             </div>
 
             {/* Coupon */}
-            <div className="pt-3 border-t border-gray-100 mt-4">
-              <p className="text-sm text-gray-600 mb-2">{te.couponCode}</p>
+            <div className="pt-3 border-t border-[var(--color-border)] mt-4">
+              <p className="text-sm text-[var(--color-muted)] mb-2">{te.couponCode}</p>
               {couponApplied ? (
-                <div className="flex items-center justify-between bg-green-50 rounded-lg px-3 py-2">
+                <div className="flex items-center justify-between bg-green-50 rounded-[var(--radius-md)] px-3 py-2">
                   <div>
                     <span className="text-sm font-medium text-green-700">{couponCode.toUpperCase()}</span>
                     <span className="text-sm text-green-600 ml-2">-{formatPrice(couponDiscount, currency)}</span>
@@ -545,7 +545,7 @@ export default function CheckoutPage() {
                   <button
                     type="button"
                     onClick={handleRemoveCoupon}
-                    className="text-xs text-gray-400 hover:text-red-500"
+                    className="text-xs text-[var(--color-muted)] hover:text-red-500"
                   >
                     {t.removeCoupon}
                   </button>
@@ -557,13 +557,13 @@ export default function CheckoutPage() {
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
                     placeholder={te.couponCodePlaceholder}
-                    className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black"
+                    className="flex-1 border border-[var(--color-border)] rounded-[var(--radius-md)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/5 focus:border-[var(--foreground)]"
                   />
                   <button
                     type="button"
                     onClick={handleApplyCoupon}
                     disabled={couponLoading || !couponCode.trim()}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors disabled:opacity-50"
+                    className="px-4 py-2 bg-[var(--color-subtle)] text-[var(--foreground)] rounded-[var(--radius-md)] text-sm font-medium hover:bg-[var(--color-border)] transition-colors disabled:opacity-50"
                   >
                     {couponLoading ? '...' : te.apply}
                   </button>
@@ -572,19 +572,21 @@ export default function CheckoutPage() {
               {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
             </div>
 
-            {/* Referral code (GUILD member) */}
-            <div className="pt-3 border-t border-gray-100 mt-4">
-              <p className="text-sm text-gray-600 mb-1">{te.referralCode}</p>
+            {/* Referral code (GUILD member) — FOMUS の会員制度に紐づく機能なので他ブランドでは出さない */}
+            {siteConfig.features.brandPages && (
+            <div className="pt-3 border-t border-[var(--color-border)] mt-4">
+              <p className="text-sm text-[var(--color-muted)] mb-1">{te.referralCode}</p>
               <input
                 type="text"
                 value={referralCode}
                 onChange={(e) => setReferralCode(e.target.value)}
                 placeholder={te.referralCodePlaceholder}
                 maxLength={20}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black"
+                className="w-full border border-[var(--color-border)] rounded-[var(--radius-md)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/5 focus:border-[var(--foreground)]"
               />
-              <p className="text-xs text-gray-400 mt-1">{te.referralCodeNote}</p>
+              <p className="text-xs text-[var(--color-muted)] mt-1">{te.referralCodeNote}</p>
             </div>
+            )}
           </div>
         </div>
 
@@ -592,31 +594,31 @@ export default function CheckoutPage() {
         {/* Payment Method Selection */}
         {(jpycEnabled || bankTransferEnabled) && (
           <div className="mt-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">{te.paymentMethod}</h2>
+            <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">{te.paymentMethod}</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <button
                 type="button"
                 onClick={() => setPaymentMethod('stripe')}
-                className={`p-4 rounded-xl border text-left transition-all ${
+                className={`p-4 rounded-[var(--radius-lg)] border text-left transition-all ${
                   paymentMethod === 'stripe'
                     ? 'border-[var(--foreground)] bg-[var(--color-subtle)]'
-                    : 'border-[var(--color-border)] hover:border-gray-400'
+                    : 'border-[var(--color-border)] hover:border-[var(--foreground)]'
                 }`}
               >
-                <p className="text-sm font-medium text-gray-900">{te.creditCard}</p>
+                <p className="text-sm font-medium text-[var(--foreground)]">{te.creditCard}</p>
                 <p className="text-[10px] text-[var(--color-muted)] mt-1">{te.creditCardBrands}</p>
               </button>
               {bankTransferEnabled && (
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('bank_transfer')}
-                  className={`p-4 rounded-xl border text-left transition-all ${
+                  className={`p-4 rounded-[var(--radius-lg)] border text-left transition-all ${
                     paymentMethod === 'bank_transfer'
                       ? 'border-[var(--foreground)] bg-[var(--color-subtle)]'
-                      : 'border-[var(--color-border)] hover:border-gray-400'
+                      : 'border-[var(--color-border)] hover:border-[var(--foreground)]'
                   }`}
                 >
-                  <p className="text-sm font-medium text-gray-900">{t.bankTransfer}</p>
+                  <p className="text-sm font-medium text-[var(--foreground)]">{t.bankTransfer}</p>
                   <p className="text-[10px] text-[var(--color-muted)] mt-1">{t.bankTransferDesc}</p>
                 </button>
               )}
@@ -624,13 +626,13 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('jpyc')}
-                  className={`p-4 rounded-xl border text-left transition-all ${
+                  className={`p-4 rounded-[var(--radius-lg)] border text-left transition-all ${
                     paymentMethod === 'jpyc'
                       ? 'border-[var(--foreground)] bg-[var(--color-subtle)]'
-                      : 'border-[var(--color-border)] hover:border-gray-400'
+                      : 'border-[var(--color-border)] hover:border-[var(--foreground)]'
                   }`}
                 >
-                  <p className="text-sm font-medium text-gray-900">{t.jpyc}</p>
+                  <p className="text-sm font-medium text-[var(--foreground)]">{t.jpyc}</p>
                   <p className="text-[10px] text-[var(--color-muted)] mt-1">{t.jpycDesc}</p>
                 </button>
               )}
@@ -639,7 +641,7 @@ export default function CheckoutPage() {
         )}
 
         {error && (
-          <div className="mt-6 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg">
+          <div className="mt-6 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-[var(--radius-md)]">
             {error}
           </div>
         )}
@@ -648,7 +650,7 @@ export default function CheckoutPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="flex-1 bg-black text-white py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-[var(--foreground)] text-[var(--background)] py-3 rounded-[var(--radius-pill)] text-sm font-medium hover:opacity-85 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting
               ? te.processing
@@ -661,7 +663,7 @@ export default function CheckoutPage() {
           </button>
           <Link
             href={p('/cart')}
-            className="text-center text-sm text-gray-500 hover:text-gray-900 py-3 transition-colors"
+            className="text-center text-sm text-[var(--color-muted)] hover:text-[var(--foreground)] py-3 transition-colors"
           >
             {te.backToCart}
           </Link>

@@ -5,6 +5,7 @@ import { getPublishedShopIds } from '@/lib/shop'
 import { getCurrency } from '@/lib/currency'
 import ProductCard from '@/components/product/ProductCard'
 import GenericHome from '@/components/home/GenericHome'
+import KachiuHome from '@/components/home/KachiuHome'
 import ScrollReveal from '@/components/ui/ScrollReveal'
 import siteConfig from '@/site.config'
 import { FAQPageJsonLd, ItemListJsonLd } from '@/components/seo/JsonLd'
@@ -89,6 +90,11 @@ export default async function HomePage() {
 
   // Non-FOMUS brands get a neutral home page until their own design is built
   if (!siteConfig.features.brandPages) {
+    if (siteConfig.defaultShopSlug === 'kachiu') {
+      return (
+        <KachiuHome products={newProducts} />
+      )
+    }
     return (
       <GenericHome
         newProducts={newProducts}

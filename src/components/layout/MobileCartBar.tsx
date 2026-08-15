@@ -33,10 +33,10 @@ export default function MobileCartBar() {
   if (cartCount === 0) return null
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-[var(--color-border)] px-4 py-3 safe-area-bottom">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--background)]/95 backdrop-blur-md border-t border-[var(--color-border)] px-4 py-3 safe-area-bottom">
       <Link
         href={localePath(locale, '/cart')}
-        className="flex items-center justify-center gap-2 w-full bg-[var(--foreground)] text-white py-3 rounded-full text-sm font-medium"
+        className="flex items-center justify-center gap-2 w-full bg-[var(--foreground)] text-[var(--background)] py-3 rounded-[var(--radius-pill)] text-sm font-medium"
       >
         <ShoppingCart className="w-4 h-4" />
         {t.viewCart} ({cartCount})

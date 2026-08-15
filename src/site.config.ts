@@ -16,7 +16,9 @@ const siteConfig = {
   corporateName: process.env.NEXT_PUBLIC_CORPORATE_NAME || 'FOMUS.jp',
 
   // Shop
-  defaultShopSlug: process.env.DEFAULT_SHOP_SLUG || 'main',
+  // サーバー側は DEFAULT_SHOP_SLUG、クライアント側('use client')は NEXT_PUBLIC_ 付きでないと読めない。
+  // どちらか片方しか設定していなくても同じ値になるよう両方を見る。
+  defaultShopSlug: process.env.NEXT_PUBLIC_DEFAULT_SHOP_SLUG || process.env.DEFAULT_SHOP_SLUG || 'main',
   orderPrefix: process.env.ORDER_PREFIX || 'OR',
   currency: 'jpy' as const,
 
@@ -34,10 +36,22 @@ const siteConfig = {
   adminNotificationEmail: process.env.ADMIN_NOTIFICATION_EMAIL || '',
 
   // Theme
+  // 既定値は globals.css のFOMUS用の値と一致させてある。環境変数を設定しない
+  // デプロイ（=FOMUS）では見た目が変わらない。
   theme: {
     primary: process.env.NEXT_PUBLIC_THEME_PRIMARY || '#111111',
     accent: process.env.NEXT_PUBLIC_THEME_ACCENT || '#111111',
     memberColor: process.env.NEXT_PUBLIC_THEME_MEMBER || '#00A8A0',
+    // 地の色・文字色まで差し替えられないと、ブランドごとの世界観が出せないため公開
+    background: process.env.NEXT_PUBLIC_THEME_BACKGROUND || '#FAF9F7',
+    foreground: process.env.NEXT_PUBLIC_THEME_FOREGROUND || '#1A1A18',
+    border: process.env.NEXT_PUBLIC_THEME_BORDER || '#E8E6E1',
+    muted: process.env.NEXT_PUBLIC_THEME_MUTED || '#6B6760',
+    subtle: process.env.NEXT_PUBLIC_THEME_SUBTLE || '#F3F2EF',
+    // 角丸。'pill' はボタン用の完全な丸み。KACHIU のように角を立てるブランドは 0 を渡す
+    radiusPill: process.env.NEXT_PUBLIC_THEME_RADIUS_PILL || '9999px',
+    radiusLg: process.env.NEXT_PUBLIC_THEME_RADIUS_LG || '0.75rem',
+    radiusMd: process.env.NEXT_PUBLIC_THEME_RADIUS_MD || '0.5rem',
   },
 
   // JPYC Payment
@@ -80,6 +94,13 @@ const siteConfig = {
     birthdayCoupons: process.env.FEATURE_BIRTHDAY_COUPONS !== 'false',
     // FOMUS brand content pages (/story, /gallery, /shop/masu) — disable on other brands
     brandPages: process.env.FEATURE_BRAND_PAGES !== 'false',
+  },
+  // 商品詳細ページの補足3行。配送・品質・支払の実態はブランドごとに違うため。
+  // 未設定なら i18n 辞書の既定文（FOMUS向け）を使う。空文字を渡すとその行を消す。
+  productNotes: {
+    shipping: process.env.NEXT_PUBLIC_PRODUCT_NOTE_SHIPPING ?? null,
+    quality:  process.env.NEXT_PUBLIC_PRODUCT_NOTE_QUALITY  ?? null,
+    payment:  process.env.NEXT_PUBLIC_PRODUCT_NOTE_PAYMENT  ?? null,
   },
   // Legal
   legal: {

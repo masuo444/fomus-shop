@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono, Noto_Sans_JP } from 'next/font/google'
+import { Geist, Geist_Mono, Noto_Sans_JP, Noto_Serif_JP } from 'next/font/google'
 import { Cormorant_Garamond } from 'next/font/google'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import KachiuHeader from '@/components/kachiu/KachiuHeader'
+import KachiuFooter from '@/components/kachiu/KachiuFooter'
 import CartToast from '@/components/ui/CartToast'
 import MobileCartBar from '@/components/layout/MobileCartBar'
 import Concierge from '@/components/ui/Concierge'
@@ -29,6 +31,14 @@ const notoSansJP = Noto_Sans_JP({
   variable: '--font-noto-sans-jp',
   subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700'],
+})
+
+// KACHIU の和文見出し用。FOMUS では使わないが、Next のフォント最適化は
+// className に variable を付けた分だけ読み込むため FOMUS 側の転送量は増えない。
+const notoSerifJP = Noto_Serif_JP({
+  variable: '--font-noto-serif-jp',
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
 })
 
 const cormorant = Cormorant_Garamond({
@@ -79,16 +89,25 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const isKachiu = siteConfig.defaultShopSlug === 'kachiu'
   return (
     <html lang="ja">
       <head>
-        <meta name="theme-color" content="#1A1A18" />
+        <meta name="theme-color" content={siteConfig.theme.foreground} />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${notoSansJP.variable} antialiased`}>
+      <body data-brand={siteConfig.defaultShopSlug} className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${notoSansJP.variable} ${isKachiu ? notoSerifJP.variable : ''} antialiased`}>
         <style dangerouslySetInnerHTML={{ __html: `
           :root {
+            --background: ${siteConfig.theme.background};
+            --foreground: ${siteConfig.theme.foreground};
+            --color-border: ${siteConfig.theme.border};
+            --color-muted: ${siteConfig.theme.muted};
+            --color-subtle: ${siteConfig.theme.subtle};
+            --radius-pill: ${siteConfig.theme.radiusPill};
+            --radius-lg: ${siteConfig.theme.radiusLg};
+            --radius-md: ${siteConfig.theme.radiusMd};
             --color-primary: ${siteConfig.theme.primary};
             --color-accent: ${siteConfig.theme.accent};
             --color-member: ${siteConfig.theme.memberColor};
@@ -102,9 +121,9 @@ export default function RootLayout({
         <WebSiteJsonLd />
         <LocalBusinessJsonLd />
         <div className="flex flex-col min-h-screen">
-          <Header />
+          {isKachiu ? <KachiuHeader /> : <Header />}
           <main className="flex-1">{children}</main>
-          <Footer />
+          {isKachiu ? <KachiuFooter /> : <Footer />}
         </div>
         <ProgressBar />
         <CartToast />

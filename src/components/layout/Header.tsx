@@ -113,12 +113,16 @@ export default function Header() {
                 Digital
               </Link>
             )}
-            <Link href="/iwaimasu" className="text-xs tracking-[0.15em] text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
-              祝枡
-            </Link>
-            <a href={locale === 'en' ? 'https://kumiki.fomusglobal.com/en/' : 'https://kumiki.fomusglobal.com/'} target="_blank" rel="noopener" className="text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
-              KUMIKI
-            </a>
+            {siteConfig.features.brandPages && (
+              <>
+                <Link href="/iwaimasu" className="text-xs tracking-[0.15em] text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
+                  祝枡
+                </Link>
+                <a href={locale === 'en' ? 'https://kumiki.fomusglobal.com/en/' : 'https://kumiki.fomusglobal.com/'} target="_blank" rel="noopener" className="text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
+                  KUMIKI
+                </a>
+              </>
+            )}
             <Link href={p('/contact')} className="text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors">
               Contact
             </Link>
@@ -259,12 +263,16 @@ export default function Header() {
                 Digital
               </Link>
             )}
-            <Link href="/iwaimasu" className="block text-xs tracking-[0.15em] text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
-              祝枡
-            </Link>
-            <a href={locale === 'en' ? 'https://kumiki.fomusglobal.com/en/' : 'https://kumiki.fomusglobal.com/'} target="_blank" rel="noopener" className="block text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
-              KUMIKI
-            </a>
+            {siteConfig.features.brandPages && (
+              <>
+                <Link href="/iwaimasu" className="block text-xs tracking-[0.15em] text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
+                  祝枡
+                </Link>
+                <a href={locale === 'en' ? 'https://kumiki.fomusglobal.com/en/' : 'https://kumiki.fomusglobal.com/'} target="_blank" rel="noopener" className="block text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
+                  KUMIKI
+                </a>
+              </>
+            )}
             <Link href={p('/contact')} className="block text-xs tracking-[0.15em] uppercase text-[var(--color-muted)] hover:text-[var(--foreground)]" onClick={() => setMenuOpen(false)}>
               Contact
             </Link>

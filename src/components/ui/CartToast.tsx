@@ -32,9 +32,9 @@ export default function CartToast() {
 
   return (
     <div className="fixed bottom-6 right-6 z-[100] animate-slide-up">
-      <div className="bg-white border border-[var(--color-border)] shadow-xl rounded-xl px-5 py-4 flex items-start gap-4 max-w-sm">
-        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center shrink-0 mt-0.5">
-          <Check className="w-4 h-4 text-green-600" />
+      <div className="bg-[var(--background)] border border-[var(--color-border)] shadow-xl rounded-[var(--radius-lg)] px-5 py-4 flex items-start gap-4 max-w-sm">
+        <div className="w-8 h-8 rounded-[var(--radius-pill)] bg-[var(--color-subtle)] flex items-center justify-center shrink-0 mt-0.5">
+          <Check className="w-4 h-4 text-[var(--color-accent)]" />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-[var(--foreground)] mb-1">{t.addedToCart}</p>
@@ -44,7 +44,7 @@ export default function CartToast() {
           <div className="flex items-center gap-3">
             <Link
               href={localePath(locale, '/cart')}
-              className="text-xs font-medium bg-[var(--foreground)] text-white px-4 py-1.5 rounded-full hover:opacity-90 transition-opacity"
+              className="text-xs font-medium bg-[var(--foreground)] text-[var(--background)] px-4 py-1.5 rounded-[var(--radius-pill)] hover:opacity-90 transition-opacity"
             >
               {t.viewCart}
             </Link>

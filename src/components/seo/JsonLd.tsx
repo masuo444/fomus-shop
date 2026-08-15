@@ -13,7 +13,10 @@ export function OrganizationJsonLd() {
     logo: siteConfig.logoUrl || undefined,
     sameAs: [siteConfig.corporateUrl],
     contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', availableLanguage: ['Japanese', 'English'] },
-    knowsAbout: ['枡', 'masu', 'ヒノキ', '日本の伝統工芸', '木製品', 'Japanese traditional crafts'],
+    // FOMUS固有の得意分野。他ブランドでは「枡の店」と検索エンジンに誤認されるので出さない
+    ...(siteConfig.features.brandPages
+      ? { knowsAbout: ['枡', 'masu', 'ヒノキ', '日本の伝統工芸', '木製品', 'Japanese traditional crafts'] }
+      : {}),
   }
   return (
     <script

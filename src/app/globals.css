@@ -184,3 +184,45 @@ a {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
+
+/* ---------- KACHIU (shop.kachiu.jp) ---------- */
+/* ページ読み込み時にひと呼吸置いて立ち上がる。品書きの項は上から順に。 */
+@keyframes kachiu-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+.kachiu-reveal {
+  animation: kachiu-rise .9s cubic-bezier(.2,.7,.2,1) both;
+  animation-delay: calc(var(--i, 0) * 90ms + 60ms);
+}
+@media (prefers-reduced-motion: reduce) {
+  .kachiu-reveal { animation: none; }
+}
+
+/* KACHIU のときだけ効く。共有ページ（商品詳細・カート・チェックアウト）の
+   太字ゴシックの見出しと価格を、トップの品書きと同じ書体に寄せる。
+   コンポーネントは触らず、body[data-brand] で当てる。 */
+body[data-brand="kachiu"] h1,
+body[data-brand="kachiu"] h2 {
+  font-family: var(--font-noto-serif-jp), "Noto Serif JP", serif;
+  font-weight: 500;
+  letter-spacing: .04em;
+}
+body[data-brand="kachiu"] h1.font-bold,
+body[data-brand="kachiu"] h2.font-bold,
+body[data-brand="kachiu"] h1.font-display,
+body[data-brand="kachiu"] h2.font-display { font-weight: 500; }
+/* 価格（¥ + 数字）は Cormorant。text-2xl font-bold の span を狙う */
+body[data-brand="kachiu"] span.text-2xl.font-bold,
+body[data-brand="kachiu"] span.text-3xl.font-bold {
+  font-family: var(--font-cormorant), "Cormorant Garamond", serif;
+  font-weight: 500;
+  letter-spacing: .02em;
+  font-size: 1.75rem;
+}
+/* 主要ボタンの字間を品書きに揃える。カートに追加／レジに進む／注文を確定 */
+body[data-brand="kachiu"] button.bg-\[var\(--foreground\)\],
+body[data-brand="kachiu"] a.bg-\[var\(--foreground\)\] {
+  letter-spacing: .16em;
+  font-weight: 400;
+}

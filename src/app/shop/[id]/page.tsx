@@ -6,6 +6,7 @@ import ProductDetailClient from './ProductDetailClient'
 import ProductReviews from '@/components/product/ProductReviews'
 import type { ProductReview } from '@/components/product/ProductReviews'
 import ProductCard from '@/components/product/ProductCard'
+import KachiuProductCard from '@/components/kachiu/KachiuProductCard'
 import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import RecentlyViewed from '@/components/product/RecentlyViewed'
 import MasuStorySection from '@/components/product/MasuStorySection'
@@ -185,8 +186,10 @@ export default async function ProductDetailPage({ params }: Props) {
           <div className="border-t border-[var(--color-border)] pt-12">
             <h2 className="text-lg font-medium text-[var(--foreground)] mb-8">関連商品</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-              {relatedProducts.map((rp) => (
-                <ProductCard key={rp.id} product={rp} currency="jpy" />
+              {relatedProducts.map((rp, i) => (
+                siteConfig.defaultShopSlug === 'kachiu'
+                  ? <KachiuProductCard key={rp.id} product={rp} index={i} />
+                  : <ProductCard key={rp.id} product={rp} currency="jpy" />
               ))}
             </div>
           </div>

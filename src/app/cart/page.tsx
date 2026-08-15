@@ -136,7 +136,7 @@ export default function CartPage() {
   if (loading) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
-        <div className="animate-pulse text-gray-400">{t.loading}</div>
+        <div className="animate-pulse text-[var(--color-muted)]">{t.loading}</div>
       </div>
     )
   }
@@ -144,12 +144,12 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-24 text-center">
-        <ShoppingBag className="w-16 h-16 text-gray-200 mx-auto mb-4" />
-        <h1 className="text-xl font-bold text-gray-900 mb-2">{t.cartEmptyTitle}</h1>
-        <p className="text-sm text-gray-400 mb-8">{t.cartEmptyDesc}</p>
+        <ShoppingBag className="w-16 h-16 text-[var(--color-border)] mx-auto mb-4" />
+        <h1 className="font-display text-xl tracking-[0.12em] text-[var(--foreground)] mb-2">{t.cartEmptyTitle}</h1>
+        <p className="text-sm text-[var(--color-muted)] mb-8">{t.cartEmptyDesc}</p>
         <Link
           href={p('/shop')}
-          className="inline-block bg-black text-white px-8 py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
+          className="inline-block bg-[var(--foreground)] text-[var(--background)] px-8 py-3 rounded-[var(--radius-pill)] text-sm font-medium hover:opacity-85 transition-colors"
         >
           {t.continueShopping}
         </Link>
@@ -159,15 +159,15 @@ export default function CartPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">{t.cartTitle}</h1>
+      <h1 className="font-display text-2xl tracking-[0.15em] text-[var(--foreground)] mb-8">{t.cartTitle}</h1>
 
       <div className="space-y-4">
         {items.map((item) => (
           <div
             key={itemKey(item)}
-            className="flex gap-4 p-4 border border-gray-100 rounded-lg"
+            className="flex gap-4 p-4 border border-[var(--color-border)] rounded-[var(--radius-md)]"
           >
-            <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 relative">
+            <div className="w-20 h-20 bg-[var(--color-subtle)] rounded-[var(--radius-md)] overflow-hidden flex-shrink-0 relative">
               {item.product?.images?.[0] ? (
                 <Image
                   src={item.product.images[0]}
@@ -177,7 +177,7 @@ export default function CartPage() {
                   sizes="80px"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">
+                <div className="w-full h-full flex items-center justify-center text-[var(--color-muted)] text-xs">
                   No Image
                 </div>
               )}
@@ -186,24 +186,24 @@ export default function CartPage() {
             <div className="flex-1 min-w-0">
               <Link
                 href={p(`/shop/${item.product_id}`)}
-                className="text-sm font-medium text-gray-900 hover:text-gray-600 line-clamp-1"
+                className="text-sm font-medium text-[var(--foreground)] hover:text-[var(--color-muted)] line-clamp-1"
               >
                 {item.product ? pname(item.product) : t.productNotFound}
               </Link>
-              <p className="text-sm font-medium text-gray-900 mt-1">
+              <p className="text-sm font-medium text-[var(--foreground)] mt-1">
                 {item.product ? formatPrice(getItemPrice(item.product, item.selected_options), currency) : '-'}
               </p>
               {item.selected_options && Object.keys(item.selected_options).length > 0 && (
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-[var(--color-muted)] mt-1">
                   {formatOptionsText(item.selected_options)}
                 </p>
               )}
 
               <div className="flex items-center justify-between mt-2">
-                <div className="flex items-center border border-gray-200 rounded-lg">
+                <div className="flex items-center border border-[var(--color-border)] rounded-[var(--radius-md)]">
                   <button
                     onClick={() => updateQuantity(item, item.quantity - 1)}
-                    className="p-2.5 text-gray-400 hover:text-gray-600"
+                    className="p-2.5 text-[var(--color-muted)] hover:text-[var(--color-muted)]"
                   >
                     <Minus className="w-3 h-3" />
                   </button>
@@ -220,14 +220,14 @@ export default function CartPage() {
                         )
                       )
                     }
-                    className="p-2.5 text-gray-400 hover:text-gray-600"
+                    className="p-2.5 text-[var(--color-muted)] hover:text-[var(--color-muted)]"
                   >
                     <Plus className="w-3 h-3" />
                   </button>
                 </div>
                 <button
                   onClick={() => removeItem(item)}
-                  className="p-2.5 text-gray-400 hover:text-red-500 transition-colors"
+                  className="p-2.5 text-[var(--color-muted)] hover:text-red-500 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -238,28 +238,28 @@ export default function CartPage() {
       </div>
 
       {/* Summary */}
-      <div className="mt-8 border-t border-gray-100 pt-6 space-y-3">
+      <div className="mt-8 border-t border-[var(--color-border)] pt-6 space-y-3">
         <div className="flex justify-between text-sm">
-          <span className="text-gray-500">{t.subtotal}</span>
-          <span className="text-gray-900">{formatPrice(subtotal, currency)}</span>
+          <span className="text-[var(--color-muted)]">{t.subtotal}</span>
+          <span className="text-[var(--foreground)]">{formatPrice(subtotal, currency)}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-gray-500">{te.shipping}</span>
-          <span className="text-gray-900">{(allDigital || allShippingIncluded) ? t.freeShippingIncluded : formatPrice(shippingFee, currency)}</span>
+          <span className="text-[var(--color-muted)]">{te.shipping}</span>
+          <span className="text-[var(--foreground)]">{(allDigital || allShippingIncluded) ? t.freeShippingIncluded : formatPrice(shippingFee, currency)}</span>
         </div>
         {!allDigital && !allShippingIncluded && (isEur ? (
-          <p className="text-xs text-gray-400">{t.intlShippingIncludedNote}</p>
+          <p className="text-xs text-[var(--color-muted)]">{t.intlShippingIncludedNote}</p>
         ) : (
-          <p className="text-xs text-gray-400">{t.domesticShippingNote}</p>
+          <p className="text-xs text-[var(--color-muted)]">{t.domesticShippingNote}</p>
         ))}
-        <div className="flex justify-between text-base font-bold pt-3 border-t border-gray-100">
+        <div className="flex justify-between text-base font-bold pt-3 border-t border-[var(--color-border)]">
           <span>{te.total}</span>
           <span>{formatPrice(total, currency)}</span>
         </div>
       </div>
 
       {hasMixedShops && (
-        <div className="mt-6 bg-orange-50 border border-orange-200 rounded-xl px-5 py-3">
+        <div className="mt-6 bg-orange-50 border border-orange-200 rounded-[var(--radius-lg)] px-5 py-3">
           <p className="text-sm text-orange-800 font-medium">{t.mixedShopsTitle}</p>
           <p className="text-xs text-orange-600 mt-1">{t.mixedShopsDesc}</p>
         </div>
@@ -272,25 +272,25 @@ export default function CartPage() {
         <span>Mastercard</span><span>/</span>
         <span>Amex</span><span>/</span>
         <span>JCB</span>
-        {locale !== 'en' && (<><span>/</span><span>JPYC</span></>)}
+        {locale !== 'en' && siteConfig.jpyc.enabled && (<><span>/</span><span>JPYC</span></>)}
       </div>
 
       <div className="mt-8 space-y-3">
         {hasMixedShops ? (
-          <span className="block w-full bg-gray-300 text-gray-500 py-3 rounded-full text-sm font-medium text-center cursor-not-allowed">
+          <span className="block w-full bg-[var(--color-border)] text-[var(--color-muted)] py-3 rounded-[var(--radius-pill)] text-sm font-medium text-center cursor-not-allowed">
             {allDigital ? t.proceedToSupport : t.proceedToCheckout}
           </span>
         ) : (
           <Link
             href={p('/checkout')}
-            className="block w-full bg-black text-white py-3 rounded-full text-sm font-medium text-center hover:bg-gray-800 transition-colors"
+            className="block w-full bg-[var(--foreground)] text-[var(--background)] py-3 rounded-[var(--radius-pill)] text-sm font-medium text-center hover:opacity-85 transition-colors"
           >
             {allDigital ? t.proceedToSupport : t.proceedToCheckout}
           </Link>
         )}
         <Link
           href={p('/shop')}
-          className="block w-full text-center text-sm text-gray-500 hover:text-gray-900 transition-colors py-2"
+          className="block w-full text-center text-sm text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors py-2"
         >
           {t.continueShopping}
         </Link>
