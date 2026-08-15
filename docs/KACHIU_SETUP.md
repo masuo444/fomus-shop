@@ -24,6 +24,23 @@
 - ビール等の「外部販売商品」は管理画面の商品編集「外部販売リンク」にURLを入れると、
   カート不可・外部購入ボタンのみの商品になる
 
+## 現在の状態(2026-08-15)
+
+- ✅ Vercelプロジェクト `kachiu-shop` 作成、GitHub(masuo444/fomus-shop main)接続。**pushで自動デプロイ**
+- ✅ `https://shop.kachiu.jp` 公開・証明書発行済み(Cloudflare CNAME → cname.vercel-dns.com / DNS only)
+- ✅ 環境変数46件を production に投入済み(下記5参照)
+- ✅ 商品4点を **非公開・在庫0** で登録済み。公開は管理画面で `is_published` と `stock` を立てる
+- ⏳ **Stripe は `sk_test_PLACEHOLDER_REPLACE_ME` 等のプレースホルダー**。SDKがキー無しで例外を投げるので仮値を入れてある。
+  本物が来たら `vercel env rm` → `vercel env add` で差し替え(3変数: STRIPE_SECRET_KEY / NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY / STRIPE_WEBHOOK_SECRET)
+- ⏳ Resend: `RESEND_API_KEY` はFOMUSと共有の値を入れてあるが、`shop.kachiu.jp` ドメインを Resend で認証するまで
+  `noreply@shop.kachiu.jp` からの送信は失敗する(注文確認メールが出ない)
+- ⏳ 公式サイト(kachiu.jp)からの購入導線はまだ張っていない
+
+**このディレクトリの `.vercel/` は fomus-shop を向いている。** kachiu-shop を CLI で触るときは
+`vercel --scope keis-projects-bdc218f5` に `--project`… ではなく、`vercel link --project kachiu-shop` で
+一時的に切り替え、作業後に `.vercel/project.json` を fomus-shop に戻すこと(両方とも同じディレクトリから
+デプロイされるため、リンクを戻し忘れると FOMUS のつもりで KACHIU にデプロイする)。
+
 ## 手順
 
 ### 1. DBマイグレーション(共有Supabaseに1回だけ)
