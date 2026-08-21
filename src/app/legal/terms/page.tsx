@@ -10,6 +10,9 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   const siteName = siteConfig.name
   const contactEmail = siteConfig.legal.email || siteConfig.adminNotificationEmail || '（メールアドレス）'
+  // KACHIUは食品のため配送・返品条件が他ブランドと異なる。
+  // 特商法ページ(/legal/commercial-transactions)と同じ条件を書くこと。
+  const isKachiu = siteConfig.defaultShopSlug === 'kachiu'
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
@@ -41,24 +44,37 @@ export default function TermsPage() {
 
       <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-4">第4条（支払い）</h2>
       <p className="text-sm text-gray-600 leading-relaxed">
-        支払方法は、クレジットカード（Visa、Mastercard、American Express、JCB）およびJPYCとします。
+        支払方法は、クレジットカード（Visa、Mastercard、American Express、JCB）
+        {isKachiu ? 'とします。' : 'およびJPYCとします。'}
         クレジットカード決済はStripe社のシステムを利用します。
       </p>
 
       <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-4">第5条（配送）</h2>
       <p className="text-sm text-gray-600 leading-relaxed">
-        商品は入金確認後、7営業日以内に発送いたします。
+        {isKachiu
+          ? 'ご注文いただいた商品は、2026年12月31日までに発送いたします。'
+          : '商品は入金確認後、7営業日以内に発送いたします。'}
         配送先の不備等によりお届けできない場合の再配送費用はお客様のご負担となります。
         天災、交通事情等により配送が遅延する場合があります。
       </p>
 
       <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-4">第6条（返品・キャンセル）</h2>
-      <p className="text-sm text-gray-600 leading-relaxed">
-        商品到着後7日以内に限り、未使用品に限り返品・交換を承ります。
-        お客様都合による返品の送料はお客様負担となります。
-        不良品の場合は、送料当サイト負担にて交換いたします。
-        注文確定後のキャンセルは、発送前に限り承ります。
-      </p>
+      {isKachiu ? (
+        <p className="text-sm text-gray-600 leading-relaxed">
+          食品につき、お客様のご都合による返品・交換はお受けできません。
+          未開封・開封を問わず、また「イメージと違う」「好みに合わない」といった理由を含め、お受けできかねます。
+          お届けした商品に破損・品質不良・誤配送があった場合に限り、商品到着後7日以内にご連絡ください。
+          同一商品との交換、または返金にて対応し、この場合の送料は当サイトが負担いたします。
+          ご注文完了後のキャンセル、および数量・お届け先などの内容変更はお受けできません。
+        </p>
+      ) : (
+        <p className="text-sm text-gray-600 leading-relaxed">
+          商品到着後7日以内に限り、未使用品に限り返品・交換を承ります。
+          お客様都合による返品の送料はお客様負担となります。
+          不良品の場合は、送料当サイト負担にて交換いたします。
+          注文確定後のキャンセルは、発送前に限り承ります。
+        </p>
+      )}
 
       <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-4">第7条（デジタルアイテム）</h2>
       <p className="text-sm text-gray-600 leading-relaxed">
