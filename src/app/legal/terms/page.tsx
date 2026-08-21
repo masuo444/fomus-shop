@@ -52,7 +52,7 @@ export default function TermsPage() {
       <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-4">第5条（配送）</h2>
       <p className="text-sm text-gray-600 leading-relaxed">
         {isKachiu
-          ? 'ご注文いただいた商品は、2026年12月31日までに発送いたします。'
+          ? '商品の完成後、ご注文順に順次発送いたします。第一弾は遅くとも2026年12月31日までに発送いたします。'
           : '商品は入金確認後、7営業日以内に発送いたします。'}
         配送先の不備等によりお届けできない場合の再配送費用はお客様のご負担となります。
         天災、交通事情等により配送が遅延する場合があります。
