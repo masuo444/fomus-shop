@@ -74,6 +74,14 @@ const ja = {
   proceedToPayment: 'お支払いへ',
   backToCart: 'カートに戻る',
 
+  // 特商法12条の6（最終確認画面の表示義務）
+  termsHeading: 'ご注文内容の確認事項',
+  termsPayment: '支払の時期・方法',
+  termsDelivery: '引渡時期',
+  termsCancellation: '申込みの撤回・解除',
+  termsPeriod: '申込期間',
+  termsLink: '特定商取引法に基づく表記を見る',
+
   // Success page
   thankYou: 'ご注文ありがとうございます',
   confirmationEmailSent: 'ご注文の確認メールをお送りしました。',
@@ -164,6 +172,14 @@ const en: Record<keyof typeof ja, string> = {
   payWithJpyc: 'Pay with JPYC',
   proceedToPayment: 'Proceed to Payment',
   backToCart: 'Back to Cart',
+
+  // 特商法12条の6（最終確認画面の表示義務）
+  termsHeading: 'Order Terms',
+  termsPayment: 'Payment',
+  termsDelivery: 'Delivery',
+  termsCancellation: 'Cancellation & Returns',
+  termsPeriod: 'Order Period',
+  termsLink: 'View Commercial Transactions Act disclosure',
 
   // Success page
   thankYou: 'Thank you for your order!',
