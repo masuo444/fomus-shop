@@ -347,6 +347,40 @@ export default function CheckoutPage() {
               </div>
             </div>
 
+            {/* 特商法12条の6：注文を確定するこの画面での表示義務。
+                分量・販売価格は上の注文明細が満たすので、ここで残りを示す。
+                文言は src/lib/legal-terms.ts の一箇所から引くこと。
+                入力フォーム側ではなく、必ず確定ボタンと同じ画面に置くこと。 */}
+            <div className="mt-6 border border-[var(--color-border)] rounded-[var(--radius-md)] p-4">
+              <h3 className="text-sm font-semibold text-[var(--foreground)] mb-3">{t.termsHeading}</h3>
+              <dl className="space-y-2.5 text-xs leading-relaxed">
+                <div className="sm:flex sm:gap-4">
+                  <dt className="text-[var(--color-muted)] sm:w-28 sm:shrink-0">{t.termsPayment}</dt>
+                  <dd className="text-[var(--foreground)]">{legalTerms.paymentTiming}</dd>
+                </div>
+                <div className="sm:flex sm:gap-4">
+                  <dt className="text-[var(--color-muted)] sm:w-28 sm:shrink-0">{t.termsDelivery}</dt>
+                  <dd className="text-[var(--foreground)]">{legalTerms.deliveryTiming}</dd>
+                </div>
+                <div className="sm:flex sm:gap-4">
+                  <dt className="text-[var(--color-muted)] sm:w-28 sm:shrink-0">{t.termsCancellation}</dt>
+                  <dd className="text-[var(--foreground)]">{legalTerms.cancellationSummary}</dd>
+                </div>
+                {legalTerms.applicationPeriod && (
+                  <div className="sm:flex sm:gap-4">
+                    <dt className="text-[var(--color-muted)] sm:w-28 sm:shrink-0">{t.termsPeriod}</dt>
+                    <dd className="text-[var(--foreground)]">{legalTerms.applicationPeriod}</dd>
+                  </div>
+                )}
+              </dl>
+              <Link
+                href={p('/legal/commercial-transactions')}
+                className="inline-block mt-3 text-xs text-[var(--color-muted)] underline hover:text-[var(--foreground)] transition-colors"
+              >
+                {t.termsLink}
+              </Link>
+            </div>
+
             {/* Action buttons */}
             <div className="mt-6 flex flex-col sm:flex-row gap-3">
               <button
@@ -647,40 +681,7 @@ export default function CheckoutPage() {
           </div>
         )}
 
-        {/* 特商法12条の6：最終確認画面での表示義務。
-            分量・販売価格は上の注文明細が満たすので、ここで残りを示す。
-            文言は src/lib/legal-terms.ts の一箇所から引くこと。 */}
-        <div className="mt-8 border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 sm:p-5">
-          <h2 className="text-sm font-medium text-[var(--foreground)] mb-3">{te.termsHeading}</h2>
-          <dl className="space-y-2.5 text-xs leading-relaxed">
-            <div className="sm:flex sm:gap-4">
-              <dt className="text-[var(--color-muted)] sm:w-28 sm:shrink-0">{te.termsPayment}</dt>
-              <dd className="text-[var(--foreground)]">{legalTerms.paymentTiming}</dd>
-            </div>
-            <div className="sm:flex sm:gap-4">
-              <dt className="text-[var(--color-muted)] sm:w-28 sm:shrink-0">{te.termsDelivery}</dt>
-              <dd className="text-[var(--foreground)]">{legalTerms.deliveryTiming}</dd>
-            </div>
-            <div className="sm:flex sm:gap-4">
-              <dt className="text-[var(--color-muted)] sm:w-28 sm:shrink-0">{te.termsCancellation}</dt>
-              <dd className="text-[var(--foreground)]">{legalTerms.cancellationSummary}</dd>
-            </div>
-            {legalTerms.applicationPeriod && (
-              <div className="sm:flex sm:gap-4">
-                <dt className="text-[var(--color-muted)] sm:w-28 sm:shrink-0">{te.termsPeriod}</dt>
-                <dd className="text-[var(--foreground)]">{legalTerms.applicationPeriod}</dd>
-              </div>
-            )}
-          </dl>
-          <Link
-            href={p('/legal/commercial-transactions')}
-            className="inline-block mt-3 text-xs text-[var(--color-muted)] underline hover:text-[var(--foreground)] transition-colors"
-          >
-            {te.termsLink}
-          </Link>
-        </div>
-
-        <div className="mt-6 flex flex-col sm:flex-row gap-3">
+        <div className="mt-8 flex flex-col sm:flex-row gap-3">
           <button
             type="submit"
             disabled={submitting}
