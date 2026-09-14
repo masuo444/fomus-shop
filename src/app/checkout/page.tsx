@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { readStoredReferral } from '@/components/ReferralCapture'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -39,8 +40,18 @@ export default function CheckoutPage() {
   const [couponApplied, setCouponApplied] = useState(false)
   const [couponLoading, setCouponLoading] = useState(false)
   const [referralCode, setReferralCode] = useState('')
+  const [referralFromLink, setReferralFromLink] = useState(false)
   const [giftWrapping, setGiftWrapping] = useState(false)
   const [giftMessage, setGiftMessage] = useState('')
+  // 紹介リンク(?ref=CODE)から来た人は、コードを手入力しなくていいように自動で埋める
+  useEffect(() => {
+    const stored = readStoredReferral()
+    if (stored) {
+      setReferralCode(stored)
+      setReferralFromLink(true)
+    }
+  }, [])
+
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -619,7 +630,9 @@ export default function CheckoutPage() {
                 maxLength={20}
                 className="w-full border border-[var(--color-border)] rounded-[var(--radius-md)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/5 focus:border-[var(--foreground)]"
               />
-              <p className="text-xs text-[var(--color-muted)] mt-1">{te.referralCodeNote}</p>
+              <p className="text-xs text-[var(--color-muted)] mt-1">
+                {referralFromLink ? te.referralCodeFromLink : te.referralCodeNote}
+              </p>
             </div>
             )}
           </div>

@@ -6,6 +6,7 @@ import Footer from '@/components/layout/Footer'
 import KachiuHeader from '@/components/kachiu/KachiuHeader'
 import KachiuFooter from '@/components/kachiu/KachiuFooter'
 import CartToast from '@/components/ui/CartToast'
+import ReferralCapture from '@/components/ReferralCapture'
 import MobileCartBar from '@/components/layout/MobileCartBar'
 import Concierge from '@/components/ui/Concierge'
 import GoogleAnalytics from '@/components/layout/GoogleAnalytics'
@@ -126,6 +127,7 @@ export default function RootLayout({
           {isKachiu ? <KachiuFooter /> : <Footer />}
         </div>
         <ProgressBar />
+        <ReferralCapture />
         <CartToast />
         <MobileCartBar />
         {/* <Concierge /> */}
