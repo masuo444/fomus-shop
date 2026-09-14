@@ -10,6 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 import { formatPrice } from '@/lib/utils'
 import type { Product } from '@/lib/types'
 import { checkoutDict, localeFromPathname, localePath } from '@/lib/i18n/checkout'
+import siteConfig from '@/site.config'
 
 export default function CheckoutSuccessPage() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
@@ -214,6 +215,27 @@ export default function CheckoutSuccessPage() {
           {t.continueShopping}
         </Link>
       </div>
+
+      {/* FOMUS GUILD への導線: 枡を買った直後が一番関心の高い瞬間なので、ここで紹介する。
+          KACHIU など他ブランドでは出さない（GUILDはFOMUSの会員制度のため）。 */}
+      {siteConfig.features.brandPages && (
+        <div className="mt-12 border-t border-gray-100 pt-10 text-left">
+          <div className="rounded-2xl bg-[#1c1917] p-6 md:p-8">
+            <p className="text-[10px] tracking-[0.25em] text-[#c0c0c0] mb-3">FOMUS GUILD</p>
+            <h2 className="text-lg font-bold text-white mb-3">{t.guildTitle}</h2>
+            <p className="text-sm text-gray-300 leading-relaxed mb-3">{t.guildBody}</p>
+            <p className="text-sm text-gray-400 leading-relaxed mb-6">{t.guildReferral}</p>
+            <a
+              href="https://guild.fomusglobal.com/archive"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full text-center bg-[#c0c0c0] text-gray-900 py-3 rounded-full text-sm font-semibold hover:bg-white transition-colors"
+            >
+              {t.guildCta}
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Recommended Products */}
       {recommended.length > 0 && (
