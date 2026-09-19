@@ -2,14 +2,14 @@
  * FOMUS GUILD 会員の紹介コードによる売上通知。
  *
  * 決済が確定した注文に紹介コードが付いている場合、GUILD側
- * （https://guild-app.fomusglobal.com）へ売上額を通知し、そのコードを
+ * （https://guild.fomus.jp）へ売上額を通知し、そのコードを
  * 持つ会員へ売上の一定割合をポイントで還元してもらう。
  *
  * GUILD側の /api/sales/credit は order_id をUNIQUE制約で冪等化しているため、
  * このリクエストが重複しても二重付与にはならない。
  *
  * 注意: MEMBERSHIP_URL(guild.fomus.co.jp)は現在DNS未解決の別ドメインのため
- * 使用しない。必ず GUILD_APP_URL（guild-app.fomusglobal.com）を使うこと。
+ * 使用しない。必ず GUILD_APP_URL（guild.fomus.jp。2026-09 に guild.fomusglobal.com から移行）を使うこと。
  */
 
 interface OrderForReferral {

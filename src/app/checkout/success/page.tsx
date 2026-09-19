@@ -226,7 +226,7 @@ export default function CheckoutSuccessPage() {
             <p className="text-sm text-gray-300 leading-relaxed mb-3">{t.guildBody}</p>
             <p className="text-sm text-gray-400 leading-relaxed mb-6">{t.guildReferral}</p>
             <a
-              href="https://guild.fomusglobal.com/archive"
+              href="https://guild.fomus.jp/archive"
               target="_blank"
               rel="noopener noreferrer"
               className="block w-full text-center bg-[#c0c0c0] text-gray-900 py-3 rounded-full text-sm font-semibold hover:bg-white transition-colors"
